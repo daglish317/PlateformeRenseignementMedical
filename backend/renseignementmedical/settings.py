@@ -199,16 +199,13 @@ REST_FRAMEWORK = {
 # ---------------------------------------------------------------------------
 # Google OAuth (connexion patient)
 # ---------------------------------------------------------------------------
-GOOGLE_CLIENT_ID = os.getenv(
-    "GOOGLE_CLIENT_ID",
-    "963310533678-29r09pjfma6nrh4cs4042k96l4n5v4a6.apps.googleusercontent.com",
-)
+GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID", "")
 GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET", "")
 
 # ---------------------------------------------------------------------------
 # Email
 # ---------------------------------------------------------------------------
-DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "daglish317@gmail.com")
+DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "noreply@localhost")
 EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", DEFAULT_FROM_EMAIL)
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
 
