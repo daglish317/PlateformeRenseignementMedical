@@ -1,4 +1,5 @@
 from rest_framework import serializers
+
 from .models import Utilisateur
 from .services.auth_service import AuthService
 
@@ -17,6 +18,13 @@ class UtilisateurSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = fields
 
+
+class UtilisateurUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Utilisateur
+        fields = ["nom"]
+
+
 class RegisterSerializer(serializers.Serializer):
     nom = serializers.CharField()
     email = serializers.EmailField()
@@ -28,10 +36,54 @@ class RegisterSerializer(serializers.Serializer):
             email=validated_data["email"],
             password=validated_data["password"],
         )
-    
+
+
 class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True)
 
+
 class GoogleAuthSerializer(serializers.Serializer):
     id_token = serializers.CharField()
+
+
+class InviteGestionnaireSerializer(serializers.Serializer):
+    nom = serializers.CharField(max_length=150)
+    email = serializers.EmailField()
+
+    def validate_nom(self, value):
+        value = value.strip()
+        if len(value) < 3:
+            raise serializers.ValidationError("Le nom est trop court.")
+        return value
+
+    def validate_email(self, value):
+        value = value.lower().strip()
+        if Utilisateur.objects.filter(email=value).exists():
+            raise serializers.ValidationError("Cette adresse email est déjà utilisée.")
+        return value
+
+
+class ValidateOtpSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    code = serializers.CharField(max_length=4)
+
+
+class SetPasswordSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only=True, min_length=8)
+
+
+class ChangePasswordSerializer(serializers.Serializer):
+    old_password = serializers.CharField(write_only=True)
+    new_password = serializers.CharField(write_only=True, min_length=8)
+
+
+class ResetPasswordSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    code = serializers.CharField(max_length=4)
+    new_password = serializers.CharField(write_only=True, min_length=8)
+
+
+class LogoutSerializer(serializers.Serializer):
+    refresh = serializers.CharField()

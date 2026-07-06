@@ -1,28 +1,65 @@
-asgiref==3.11.1
-certifi==2026.6.17
-cffi==2.0.0
-charset-normalizer==3.4.7
-cloudinary==1.44.2
-cryptography==49.0.0
-dj-database-url==3.1.2
-dj-rest-auth==7.2.0
+# RechercheMedical - Python dependencies (local + production)
+# Install: py -3 -m pip install -r requirements.txt
+
+# Django core
 Django==6.0.6
-django-allauth==65.18.0
-django-cloudinary-storage==0.3.0
-django-cors-headers==4.9.0
+asgiref==3.11.1
+sqlparse==0.5.5
+tzdata==2026.2
+
+# Django REST / Auth
 djangorestframework==3.17.1
 djangorestframework_simplejwt==5.5.1
+django-filter==25.2
+django-cors-headers==4.9.0
+dj-rest-auth==7.2.0
+django-allauth==65.18.0
+
+# WebSocket (Channels)
+channels==4.3.2
+channels_redis==4.3.0
+daphne==4.2.1
+
+# Database
+psycopg2==2.9.12
+dj-database-url==3.1.2
+
+# Cache / Redis
+redis==8.0.1
+
+# Production server / static files
+gunicorn==23.0.0
+whitenoise==6.12.0
+
+# Configuration
+python-dotenv==1.2.2
+
+# Google OAuth
 google-auth==2.55.1
+PyJWT==2.13.0
+
+# HTTP
+requests==2.34.2
+certifi==2026.6.17
+charset-normalizer==3.4.7
 idna==3.18
+urllib3==2.7.0
+
+# Media / import
 pillow==12.2.0
+openpyxl==3.1.5
+cloudinary==1.44.2
+django-cloudinary-storage==0.3.0
+
+# Fuzzy search
+rapidfuzz==3.14.3
+
+# Crypto / transitive
+cffi==2.0.0
+cryptography==49.0.0
+et_xmlfile==2.0.0
+msgpack==1.2.1
 pyasn1==0.6.3
 pyasn1_modules==0.4.2
 pycparser==3.0
-PyJWT==2.13.0
-python-dotenv==1.2.2
-requests==2.34.2
 six==1.17.0
-sqlparse==0.5.5
-tzdata==2026.2
-urllib3==2.7.0
-whitenoise==6.12.0

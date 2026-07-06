@@ -5,7 +5,10 @@ from .views import (
     AdminListStructuresView,
     ValidateStructureView,
     StructureDetailView,
+    
 )
+from .views import StructuresProchesView
+from .form import StructureFormSubmitView
 
 urlpatterns = [
     path("create/", CreateStructureView.as_view(), name="structure-create"),
@@ -15,4 +18,6 @@ urlpatterns = [
     path("admin/validate/<uuid:pk>/", ValidateStructureView.as_view(), name="structure-validate"),
 
     path("<uuid:pk>/", StructureDetailView.as_view(), name="structure-detail"),
+    path("proches/", StructuresProchesView.as_view()),
+     path("submit/", StructureFormSubmitView.as_view()),
 ]

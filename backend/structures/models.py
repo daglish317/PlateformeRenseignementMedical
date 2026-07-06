@@ -83,11 +83,31 @@ class Structure(models.Model):
         null=True,
         blank=True,
     )
+    motif_refus = models.TextField(
+        blank=True,
+        default=""
+    )
+
+    valide_par = models.ForeignKey(
+    "utilisateurs.Utilisateur",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="structures_validees"
+    )
+
+    est_supprimee = models.BooleanField(
+        default=False,
+        db_index=True,
+    )
 
     class Meta:
         verbose_name = "Structure"
         verbose_name_plural = "Structures"
         ordering = ["-date_creation"]
+        indexes = [
+            models.Index(fields=["latitude", "longitude"]),
+        ]
 
     def valider(self):
         self.statut = StatutStructure.ACTIVE
@@ -96,7 +116,7 @@ class Structure(models.Model):
 
     def refuser(self):
         self.statut = StatutStructure.REFUSEE
-        self.save(update_fields=["statut"])
-
+        self.date_validation = timezone.now()
+        self.save(update_fields=["statut", "date_validation"])
     def __str__(self):
         return f"{self.nom} ({self.get_type_display()})"

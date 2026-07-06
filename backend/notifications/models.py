@@ -43,8 +43,12 @@ class Notification(models.Model):
         blank=True
     )
 
+    class Meta:
+        ordering = ["-date_creation"]
+
     def __str__(self):
         return self.titre
-    
 
-
+    def marquer_comme_lue(self):
+        self.est_lue = True
+        self.save(update_fields=["est_lue"])

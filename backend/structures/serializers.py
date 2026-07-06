@@ -1,11 +1,40 @@
 from rest_framework import serializers
-
 from .models import Structure
+
+
+class StructureCreateSerializer(serializers.ModelSerializer):
+    """
+    Création structure (gestionnaire)
+    """
+
+    class Meta:
+        model = Structure
+        fields = [
+            "nom",
+            "type",
+            "photo",
+            "adresse",
+            "telephone",
+            "latitude",
+            "longitude",
+        ]
+
+    def validate_nom(self, value):
+        value = value.strip()
+        if len(value) < 3:
+            raise serializers.ValidationError("Nom trop court")
+        return value
+
+    def validate_telephone(self, value):
+        value = value.strip()
+        if len(value) < 8:
+            raise serializers.ValidationError("Numéro invalide")
+        return value
 
 
 class StructureListSerializer(serializers.ModelSerializer):
     """
-    Utilisé pour afficher les cartes de structures.
+    Affichage en cartes (liste frontend)
     """
 
     class Meta:
@@ -21,7 +50,7 @@ class StructureListSerializer(serializers.ModelSerializer):
 
 class StructureDetailSerializer(serializers.ModelSerializer):
     """
-    Utilisé pour afficher la fiche complète d'une structure.
+    Détail complet structure
     """
 
     gestionnaire = serializers.StringRelatedField()
@@ -39,47 +68,36 @@ class StructureDetailSerializer(serializers.ModelSerializer):
             "longitude",
             "statut",
             "gestionnaire",
+            "motif_refus",
+            "valide_par",
             "date_creation",
             "date_validation",
         ]
 
 
-class StructureCreateSerializer(serializers.ModelSerializer):
-    """
-    Validation des données de création.
-    Aucune logique métier ici.
-    """
+class StructureValidationSerializer(serializers.Serializer):
 
-    class Meta:
-        model = Structure
-        fields = [
-            "nom",
-            "type",
-            "photo",
-            "adresse",
-            "telephone",
-            "latitude",
-            "longitude",
+    action = serializers.ChoiceField(
+        choices=[
+            ("APPROVE", "APPROVE"),
+            ("REJECT", "REJECT"),
         ]
+    )
 
-    def validate_nom(self, value):
+    motif = serializers.CharField(
+        required=False,
+        allow_blank=True
+    )
 
-        value = value.strip()
+    def validate(self, attrs):
 
-        if len(value) < 3:
-            raise serializers.ValidationError(
-                "Le nom est trop court."
-            )
+        if attrs["action"] == "REJECT":
 
-        return value
+            if not attrs.get("motif"):
+                raise serializers.ValidationError(
+                    {
+                        "motif": "Le motif est obligatoire."
+                    }
+                )
 
-    def validate_telephone(self, value):
-
-        value = value.strip()
-
-        if len(value) < 8:
-            raise serializers.ValidationError(
-                "Numéro de téléphone invalide."
-            )
-
-        return value
+        return attrs

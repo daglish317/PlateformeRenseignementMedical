@@ -1,0 +1,10 @@
+class EventTypes:
+    OTP_GENERATED = "otp.generated"
+    USER_CREATED = "user.created"
+    USER_INVITED = "user.invited"
+    STRUCTURE_CREATED = "structure.created"
+    STRUCTURE_VALIDATED = "structure.validated"
+    STRUCTURE_REJECTED = "structure.rejected"
+    NOTIFICATION_CREATED = "notification.created"
+    FEEDBACK_CREATED = "feedback.created"
+    MESSAGE_SENT = "message.sent"

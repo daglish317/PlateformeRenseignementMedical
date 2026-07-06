@@ -1,26 +1,26 @@
 from rest_framework import serializers
 
-from .models import Maladie, PriseEnCharge
+from .models import PriseEnCharge
+from catalogues.models import Catalogue
 from structures.models import Structure
 
 
-class MaladieSerializer(serializers.ModelSerializer):
-
+class CatalogueSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Maladie
-        fields = ["id", "nom"]
+        model = Catalogue
+        fields = ["id", "nom", "type"]
 
 
 class PriseEnChargeSerializer(serializers.ModelSerializer):
 
-    maladie = MaladieSerializer(read_only=True)
+    catalogue = CatalogueSerializer(read_only=True)
 
     class Meta:
         model = PriseEnCharge
         fields = [
             "id",
             "structure",
-            "maladie",
+            "catalogue",
             "niveau",
             "date_ajout",
         ]
@@ -29,10 +29,15 @@ class PriseEnChargeSerializer(serializers.ModelSerializer):
 class PriseEnChargeCreateSerializer(serializers.Serializer):
 
     structure_id = serializers.UUIDField()
-    maladie_nom = serializers.CharField(max_length=255)
+    catalogue_id = serializers.UUIDField()
     niveau = serializers.CharField(required=False, allow_blank=True)
 
     def validate_structure_id(self, value):
         if not Structure.objects.filter(id=value).exists():
             raise serializers.ValidationError("Structure invalide.")
+        return value
+
+    def validate_catalogue_id(self, value):
+        if not Catalogue.objects.filter(id=value).exists():
+            raise serializers.ValidationError("Catalogue invalide.")
         return value
