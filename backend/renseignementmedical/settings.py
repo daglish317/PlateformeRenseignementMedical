@@ -46,11 +46,21 @@ ALLOWED_HOSTS = [
     if h.strip()
 ]
 
+# Render.com injecte RENDER_EXTERNAL_HOSTNAME (ex: mon-api.onrender.com)
+RENDER_EXTERNAL_HOSTNAME = os.getenv("RENDER_EXTERNAL_HOSTNAME", "").strip()
+if RENDER_EXTERNAL_HOSTNAME and RENDER_EXTERNAL_HOSTNAME not in ALLOWED_HOSTS:
+    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
+
 CSRF_TRUSTED_ORIGINS = [
     o.strip()
     for o in os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",")
     if o.strip()
 ]
+
+if RENDER_EXTERNAL_HOSTNAME:
+    render_origin = f"https://{RENDER_EXTERNAL_HOSTNAME}"
+    if render_origin not in CSRF_TRUSTED_ORIGINS:
+        CSRF_TRUSTED_ORIGINS.append(render_origin)
 
 # ---------------------------------------------------------------------------
 # Applications
@@ -256,10 +266,18 @@ else:
 # Channels / WebSocket
 # ---------------------------------------------------------------------------
 USE_REDIS = os.getenv("USE_REDIS", "false" if IS_LOCAL else "true").lower() == "true"
+REDIS_URL = os.getenv("REDIS_URL", "").strip()
 
 if IS_TESTING or not USE_REDIS:
     CHANNEL_LAYERS = {
         "default": {"BACKEND": "channels.layers.InMemoryChannelLayer"},
+    }
+elif REDIS_URL:
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels_redis.core.RedisChannelLayer",
+            "CONFIG": {"hosts": [REDIS_URL]},
+        },
     }
 else:
     CHANNEL_LAYERS = {
@@ -305,7 +323,10 @@ if IS_PRODUCTION:
     X_FRAME_OPTIONS = "DENY"
     SECURE_HSTS_SECONDS = int(os.getenv("SECURE_HSTS_SECONDS", "31536000"))
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-    SECURE_SSL_REDIRECT = os.getenv("SECURE_SSL_REDIRECT", "True").lower() == "true"
+    SECURE_SSL_REDIRECT = os.getenv(
+        "SECURE_SSL_REDIRECT",
+        "False" if os.getenv("RENDER") else "True",
+    ).lower() == "true"
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
