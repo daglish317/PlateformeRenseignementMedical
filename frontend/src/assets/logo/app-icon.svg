@@ -1,0 +1,23 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#2563EB"/>
+      <stop offset="100%" stop-color="#14B8A6"/>
+    </linearGradient>
+    <linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"   stop-color="#ffffff" stop-opacity="0.15"/>
+      <stop offset="50%"  stop-color="#ffffff" stop-opacity="0.45"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.15"/>
+    </linearGradient>
+  </defs>
+  <!-- Fond arrondi dégradé -->
+  <rect width="512" height="512" rx="110" fill="url(#bgGrad)"/>
+  <!-- Anneaux -->
+  <ellipse cx="256.0" cy="385.0" rx="42.5" ry="12.8" fill="none" stroke="url(#ringGrad)" stroke-width="7.1" opacity="0.85"/>
+  <ellipse cx="256.0" cy="399.2" rx="73.7" ry="22.7" fill="none" stroke="url(#ringGrad)" stroke-width="6.2" opacity="0.55"/>
+  <!-- Pin blanc -->
+  <path d="M 256.0,138.5 C 207.8,138.5 171.0,175.3 171.0,223.5 C 171.0,271.7 256.0,373.7 256.0,373.7 C 256.0,373.7 341.0,271.7 341.0,223.5 C 341.0,175.3 304.2,138.5 256.0,138.5 Z" fill="white" opacity="0.97"/>
+  <!-- Croix (teal sur blanc = on met le bleu bg color) -->
+  <rect x="222.0" y="213.6" width="68.0" height="19.8" rx="5.7" fill="url(#bgGrad)"/>
+  <rect x="246.1" y="189.5" width="19.8" height="68.0" rx="5.7" fill="url(#bgGrad)"/>
+</svg>

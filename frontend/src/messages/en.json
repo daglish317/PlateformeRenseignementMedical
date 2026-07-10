@@ -1,0 +1,52 @@
+{
+  "common": {},
+
+  "navigation": {},
+
+  "navbar": {},
+
+  "sidebar": {},
+
+  "footer": {},
+
+  "home": {},
+
+  "auth": {},
+
+  "search": {},
+
+  "map": {},
+
+  "structure": {},
+
+  "medical": {},
+
+  "catalogue": {},
+
+  "stock": {},
+
+  "servicesMedicaux": {},
+
+  "plateauTechnique": {},
+
+  "priseEnCharge": {},
+
+  "dashboard": {
+    "admin": {},
+    "gestionnaire": {}
+  },
+
+  "notifications": {},
+
+  "messagerie": {},
+
+  "feedback": {},
+
+  "profile": {},
+
+  "settings": {},
+
+  "validation": {},
+
+  "errors": {}
+}
