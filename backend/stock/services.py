@@ -80,6 +80,11 @@ class StockService:
         return item
 
     @staticmethod
+    @transaction.atomic
+    def supprimer_item(*, item):
+        item.delete()
+
+    @staticmethod
     def _verifier_alerte(item):
         if item.quantite <= item.seuil_alerte:
             NotificationService.envoyer(

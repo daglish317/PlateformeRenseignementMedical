@@ -52,6 +52,16 @@ class FeedbackService:
         return feedback
 
     @staticmethod
+    @transaction.atomic
+    def modifier_feedback(*, feedback, note=None, commentaire=None):
+        if note is not None:
+            feedback.note = note
+        if commentaire is not None:
+            feedback.commentaire = commentaire
+        feedback.save()
+        return feedback
+
+    @staticmethod
     def statistiques():
         structure_stats = (
             Feedback.objects.filter(type=TypeFeedback.STRUCTURE)

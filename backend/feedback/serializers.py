@@ -40,3 +40,9 @@ class FeedbackCreateSerializer(serializers.Serializer):
             )
 
         return data
+
+
+class FeedbackUpdateSerializer(serializers.Serializer):
+
+    note = serializers.IntegerField(min_value=1, max_value=5, required=False)
+    commentaire = serializers.CharField(required=False, allow_blank=True)

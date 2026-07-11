@@ -13,23 +13,29 @@ class CommentaireSerializer(serializers.ModelSerializer):
 class AvisSerializer(serializers.ModelSerializer):
 
     commentaires = CommentaireSerializer(many=True, read_only=True)
+    utilisateur_nom = serializers.CharField(source="utilisateur.nom", read_only=True)
 
     class Meta:
         model = AvisStructure
         fields = [
             "id",
             "utilisateur",
+            "utilisateur_nom",
             "structure",
             "note",
             "commentaires",
-            "created_at"
+            "created_at",
         ]
-        read_only_fields = ["note"]  # 🔥 IMPORTANT: note non modifiable
 
 
 class AvisCreateSerializer(serializers.Serializer):
 
     structure_id = serializers.UUIDField()
+    note = serializers.IntegerField(min_value=1, max_value=5)
+
+
+class AvisUpdateSerializer(serializers.Serializer):
+
     note = serializers.IntegerField(min_value=1, max_value=5)
 
 

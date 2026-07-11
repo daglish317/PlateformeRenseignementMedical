@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Structure
+from .models import Structure, Favori, Horaire
 
 
 class StructureCreateSerializer(serializers.ModelSerializer):
@@ -101,3 +101,56 @@ class StructureValidationSerializer(serializers.Serializer):
                 )
 
         return attrs
+
+
+class FavoriCreateSerializer(serializers.Serializer):
+
+    structure_id = serializers.UUIDField()
+
+
+class FavoriSerializer(serializers.ModelSerializer):
+
+    structure = StructureListSerializer(read_only=True)
+
+    class Meta:
+        model = Favori
+        fields = [
+            "id",
+            "structure",
+            "date_ajout",
+        ]
+
+
+class HoraireSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Horaire
+        fields = [
+            "id",
+            "jour",
+            "heure_ouverture",
+            "heure_fermeture",
+            "est_ferme",
+        ]
+
+
+class HoraireBulkCreateSerializer(serializers.Serializer):
+
+    horaires = HoraireSerializer(many=True)
+
+    def validate_horaires(self, value):
+        jours_vus = set()
+        for h in value:
+            jour = h.get("jour")
+            if jour in jours_vus:
+                raise serializers.ValidationError(f"Le jour {jour} est duplicé.")
+            jours_vus.add(jour)
+
+            if not h.get("est_ferme", False):
+                ouverture = h.get("heure_ouverture")
+                fermeture = h.get("heure_fermeture")
+                if ouverture and fermeture and ouverture >= fermeture:
+                    raise serializers.ValidationError(
+                        f"Pour {jour}: l'heure d'ouverture doit être avant l'heure de fermeture."
+                    )
+        return value

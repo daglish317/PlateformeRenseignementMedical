@@ -67,6 +67,19 @@ class CatalogueUpdateView(APIView):
         return Response({"message": "Élément modifié.", "data": CatalogueSerializer(catalogue).data})
 
 
+class CatalogueDeleteView(APIView):
+    permission_classes = [IsAdminCatalogue]
+
+    def delete(self, request, pk):
+
+        catalogue = CatalogueService.obtenir_par_id(pk)
+        if catalogue is None:
+            return Response({"detail": "Élément introuvable."}, status=status.HTTP_404_NOT_FOUND)
+
+        CatalogueService.supprimer(catalogue=catalogue)
+        return Response({"message": "Élément supprimé."}, status=status.HTTP_200_OK)
+
+
 class CatalogueDesactiverView(APIView):
     permission_classes = [IsAdminCatalogue]
 

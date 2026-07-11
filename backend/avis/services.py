@@ -6,7 +6,7 @@ from .models import AvisStructure, CommentaireAvis
 class AvisService:
 
     # =========================
-    # CREER AVIS (NOTE FIXE)
+    # CREER AVIS
     # =========================
     @staticmethod
     @transaction.atomic
@@ -19,6 +19,24 @@ class AvisService:
         )
 
         return avis
+
+    # =========================
+    # MODIFIER NOTE AVIS
+    # =========================
+    @staticmethod
+    @transaction.atomic
+    def modifier_avis(*, avis, note):
+        avis.note = note
+        avis.save(update_fields=["note"])
+        return avis
+
+    # =========================
+    # SUPPRIMER AVIS
+    # =========================
+    @staticmethod
+    @transaction.atomic
+    def supprimer_avis(*, avis):
+        avis.delete()
 
     # =========================
     # AJOUT COMMENTAIRE

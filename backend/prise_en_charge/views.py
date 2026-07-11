@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from .models import PriseEnCharge
-from .serializers import PriseEnChargeSerializer, PriseEnChargeCreateSerializer
+from .serializers import PriseEnChargeSerializer, PriseEnChargeCreateSerializer, PriseEnChargeUpdateSerializer
 from .services import PriseEnChargeService
 
 from utilisateurs.decorators import gestionnaire_required, admin_required
@@ -30,6 +30,58 @@ class CreatePriseEnChargeView(APIView):
         return Response(
             {"message": "Prise en charge enregistrée", "data": PriseEnChargeSerializer(prise).data},
             status=status.HTTP_201_CREATED,
+        )
+
+
+class UpdatePriseEnChargeView(APIView):
+
+    @gestionnaire_required
+    def patch(self, request, pk):
+
+        try:
+            prise_en_charge = PriseEnCharge.objects.select_related("structure").get(id=pk)
+        except PriseEnCharge.DoesNotExist:
+            return Response(
+                {"detail": "Prise en charge introuvable"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        assert_gestionnaire_owns_structure(request.user, prise_en_charge.structure_id)
+
+        serializer = PriseEnChargeUpdateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        prise_en_charge = PriseEnChargeService.modifier(
+            prise_en_charge=prise_en_charge,
+            niveau=serializer.validated_data.get("niveau"),
+        )
+
+        return Response(
+            {"message": "Prise en charge mise à jour", "data": PriseEnChargeSerializer(prise_en_charge).data},
+            status=status.HTTP_200_OK,
+        )
+
+
+class DeletePriseEnChargeView(APIView):
+
+    @gestionnaire_required
+    def delete(self, request, pk):
+
+        try:
+            prise_en_charge = PriseEnCharge.objects.select_related("structure").get(id=pk)
+        except PriseEnCharge.DoesNotExist:
+            return Response(
+                {"detail": "Prise en charge introuvable"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        assert_gestionnaire_owns_structure(request.user, prise_en_charge.structure_id)
+
+        PriseEnChargeService.supprimer(prise_en_charge=prise_en_charge)
+
+        return Response(
+            {"message": "Prise en charge supprimée"},
+            status=status.HTTP_200_OK,
         )
 
 

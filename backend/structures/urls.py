@@ -5,7 +5,13 @@ from .views import (
     AdminListStructuresView,
     ValidateStructureView,
     StructureDetailView,
-    
+    AddFavoriView,
+    RemoveFavoriView,
+    ListFavorisView,
+    CheckFavoriView,
+    ListHorairesView,
+    SetHorairesView,
+    UpdateSingleHoraireView,
 )
 from .views import StructuresProchesView
 from .form import StructureFormSubmitView
@@ -19,5 +25,14 @@ urlpatterns = [
 
     path("<uuid:pk>/", StructureDetailView.as_view(), name="structure-detail"),
     path("proches/", StructuresProchesView.as_view()),
-     path("submit/", StructureFormSubmitView.as_view()),
+    path("submit/", StructureFormSubmitView.as_view()),
+
+    path("favoris/", ListFavorisView.as_view(), name="favoris-list"),
+    path("favoris/add/", AddFavoriView.as_view(), name="favoris-add"),
+    path("favoris/<uuid:structure_id>/remove/", RemoveFavoriView.as_view(), name="favoris-remove"),
+    path("favoris/<uuid:structure_id>/check/", CheckFavoriView.as_view(), name="favoris-check"),
+
+    path("<uuid:structure_id>/horaires/", ListHorairesView.as_view(), name="horaires-list"),
+    path("<uuid:structure_id>/horaires/set/", SetHorairesView.as_view(), name="horaires-set"),
+    path("horaires/<uuid:pk>/", UpdateSingleHoraireView.as_view(), name="horaire-update"),
 ]

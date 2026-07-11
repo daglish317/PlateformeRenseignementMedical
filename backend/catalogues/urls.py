@@ -5,6 +5,7 @@ from .views import (
     CatalogueDetailView,
     CatalogueCreateView,
     CatalogueUpdateView,
+    CatalogueDeleteView,
     CatalogueActiverView,
     CatalogueDesactiverView,
 )
@@ -24,6 +25,12 @@ urlpatterns = [
         "update/<uuid:pk>/",
         CatalogueUpdateView.as_view(),
         name="catalogue-update",
+    ),
+
+    path(
+        "delete/<uuid:pk>/",
+        CatalogueDeleteView.as_view(),
+        name="catalogue-delete",
     ),
 
     path(

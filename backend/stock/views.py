@@ -40,6 +40,29 @@ class ListStockStructureView(APIView):
         return Response(StockSerializer(items, many=True).data)
 
 
+class DeleteStockView(APIView):
+
+    @gestionnaire_required
+    def delete(self, request, pk):
+
+        try:
+            item = StockItem.objects.select_related("structure").get(id=pk)
+        except StockItem.DoesNotExist:
+            return Response(
+                {"detail": "Article introuvable"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        assert_gestionnaire_owns_structure(request.user, item.structure_id)
+
+        StockService.supprimer_item(item=item)
+
+        return Response(
+            {"message": "Article supprimé"},
+            status=status.HTTP_200_OK,
+        )
+
+
 class RetirerStockView(APIView):
 
     @gestionnaire_required

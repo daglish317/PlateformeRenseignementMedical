@@ -1,25 +1,68 @@
 {
-  "common": {},
+  "common": {
+    "loading": "Loading...",
+    "cancel": "Cancel",
+    "save": "Save",
+    "close": "Close",
+    "search": "Search",
+    "confirm": "Confirm",
+    "delete": "Delete",
+    "edit": "Edit"
+  },
 
-  "navigation": {},
+  "navigation": {
+    "home": "Home",
+    "search": "Search",
+    "login": "Login"
+  },
 
-  "navbar": {},
+  "header": {
+    "ariaLabel": "Main navigation",
+    "logoAlt": "SantéProx logo",
+    "login": "Login",
+    "dashboard": "My space"
+  },
 
-  "sidebar": {},
+  "footer": {
+  "about": "À propos",
+  "contact": "Me contacter",
+  "feedback": "Laisser un avis",
+  "copyright": "Tous droits réservés."
+ },
 
-  "footer": {},
+  "language": {
+    "label": "Language",
+    "change": "Change language",
+    "fr": "French",
+    "en": "English"
+  },
+
+  "theme": {
+    "label": "Theme",
+    "system": "System",
+    "toggle": "Change theme",
+    "light": "Light mode",
+    "dark": "Dark mode"
+    
+  },
 
   "home": {},
 
-  "auth": {},
+  "auth": {
+    "login": "Login",
+    "register": "Create an account",
+    "dashboard": "My space"
+  },
 
-  "search": {},
+  "search": {
+    "placeholder": "Search for a hospital, pharmacy, service...",
+    "history": "Recent searches",
+    "suggestions": "Suggestions"
+  },
 
   "map": {},
 
   "structure": {},
-
-  "medical": {},
 
   "catalogue": {},
 

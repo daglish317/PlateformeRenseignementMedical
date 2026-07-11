@@ -41,3 +41,8 @@ class PriseEnChargeCreateSerializer(serializers.Serializer):
         if not Catalogue.objects.filter(id=value).exists():
             raise serializers.ValidationError("Catalogue invalide.")
         return value
+
+
+class PriseEnChargeUpdateSerializer(serializers.Serializer):
+
+    niveau = serializers.CharField(required=False, allow_blank=True)

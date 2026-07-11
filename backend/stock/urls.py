@@ -3,6 +3,7 @@ from django.urls import path
 from .views import (
     CreateStockView,
     ListStockStructureView,
+    DeleteStockView,
     RetirerStockView,
     EntreeStockView,
     StockMovementsView,
@@ -12,6 +13,7 @@ from .views import (
 urlpatterns = [
     path("create/", CreateStockView.as_view()),
     path("structure/<uuid:structure_id>/", ListStockStructureView.as_view()),
+    path("<uuid:pk>/delete/", DeleteStockView.as_view()),
     path("<uuid:pk>/retirer/", RetirerStockView.as_view()),
     path("<uuid:pk>/entree/", EntreeStockView.as_view()),
     path("<uuid:pk>/mouvements/", StockMovementsView.as_view()),

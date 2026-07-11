@@ -33,6 +33,14 @@ class CatalogueService:
 
     @staticmethod
     @transaction.atomic
+    def supprimer(*, catalogue):
+        """
+        Suppression définitive d'une entrée du catalogue.
+        """
+        catalogue.delete()
+
+    @staticmethod
+    @transaction.atomic
     def activer(catalogue):
         """
         Réactive une entrée du catalogue.

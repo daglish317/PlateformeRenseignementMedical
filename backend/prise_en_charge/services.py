@@ -21,3 +21,15 @@ class PriseEnChargeService:
         )
 
         return prise
+
+    @staticmethod
+    @transaction.atomic
+    def modifier(*, prise_en_charge, niveau):
+        prise_en_charge.niveau = niveau
+        prise_en_charge.save(update_fields=["niveau"])
+        return prise_en_charge
+
+    @staticmethod
+    @transaction.atomic
+    def supprimer(*, prise_en_charge):
+        prise_en_charge.delete()

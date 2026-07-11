@@ -11,6 +11,7 @@ class MessageInline(admin.TabularInline):
         "expediteur",
         "contenu",
         "is_read",
+        "est_supprime",
         "created_at",
     )
 
@@ -29,13 +30,14 @@ class MessageInline(admin.TabularInline):
 class ConversationAdmin(admin.ModelAdmin):
 
     ordering = (
-        "-created_at",
+        "-updated_at",
     )
 
     list_display = (
         "id",
         "structure",
         "created_at",
+        "updated_at",
     )
 
     search_fields = (
@@ -45,6 +47,7 @@ class ConversationAdmin(admin.ModelAdmin):
     readonly_fields = (
         "id",
         "created_at",
+        "updated_at",
     )
 
     list_select_related = (
@@ -63,6 +66,7 @@ class ConversationAdmin(admin.ModelAdmin):
                     "id",
                     "structure",
                     "created_at",
+                    "updated_at",
                 )
             },
         ),
@@ -83,11 +87,13 @@ class MessageAdmin(admin.ModelAdmin):
         "conversation",
         "expediteur",
         "is_read",
+        "est_supprime",
         "created_at",
     )
 
     list_filter = (
         "is_read",
+        "est_supprime",
         "created_at",
     )
 
@@ -128,6 +134,7 @@ class MessageAdmin(admin.ModelAdmin):
             {
                 "fields": (
                     "is_read",
+                    "est_supprime",
                 )
             },
         ),

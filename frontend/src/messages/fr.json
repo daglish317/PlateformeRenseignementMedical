@@ -1,25 +1,67 @@
 {
-  "common": {},
+  "common": {
+    "loading": "Chargement...",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "close": "Fermer",
+    "search": "Rechercher",
+    "confirm": "Confirmer",
+    "delete": "Supprimer",
+    "edit": "Modifier"
+  },
 
-  "navigation": {},
+  "navigation": {
+    "home": "Accueil",
+    "search": "Recherche",
+    "login": "Connexion"
+  },
 
-  "navbar": {},
+  "header": {
+    "ariaLabel": "Navigation principale",
+    "logoAlt": "Logo SantéProx",
+    "login": "Connexion",
+    "dashboard": "Mon espace"
+  },
 
-  "sidebar": {},
+  "footer": {
+  "about": "À propos",
+  "contact": "Me contacter",
+  "feedback": "Laisser un avis",
+  "copyright": "Tous droits réservés."
+},
 
-  "footer": {},
+  "language": {
+    "label": "Langue",
+    "change": "Changer de langue",
+    "fr": "Français",
+    "en": "Anglais"
+  },
+
+  "theme": {
+    "light": "Mode clair",
+    "dark": "Mode sombre",
+    "label": "Thème",
+    "system": "Système",
+    "toggle": "Changer le thème"
+  },
 
   "home": {},
 
-  "auth": {},
+  "auth": {
+    "login": "Connexion",
+    "register": "Créer un compte",
+    "dashboard": "Mon espace"
+  },
 
-  "search": {},
+  "search": {
+    "placeholder": "Rechercher un hôpital, une pharmacie, un service...",
+    "history": "Recherches récentes",
+    "suggestions": "Suggestions"
+  },
 
   "map": {},
 
   "structure": {},
-
-  "medical": {},
 
   "catalogue": {},
 

@@ -42,6 +42,23 @@ class MarkAsReadView(APIView):
         return Response({"message": "Notification marquée comme lue"})
 
 
+class DeleteNotificationView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, pk):
+
+        try:
+            notif = Notification.objects.get(id=pk, utilisateur=request.user)
+        except Notification.DoesNotExist:
+            return Response({"detail": "Notification introuvable"}, status=404)
+
+        notif.delete()
+        return Response(
+            {"message": "Notification supprimée"},
+            status=status.HTTP_200_OK,
+        )
+
+
 class AdminSendNotificationView(APIView):
 
     @admin_required

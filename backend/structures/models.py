@@ -120,3 +120,92 @@ class Structure(models.Model):
         self.save(update_fields=["statut", "date_validation"])
     def __str__(self):
         return f"{self.nom} ({self.get_type_display()})"
+
+
+class Favori(models.Model):
+
+    id = models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4,
+        editable=False,
+    )
+
+    utilisateur = models.ForeignKey(
+        "utilisateurs.Utilisateur",
+        on_delete=models.CASCADE,
+        related_name="favoris",
+    )
+
+    structure = models.ForeignKey(
+        Structure,
+        on_delete=models.CASCADE,
+        related_name="favoris",
+    )
+
+    date_ajout = models.DateTimeField(
+        auto_now_add=True,
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["utilisateur", "structure"],
+                name="unique_favori_utilisateur_structure",
+            )
+        ]
+        ordering = ["-date_ajout"]
+
+    def __str__(self):
+        return f"Favori: {self.utilisateur.nom} → {self.structure.nom}"
+
+
+class JourSemaine(models.TextChoices):
+    LUNDI = "LUNDI", "Lundi"
+    MARDI = "MARDI", "Mardi"
+    MERCREDI = "MERCREDI", "Mercredi"
+    JEUDI = "JEUDI", "Jeudi"
+    VENDREDI = "VENDREDI", "Vendredi"
+    SAMEDI = "SAMEDI", "Samedi"
+    DIMANCHE = "DIMANCHE", "Dimanche"
+
+
+class Horaire(models.Model):
+
+    id = models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4,
+        editable=False,
+    )
+
+    structure = models.ForeignKey(
+        Structure,
+        on_delete=models.CASCADE,
+        related_name="horaires",
+    )
+
+    jour = models.CharField(
+        max_length=10,
+        choices=JourSemaine.choices,
+    )
+
+    heure_ouverture = models.TimeField()
+
+    heure_fermeture = models.TimeField()
+
+    est_ferme = models.BooleanField(
+        default=False,
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["structure", "jour"],
+                name="unique_horaire_structure_jour",
+            )
+        ]
+        ordering = ["jour"]
+
+    def __str__(self):
+        if self.est_ferme:
+            return f"{self.structure.nom} - {self.jour}: Fermé"
+        return f"{self.structure.nom} - {self.jour}: {self.heure_ouverture} - {self.heure_fermeture}"
