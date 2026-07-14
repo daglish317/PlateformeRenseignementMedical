@@ -1,10 +1,14 @@
 import HeaderActions from "./HeaderActions";
 import HeaderLogo from "./HeaderLogo";
+import HeaderSearch from "./HeaderSearch";
 
-import { SearchBar } from "@/components/common/search";
+type HeaderMenuProps = {
+  showSearch?: boolean;
+};
 
-
-export default function HeaderMenu() {
+export default function HeaderMenu({
+  showSearch = true,
+}: HeaderMenuProps) {
   return (
     <div
       className="
@@ -15,25 +19,11 @@ export default function HeaderMenu() {
         gap-6
       "
     >
-
-      {/* Logo */}
       <HeaderLogo />
 
+      <HeaderSearch visible={showSearch} />
 
-      {/* Recherche principale */}
-      <div
-        className="
-          flex-1
-          max-w-3xl
-        "
-      >
-        <SearchBar />
-      </div>
-
-
-      {/* Actions utilisateur */}
       <HeaderActions />
-
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 
-type SectionSpacing = "sm" | "md" | "lg" | "xl" | "none";
+type SectionSpacing = "none" | "sm" | "md" | "lg" | "xl";
 
 type SectionProps = {
   children: React.ReactNode;
@@ -26,6 +26,7 @@ export default function Section({
   return (
     <Component
       className={cn(
+        "flex min-h-0 flex-col",
         spacingClasses[spacing],
         className
       )}

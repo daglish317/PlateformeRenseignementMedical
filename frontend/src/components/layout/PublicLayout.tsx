@@ -9,13 +9,30 @@ export default function PublicLayout({
   children,
 }: PublicLayoutProps) {
   return (
-    <div className="flex min-h-screen flex-col">
+    <div
+      className="
+        flex
+        h-dvh
+        flex-col
+        overflow-hidden
+        bg-background
+      "
+    >
+      {/* Header */}
       <Header />
 
-      <main className="flex-1">
+      {/* Contenu principal */}
+      <main
+        className="
+          flex-1
+          min-h-0
+          overflow-hidden
+        "
+      >
         {children}
       </main>
 
+      {/* Footer */}
       <Footer />
     </div>
   );

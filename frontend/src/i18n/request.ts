@@ -10,6 +10,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
     : routing.defaultLocale;
 
   return {
+    timeZone: "Africa/Douala",
     locale: currentLocale,
     messages: (
       await import(`../messages/${currentLocale}.json`)

@@ -1,8 +1,13 @@
 import HeaderMenu from "./HeaderMenu";
 import MobileMenu from "./MobileMenu";
 
+type HeaderProps = {
+  showSearch?: boolean;
+};
 
-export default function Header() {
+export default function Header({
+  showSearch = true,
+}: HeaderProps) {
   return (
     <header
       className="
@@ -16,7 +21,6 @@ export default function Header() {
         backdrop-blur-xl
       "
     >
-
       <div
         className="
           mx-auto
@@ -30,17 +34,10 @@ export default function Header() {
           lg:px-8
         "
       >
+        <HeaderMenu showSearch={showSearch} />
 
-        {/* Desktop */}
-        <HeaderMenu />
-
-
-        {/* Mobile */}
-        <MobileMenu />
-
-
+        <MobileMenu showSearch={showSearch} />
       </div>
-
     </header>
   );
 }

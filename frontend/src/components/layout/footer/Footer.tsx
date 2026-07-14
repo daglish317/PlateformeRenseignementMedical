@@ -7,20 +7,48 @@ export default function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="border-t border-border bg-card">
-      <div className="mx-auto flex w-full max-w-7xl flex-col items-center gap-8 px-6 py-10">
+    <footer
+      className="
+        shrink-0
+        border-t
+        border-border
+        bg-background
+      "
+    >
+      <div
+        className="
+          mx-auto
+          flex
+          w-full
+          max-w-7xl
+          flex-col
+          gap-4
+          px-6
+          py-5
 
+          md:flex-row
+          md:items-center
+          md:justify-between
+        "
+      >
         {/* Logo */}
         <Logo
           variant="horizontal"
-          width={180}
-          priority={false}
+          width={155}
         />
 
         {/* Navigation */}
         <nav
           aria-label="Navigation du pied de page"
-          className="flex flex-col items-center gap-4 text-sm font-medium text-muted-foreground sm:flex-row sm:gap-8"
+          className="
+            flex
+            flex-wrap
+            items-center
+            justify-center
+            gap-6
+            text-sm
+            text-muted-foreground
+          "
         >
           <Link
             href="/about"
@@ -45,10 +73,17 @@ export default function Footer() {
         </nav>
 
         {/* Copyright */}
-        <p className="text-center text-sm text-muted-foreground">
-          © {year} SantéProx · Tous droits réservés.
-        </p>
+        <p
+          className="
+            text-center
+            text-xs
+            text-muted-foreground
 
+            md:text-right
+          "
+        >
+          © {year} SantéProx
+        </p>
       </div>
     </footer>
   );

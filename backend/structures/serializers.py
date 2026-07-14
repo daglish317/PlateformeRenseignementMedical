@@ -154,3 +154,38 @@ class HoraireBulkCreateSerializer(serializers.Serializer):
                         f"Pour {jour}: l'heure d'ouverture doit être avant l'heure de fermeture."
                     )
         return value
+
+
+class StructureMapSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Structure
+
+        fields = [
+            "id",
+            "nom",
+            "type",
+            "photo",
+            "adresse",
+            "latitude",
+            "longitude",
+        ]
+
+
+
+class StructurePublicMapSerializer(serializers.ModelSerializer):
+    """
+    Données publiques utilisées par la carte et les résultats de recherche.
+    """
+
+    class Meta:
+        model = Structure
+        fields = [
+            "id",
+            "nom",
+            "type",
+            "photo",
+            "adresse",
+            "latitude",
+            "longitude",
+        ]

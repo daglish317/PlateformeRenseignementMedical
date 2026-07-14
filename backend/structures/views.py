@@ -2,7 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
-
+from .serializers_public import StructureMapSerializer
 from .models import Structure, Favori, Horaire
 from .serializers import (
     StructureCreateSerializer,
@@ -13,6 +13,7 @@ from .serializers import (
     FavoriSerializer,
     HoraireSerializer,
     HoraireBulkCreateSerializer,
+    StructureMapSerializer,
 )
 
 from .services import StructureService, StructureGeoService
@@ -161,7 +162,7 @@ class StructuresProchesView(APIView):
 
         for r in resultats:
             data.append({
-                "structure": StructureListSerializer(r["structure"]).data,
+                "structure": StructureMapSerializer(r["structure"]).data,
                 "distance_km": r["distance"]
             })
 
@@ -341,4 +342,23 @@ class UpdateSingleHoraireView(APIView):
         return Response(
             {"message": "Horaire mis à jour", "data": serializer.data},
             status=status.HTTP_200_OK,
+        )
+    
+
+class StructureMapView(APIView):
+
+    def get(self, request):
+
+        structures = Structure.objects.filter(
+            statut="ACTIVE",
+            est_supprimee=False,
+            latitude__isnull=False,
+            longitude__isnull=False,
+        )
+
+        return Response(
+            StructureMapSerializer(
+                structures,
+                many=True
+            ).data
         )

@@ -36,3 +36,4 @@ urlpatterns = [
     path("<uuid:structure_id>/horaires/set/", SetHorairesView.as_view(), name="horaires-set"),
     path("horaires/<uuid:pk>/", UpdateSingleHoraireView.as_view(), name="horaire-update"),
 ]
+
