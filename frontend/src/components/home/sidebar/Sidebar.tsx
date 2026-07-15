@@ -1,7 +1,20 @@
+"use client";
+
 import SidebarHeader from "./SidebarHeader";
 import EmergencyGrid from "./emergency/EmergencyGrid";
+import SearchResults from "./results/SearchResults";
 
-export default function Sidebar() {
+import type { SearchResult } from "@/types/search";
+
+type SidebarProps = {
+  results: SearchResult[];
+  loading: boolean;
+};
+
+export default function Sidebar({
+  results,
+  loading,
+}: SidebarProps) {
   return (
     <div
       className="
@@ -13,8 +26,9 @@ export default function Sidebar() {
       "
     >
       {/* ===========================
-          Zone fixe
-      ============================ */}
+          En-tête
+      =========================== */}
+
       <div
         className="
           shrink-0
@@ -29,7 +43,8 @@ export default function Sidebar() {
 
       {/* ===========================
           Résultats
-      ============================ */}
+      =========================== */}
+
       <section
         className="
           flex
@@ -39,7 +54,6 @@ export default function Sidebar() {
           overflow-hidden
         "
       >
-        {/* Titre fixe */}
         <div
           className="
             shrink-0
@@ -49,22 +63,30 @@ export default function Sidebar() {
             py-4
           "
         >
-          <h2 className="text-lg font-semibold tracking-tight">
+          <h2
+            className="
+              text-lg
+              font-semibold
+              tracking-tight
+            "
+          >
             Résultats de recherche
           </h2>
         </div>
 
-        {/* Liste scrollable */}
         <div
           className="
-            min-h-0
             flex-1
+            min-h-0
             overflow-y-auto
             px-6
             py-5
           "
         >
-          {/* Les cartes des structures seront affichées ici */}
+          <SearchResults
+            results={results}
+            loading={loading}
+          />
         </div>
       </section>
     </div>

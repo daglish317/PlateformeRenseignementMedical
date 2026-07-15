@@ -34,9 +34,13 @@ export default function Header({
           lg:px-8
         "
       >
-        <HeaderMenu showSearch={showSearch} />
+        <HeaderMenu
+          showSearch={showSearch}
+        />
 
-        <MobileMenu showSearch={showSearch} />
+        <MobileMenu
+          showSearch={showSearch}
+        />
       </div>
     </header>
   );

@@ -1,5 +1,6 @@
 from django.urls import path
-
+from django.conf import settings
+from django.conf.urls.static import static
 from .views import (
     CreateStructureView,
     AdminListStructuresView,
@@ -36,4 +37,8 @@ urlpatterns = [
     path("<uuid:structure_id>/horaires/set/", SetHorairesView.as_view(), name="horaires-set"),
     path("horaires/<uuid:pk>/", UpdateSingleHoraireView.as_view(), name="horaire-update"),
 ]
-
+if settings.DEBUG:
+    urlpatterns += static(
+        settings.MEDIA_URL,
+        document_root=settings.MEDIA_ROOT
+    )

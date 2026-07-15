@@ -10,6 +10,18 @@ import { useCurrentLocation } from "@/hooks/map/useCurrentLocation";
 import MapControls from "./MapControls";
 
 
+export type MapStructure = {
+  id: string;
+  nom: string;
+  type: string;
+  adresse: string;
+  telephone?: string;
+  latitude: number;
+  longitude: number;
+};
+
+
+
 const MapView = dynamic(
   () => import("./MapView"),
   {
@@ -43,10 +55,21 @@ const MapView = dynamic(
 );
 
 
-export default function MedicalMap() {
+
+type MedicalMapProps = {
+  structures?: MapStructure[];
+};
+
+
+
+export default function MedicalMap({
+  structures = [],
+}: MedicalMapProps) {
+
 
   const [location, setLocation] =
     useState<UserLocation | null>(null);
+
 
 
   const {
@@ -86,6 +109,7 @@ export default function MedicalMap() {
 
       <MapView
         location={location}
+        structures={structures}
       />
 
 

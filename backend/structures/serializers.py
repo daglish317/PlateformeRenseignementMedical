@@ -186,6 +186,7 @@ class StructurePublicMapSerializer(serializers.ModelSerializer):
             "type",
             "photo",
             "adresse",
+            "telephone",
             "latitude",
             "longitude",
         ]

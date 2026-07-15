@@ -1,13 +1,19 @@
+"use client";
+
 import Header from "@/components/layout/header/Header";
 import Footer from "@/components/layout/footer/Footer";
+
 
 type PublicLayoutProps = {
   children: React.ReactNode;
 };
 
+
 export default function PublicLayout({
   children,
 }: PublicLayoutProps) {
+
+
   return (
     <div
       className="
@@ -18,10 +24,10 @@ export default function PublicLayout({
         bg-background
       "
     >
-      {/* Header */}
+
       <Header />
 
-      {/* Contenu principal */}
+
       <main
         className="
           flex-1
@@ -32,8 +38,9 @@ export default function PublicLayout({
         {children}
       </main>
 
-      {/* Footer */}
-      <Footer />
+
+      
+
     </div>
   );
 }

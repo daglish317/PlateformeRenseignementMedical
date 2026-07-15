@@ -1,45 +1,14 @@
 "use client";
 
+import { useEffect } from "react";
+
 import { useQuery } from "@tanstack/react-query";
+
 import axios from "@/lib/axios";
 
-export type Structure = {
-  id: string;
-  nom: string;
-  type: string;
-  adresse: string;
-  telephone: string;
-  latitude: number;
-  longitude: number;
-};
+import { useSearchStore } from "@/store/search-store";
 
-export type SearchResult = {
-  structure: Structure;
-  score: number;
-  distance_km: number | null;
-  services_matches: string[];
-};
-
-export type Catalogue = {
-  id: string;
-  nom: string;
-  type: string;
-};
-
-export type SearchResponse = {
-  query: string;
-  catalogue: Catalogue | null;
-  results: SearchResult[];
-  suggestions: {
-    id: string;
-    nom: string;
-    type: string;
-  }[];
-  total: number;
-  page: number;
-  page_size: number;
-  message?: string;
-};
+import type { SearchResponse } from "@/types/search";
 
 type SearchParams = {
   query: string;
@@ -56,7 +25,15 @@ export function useSearch({
   page = 1,
   pageSize = 20,
 }: SearchParams) {
-  return useQuery({
+  const setResults = useSearchStore(
+    (state) => state.setResults
+  );
+
+  const setLoading = useSearchStore(
+    (state) => state.setLoading
+  );
+
+  const searchQuery = useQuery<SearchResponse>({
     queryKey: [
       "search",
       query,
@@ -87,4 +64,28 @@ export function useSearch({
 
     staleTime: 1000 * 60,
   });
+
+  useEffect(() => {
+    setLoading(searchQuery.isFetching);
+  }, [
+    searchQuery.isFetching,
+    setLoading,
+  ]);
+
+  useEffect(() => {
+    if (query.trim().length === 0) {
+      setResults(null);
+      return;
+    }
+
+    if (searchQuery.data) {
+      setResults(searchQuery.data);
+    }
+  }, [
+    query,
+    searchQuery.data,
+    setResults,
+  ]);
+
+  return searchQuery;
 }

@@ -1,11 +1,51 @@
+"use client";
+
+import { useSearch } from "@/hooks/useSearch";
+
 import Sidebar from "./sidebar/Sidebar";
 
 import MedicalMap from "@/components/map/MedicalMap";
 
-export default function PublicHome() {
+
+type PublicHomeProps = {
+  query?: string;
+};
+
+
+export default function PublicHome({
+  query = "",
+}: PublicHomeProps) {
+
+
+  const {
+    data,
+    isLoading,
+  } = useSearch({
+    query,
+  });
+
+
+
+  const structures =
+    data?.results.map(
+      (item) => item.structure
+    ) ?? [];
+
+
+
   return (
-    <div className="flex h-full min-h-0 w-full">
-      {/* Sidebar */}
+
+    <div
+      className="
+        flex
+        h-full
+        min-h-0
+        w-full
+      "
+    >
+
+
+      {/* Sidebar résultats */}
       <aside
         className="
           w-[390px]
@@ -16,8 +56,16 @@ export default function PublicHome() {
           bg-background
         "
       >
-        <Sidebar />
+
+        <Sidebar
+          results={data?.results ?? []}
+          loading={isLoading}
+        />
+
       </aside>
+
+
+
 
       {/* Carte */}
       <section
@@ -28,6 +76,7 @@ export default function PublicHome() {
           lg:p-5
         "
       >
+
         <div
           className="
             relative
@@ -40,9 +89,19 @@ export default function PublicHome() {
             shadow-sm
           "
         >
-          <MedicalMap />
+
+          <MedicalMap
+            structures={structures}
+          />
+
+
         </div>
+
+
       </section>
+
+
     </div>
+
   );
 }

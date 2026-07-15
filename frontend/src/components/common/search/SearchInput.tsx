@@ -8,6 +8,9 @@ type SearchInputProps = {
   placeholder?: string;
   onChange: (value: string) => void;
   onFocus: () => void;
+  onKeyDown?: (
+    event: React.KeyboardEvent<HTMLInputElement>
+  ) => void;
 };
 
 export default function SearchInput({
@@ -15,18 +18,41 @@ export default function SearchInput({
   placeholder = "Rechercher une structure, un service médical...",
   onChange,
   onFocus,
+  onKeyDown,
 }: SearchInputProps) {
   return (
     <div className="relative w-full">
-      <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+      <Search
+        className="
+          pointer-events-none
+          absolute
+          left-4
+          top-1/2
+          h-5
+          w-5
+          -translate-y-1/2
+          text-muted-foreground
+        "
+      />
 
       <Input
         value={value}
         onFocus={onFocus}
         onChange={(e) => onChange(e.target.value)}
+        onKeyDown={onKeyDown}
         placeholder={placeholder}
         autoComplete="off"
-        className="h-12 rounded-2xl border-border pl-12 pr-4 text-base shadow-sm transition-all focus-visible:ring-2"
+        className="
+          h-12
+          rounded-2xl
+          border-border
+          pl-12
+          pr-4
+          text-base
+          shadow-sm
+          transition-all
+          focus-visible:ring-2
+        "
       />
     </div>
   );

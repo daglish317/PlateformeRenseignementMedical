@@ -9,27 +9,25 @@ import SearchSuggestions from "./SearchSuggestions";
 
 import { useSuggestions } from "@/hooks/useSuggestions";
 import { useSearchHistory } from "@/hooks/useSearchHistory";
+import { useSearchStore } from "@/store/search-store";
 
-type SearchBarProps = {
-  onSearch?: (query: string) => void;
-};
-
-export default function SearchBar({
-  onSearch,
-}: SearchBarProps) {
-  const [query, setQuery] = useState("");
+export default function SearchBar() {
+  const [inputValue, setInputValue] = useState("");
   const [open, setOpen] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const {
-    history,
-    addSearch,
-    removeSearch,
-    clearHistory,
-  } = useSearchHistory();
+  const { history, addSearch, removeSearch, clearHistory } = useSearchHistory();
 
-  const { data: suggestions = [] } = useSuggestions(query);
+  const { data: suggestions = [] } = useSuggestions(inputValue);
+
+  const query = useSearchStore((state) => state.query);
+
+  const setQuery = useSearchStore((state) => state.setQuery);
+
+  useEffect(() => {
+    setInputValue(query);
+  }, [query]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -44,10 +42,7 @@ export default function SearchBar({
     document.addEventListener("mousedown", handleClickOutside);
 
     return () => {
-      document.removeEventListener(
-        "mousedown",
-        handleClickOutside
-      );
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
@@ -58,30 +53,32 @@ export default function SearchBar({
 
     addSearch(text);
 
+    setInputValue(text);
+
     setQuery(text);
 
     setOpen(false);
-
-    onSearch?.(text);
   }
 
   return (
-    <div
-      ref={containerRef}
-      className="relative w-full"
-    >
+    <div ref={containerRef} className="relative w-full">
       <SearchInput
-        value={query}
+        value={inputValue}
         onChange={(value) => {
-          setQuery(value);
+          setInputValue(value);
           setOpen(true);
         }}
         onFocus={() => setOpen(true)}
+        onKeyDown={(event) => {
+          if (event.key === "Enter") {
+            submit(inputValue);
+          }
+        }}
       />
 
       {open && (
         <SearchDropdown>
-          {query.trim() === "" ? (
+          {inputValue.trim() === "" ? (
             <SearchHistory
               history={history}
               onSelect={submit}
@@ -89,10 +86,7 @@ export default function SearchBar({
               onClear={clearHistory}
             />
           ) : (
-            <SearchSuggestions
-              suggestions={suggestions}
-              onSelect={submit}
-            />
+            <SearchSuggestions suggestions={suggestions} onSelect={submit} />
           )}
         </SearchDropdown>
       )}

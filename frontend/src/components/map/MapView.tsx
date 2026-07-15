@@ -6,18 +6,24 @@ import { MAP } from "@/constants/map";
 
 import MapController from "./MapController";
 import UserMarker from "./UserMarker";
+import StructureMarker from "./StructureMarker";
 
 import type { UserLocation } from "@/services/map/geolocalisation";
+import type { MapStructure } from "./MedicalMap";
 
 
 type MapViewProps = {
   location: UserLocation | null;
+  structures: MapStructure[];
 };
+
 
 
 export default function MapView({
   location,
+  structures,
 }: MapViewProps) {
+
 
   return (
     <MapContainer
@@ -33,10 +39,12 @@ export default function MapView({
       className="h-full w-full"
     >
 
+
       <TileLayer
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         attribution="© OpenStreetMap contributors"
       />
+
 
 
       <MapController
@@ -44,11 +52,22 @@ export default function MapView({
       />
 
 
+
       {location && (
         <UserMarker
           location={location}
         />
       )}
+
+
+
+      {structures.map((structure) => (
+        <StructureMarker
+          key={structure.id}
+          structure={structure}
+        />
+      ))}
+
 
     </MapContainer>
   );

@@ -1,6 +1,6 @@
-import HeaderActions from "./HeaderActions";
 import HeaderLogo from "./HeaderLogo";
 import HeaderSearch from "./HeaderSearch";
+import HeaderActions from "./HeaderActions";
 
 type HeaderMenuProps = {
   showSearch?: boolean;
@@ -12,8 +12,7 @@ export default function HeaderMenu({
   return (
     <div
       className="
-        hidden
-        lg:flex
+        flex
         w-full
         items-center
         gap-6
@@ -21,7 +20,9 @@ export default function HeaderMenu({
     >
       <HeaderLogo />
 
-      <HeaderSearch visible={showSearch} />
+      <HeaderSearch
+        visible={showSearch}
+      />
 
       <HeaderActions />
     </div>
