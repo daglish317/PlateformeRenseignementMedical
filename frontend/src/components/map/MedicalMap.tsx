@@ -2,13 +2,14 @@
 
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
-
 import type { UserLocation } from "@/services/map/geolocalisation";
-
 import { useCurrentLocation } from "@/hooks/map/useCurrentLocation";
-
 import MapControls from "./MapControls";
+import { useSearchStore } from "@/store/search-store";
 
+// Use dynamic imports for markers because they evaluate Leaflet icons at module level
+const UserMarker = dynamic(() => import("./UserMarker"), { ssr: false });
+const StructureMarker = dynamic(() => import("./StructureMarker"), { ssr: false });
 
 export type MapStructure = {
   id: string;
@@ -20,103 +21,46 @@ export type MapStructure = {
   longitude: number;
 };
 
+const MapView = dynamic(() => import("./MapView"), {
+  ssr: false,
+  loading: () => (
+    <div className="flex h-full w-full items-center justify-center bg-muted/20">
+      <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary/20 border-t-primary" />
+    </div>
+  ),
+});
 
+const RouteLayer = dynamic(() => import("./RouteLayer"), { ssr: false });
 
-const MapView = dynamic(
-  () => import("./MapView"),
-  {
-    ssr: false,
+export default function MedicalMap() {
+  const [location, setLocation] = useState<UserLocation | null>(null);
+  const { locateUser } = useCurrentLocation();
+  const results = useSearchStore((state) => state.results);
 
-    loading: () => (
-      <div
-        className="
-          flex
-          h-full
-          w-full
-          items-center
-          justify-center
-          bg-muted/20
-        "
-      >
-        <div
-          className="
-            h-12
-            w-12
-            animate-spin
-            rounded-full
-            border-4
-            border-primary/20
-            border-t-primary
-          "
-        />
-      </div>
-    ),
-  }
-);
-
-
-
-type MedicalMapProps = {
-  structures?: MapStructure[];
-};
-
-
-
-export default function MedicalMap({
-  structures = [],
-}: MedicalMapProps) {
-
-
-  const [location, setLocation] =
-    useState<UserLocation | null>(null);
-
-
-
-  const {
-    locateUser,
-  } = useCurrentLocation();
-
-
+  const structures = results?.results.map((item) => item.structure) ?? [];
 
   useEffect(() => {
-
     async function initializeLocation() {
-
       const position = await locateUser();
-
-
       if (position) {
         setLocation(position);
       }
-
     }
-
-
     initializeLocation();
-
   }, [locateUser]);
 
-
-
   return (
-    <div
-      className="
-        relative
-        h-full
-        w-full
-      "
-    >
+    <div className="relative h-full w-full">
+      <MapView location={location}>
+        {location && <UserMarker location={location} />}
+        {structures.map((structure) => (
+          <StructureMarker key={structure.id} structure={structure} />
+        ))}
+        <RouteLayer />
+      </MapView>
 
-      <MapView
-        location={location}
-        structures={structures}
-      />
-
-
-      <MapControls
-        onLocation={setLocation}
-      />
-
+      <MapControls onLocation={setLocation} />
     </div>
   );
 }
+

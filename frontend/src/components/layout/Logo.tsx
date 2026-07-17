@@ -106,7 +106,7 @@ switch (variant) {
           width={180}
           height={48}
           priority={priority}
-          className="hidden h-auto md:block"
+          className="hidden h-auto w-auto md:block"
         />
 
         {/* Mobile */}
@@ -116,7 +116,7 @@ switch (variant) {
           width={42}
           height={42}
           priority={priority}
-          className="block h-auto md:hidden"
+          className="block h-auto w-auto md:hidden"
         />
       </Link>
     );

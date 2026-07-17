@@ -4,42 +4,52 @@ import { useMap } from "react-leaflet";
 import { useEffect } from "react";
 
 import type { UserLocation } from "@/services/map/geolocalisation";
-
 import { MAP } from "@/constants/map";
-
+import { useStructureSelectionStore } from "@/features/structure-selection/store/structure-selection-store";
 
 type MapControllerProps = {
   location?: UserLocation | null;
 };
 
-
 export default function MapController({
   location,
 }: MapControllerProps) {
-
   const map = useMap();
-
+  const selectedStructure = useStructureSelectionStore((state) => state.selectedStructure);
 
   useEffect(() => {
-
     if (!location) {
       return;
     }
-
-
-    map.flyTo(
-      [
-        location.latitude,
-        location.longitude,
-      ],
-      MAP.userZoom,
-      {
-        duration: MAP.flyTo.duration,
-      }
-    );
-
+    // Only fly to location if there's no selected structure yet
+    if (!selectedStructure) {
+      map.flyTo(
+        [
+          location.latitude,
+          location.longitude,
+        ],
+        MAP.userZoom,
+        {
+          duration: MAP.flyTo.duration,
+        }
+      );
+    }
   }, [location, map]);
 
+  useEffect(() => {
+    if (selectedStructure) {
+      map.flyTo(
+        [
+          selectedStructure.latitude,
+          selectedStructure.longitude,
+        ],
+        MAP.userZoom,
+        {
+          duration: MAP.flyTo.duration,
+        }
+      );
+    }
+  }, [selectedStructure, map]);
 
   return null;
-}
+}

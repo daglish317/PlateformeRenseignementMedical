@@ -8,6 +8,9 @@ import ThemeProvider from "./theme.provider";
 import QueryProvider from "./query.provider";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { Toaster } from "sonner";
+
+const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
+
 type AppProvidersProps = {
   children: React.ReactNode;
   locale: string;
@@ -19,30 +22,35 @@ export default function AppProviders({
   locale,
   messages,
 }: AppProvidersProps) {
-  return (
-  <LocaleProvider locale={locale} messages={messages}>
-    <ThemeProvider>
-      <GoogleOAuthProvider
-        clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? ""}
-      >
-        <QueryProvider>
-          <AuthProvider>
-            <WebSocketProvider>
-              <NotificationProvider>
-                {children}
+  const providers = (
+    <QueryProvider>
+      <AuthProvider>
+        <WebSocketProvider>
+          <NotificationProvider>
+            {children}
+            <Toaster
+              position="top-right"
+              richColors
+              closeButton
+              duration={3000}
+            />
+          </NotificationProvider>
+        </WebSocketProvider>
+      </AuthProvider>
+    </QueryProvider>
+  );
 
-                <Toaster
-                  position="top-right"
-                  richColors
-                  closeButton
-                  duration={3000}
-                />
-              </NotificationProvider>
-            </WebSocketProvider>
-          </AuthProvider>
-        </QueryProvider>
-      </GoogleOAuthProvider>
-    </ThemeProvider>
-  </LocaleProvider>
- );
+  return (
+    <LocaleProvider locale={locale} messages={messages}>
+      <ThemeProvider>
+        {googleClientId ? (
+          <GoogleOAuthProvider clientId={googleClientId}>
+            {providers}
+          </GoogleOAuthProvider>
+        ) : (
+          providers
+        )}
+      </ThemeProvider>
+    </LocaleProvider>
+  );
 }

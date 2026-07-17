@@ -17,6 +17,7 @@ export default function LocaleProvider({
     <NextIntlClientProvider
       locale={locale}
       messages={messages}
+      timeZone="Africa/Douala"
     >
       {children}
     </NextIntlClientProvider>

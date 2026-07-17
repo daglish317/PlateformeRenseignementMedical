@@ -10,6 +10,7 @@ import SearchSuggestions from "./SearchSuggestions";
 import { useSuggestions } from "@/hooks/useSuggestions";
 import { useSearchHistory } from "@/hooks/useSearchHistory";
 import { useSearchStore } from "@/store/search-store";
+import { useSearch } from "@/hooks/useSearch";
 
 export default function SearchBar() {
   const [inputValue, setInputValue] = useState("");
@@ -24,6 +25,8 @@ export default function SearchBar() {
   const query = useSearchStore((state) => state.query);
 
   const setQuery = useSearchStore((state) => state.setQuery);
+
+  useSearch({ query });
 
   useEffect(() => {
     setInputValue(query);
@@ -93,3 +96,4 @@ export default function SearchBar() {
     </div>
   );
 }
+
