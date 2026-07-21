@@ -48,6 +48,28 @@ class StructureListSerializer(serializers.ModelSerializer):
         ]
 
 
+class StructureAdminListSerializer(serializers.ModelSerializer):
+    gestionnaire_nom = serializers.CharField(source="gestionnaire.nom", read_only=True)
+    gestionnaire_email = serializers.CharField(source="gestionnaire.email", read_only=True)
+
+    class Meta:
+        model = Structure
+        fields = [
+            "id",
+            "nom",
+            "type",
+            "photo",
+            "adresse",
+            "telephone",
+            "statut",
+            "gestionnaire_nom",
+            "gestionnaire_email",
+            "date_creation",
+            "latitude",
+            "longitude",
+        ]
+
+
 class StructureDetailSerializer(serializers.ModelSerializer):
     """
     Détail complet structure

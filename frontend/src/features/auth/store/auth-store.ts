@@ -1,60 +1,91 @@
 import { create } from "zustand";
-import { User } from "@/features/auth/types/user";
-import { Tokens, AuthResponse } from "@/features/auth/types/auth";
+
+import type { User } from "@/features/auth/types/user";
+import type {
+  AuthResponse,
+  Tokens,
+} from "@/features/auth/types/auth";
+
 import { authStorage } from "@/features/auth/utils/auth-storage";
 
 interface AuthState {
   user: User | null;
+
   accessToken: string | null;
+
   refreshToken: string | null;
+
   authenticated: boolean;
-  setAuth: (authResponse: AuthResponse) => void;
-  setUser: (user: User) => void;
+
+  hydrated: boolean;
+
+  setHydrated: (value: boolean) => void;
+
+  setAuth: (auth: AuthResponse) => void;
+
+  setUser: (user: User | null) => void;
+
   setTokens: (tokens: Tokens) => void;
+
   clearAuth: () => void;
 }
 
-export const useAuthStore = create<AuthState>((set) => {
-  // Initialize from storage on mount (client side)
-  const accessToken = typeof window !== "undefined" ? authStorage.getAccessToken() : null;
-  const refreshToken = typeof window !== "undefined" ? authStorage.getRefreshToken() : null;
+export const useAuthStore = create<AuthState>((set) => ({
+  user: null,
 
-  return {
-    user: null,
-    accessToken,
-    refreshToken,
-    authenticated: !!accessToken,
+  accessToken: null,
 
-    setAuth: (authResponse: AuthResponse) => {
-      authStorage.setTokens(authResponse.tokens);
-      set({
-        user: authResponse.user,
-        accessToken: authResponse.tokens.access,
-        refreshToken: authResponse.tokens.refresh,
-        authenticated: true,
-      });
-    },
+  refreshToken: null,
 
-    setUser: (user: User) => {
-      set({ user });
-    },
+  authenticated: false,
 
-    setTokens: (tokens: Tokens) => {
-      authStorage.setTokens(tokens);
-      set({
-        accessToken: tokens.access,
-        refreshToken: tokens.refresh,
-      });
-    },
+  hydrated: false,
 
-    clearAuth: () => {
-      authStorage.removeTokens();
-      set({
-        user: null,
-        accessToken: null,
-        refreshToken: null,
-        authenticated: false,
-      });
-    },
-  };
-});
+
+  setHydrated: (value) =>
+    set({
+      hydrated: value,
+    }),
+
+
+  setAuth: (auth) => {
+    authStorage.setTokens(auth.tokens);
+
+    set({
+      user: auth.user,
+      accessToken: auth.tokens.access,
+      refreshToken: auth.tokens.refresh,
+      authenticated: true,
+    });
+  },
+
+
+  setUser: (user) =>
+    set({
+      user,
+    }),
+
+
+  setTokens: (tokens) => {
+    authStorage.setTokens(tokens);
+
+    set((state) => ({
+      user: state.user,
+      accessToken: tokens.access,
+      refreshToken: tokens.refresh,
+      authenticated: true,
+    }));
+  },
+
+
+  clearAuth: () => {
+    authStorage.removeTokens();
+
+    set({
+      user: null,
+      accessToken: null,
+      refreshToken: null,
+      authenticated: false,
+    });
+  },
+}));

@@ -13,6 +13,18 @@ const withPWA = withPWAInit({
 });
 
 const nextConfig: NextConfig = {
+  async rewrites() {
+    return [
+      {
+        source: "/fr/administrateur/:path*",
+        destination: "/fr/admin/:path*",
+      },
+      {
+        source: "/fr/administrateur",
+        destination: "/fr/admin",
+      },
+    ];
+  },
 };
 
 export default withPWA(withNextIntl(nextConfig));

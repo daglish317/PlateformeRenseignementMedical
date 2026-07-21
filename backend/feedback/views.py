@@ -2,7 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 
-from .models import Feedback
+from .models import Feedback, TypeFeedback
 from .serializers import FeedbackSerializer, FeedbackCreateSerializer, FeedbackUpdateSerializer
 from .services import FeedbackService
 
@@ -70,16 +70,40 @@ class AdminListFeedbackView(APIView):
 
     @admin_required
     def get(self, request):
+        from django.db.models import Q
 
-        feedbacks = Feedback.objects.all().select_related(
-            "utilisateur", "structure"
-        ).order_by("-created_at")
+        feedbacks = Feedback.objects.filter(
+            type=TypeFeedback.PLATEFORME,
+        ).select_related("utilisateur").order_by("-created_at")
 
-        feedback_type = request.query_params.get("type")
-        if feedback_type:
-            feedbacks = feedbacks.filter(type=feedback_type)
+        search = request.query_params.get("search", "").strip()
+        if search:
+            feedbacks = feedbacks.filter(
+                Q(utilisateur__nom__icontains=search)
+                | Q(utilisateur__email__icontains=search)
+                | Q(sujet__icontains=search)
+            )
 
-        return Response(FeedbackSerializer(feedbacks, many=True).data)
+        statut = request.query_params.get("statut")
+        if statut:
+            feedbacks = feedbacks.filter(statut=statut)
+
+        categorie = request.query_params.get("categorie")
+        if categorie:
+            feedbacks = feedbacks.filter(categorie=categorie)
+
+        page = max(int(request.query_params.get("page", 1)), 1)
+        page_size = min(int(request.query_params.get("page_size", 20)), 100)
+        total = feedbacks.count()
+        start = (page - 1) * page_size
+        items = feedbacks[start : start + page_size]
+
+        return Response({
+            "results": FeedbackSerializer(items, many=True).data,
+            "page": page,
+            "page_size": page_size,
+            "total": total,
+        })
 
 
 class AdminStructureFeedbackView(APIView):
@@ -99,6 +123,24 @@ class FeedbackStatsView(APIView):
     @admin_required
     def get(self, request):
         return Response(FeedbackService.statistiques())
+
+
+class UpdateFeedbackStatusView(APIView):
+
+    @admin_required
+    def patch(self, request, pk):
+        try:
+            feedback = Feedback.objects.get(id=pk, type=TypeFeedback.PLATEFORME)
+        except Feedback.DoesNotExist:
+            return Response({"detail": "Feedback introuvable"}, status=404)
+
+        statut = request.data.get("statut")
+        if statut not in ("NON_LU", "LU", "TRAITE"):
+            return Response({"detail": "Statut invalide"}, status=400)
+
+        feedback.statut = statut
+        feedback.save(update_fields=["statut"])
+        return Response({"message": "Statut mis à jour", "data": FeedbackSerializer(feedback).data})
 
 
 class DeleteFeedbackView(APIView):

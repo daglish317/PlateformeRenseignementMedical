@@ -7,6 +7,19 @@ class TypeFeedback(models.TextChoices):
     PLATEFORME = "PLATEFORME", "Plateforme"
 
 
+class CategorieFeedback(models.TextChoices):
+    BUG = "BUG", "Bug"
+    SUGGESTION = "SUGGESTION", "Suggestion"
+    SIGNALEMENT = "SIGNALEMENT", "Signalement"
+    AUTRE = "AUTRE", "Autre"
+
+
+class StatutFeedback(models.TextChoices):
+    NON_LU = "NON_LU", "Non lu"
+    LU = "LU", "Lu"
+    TRAITE = "TRAITE", "Traité"
+
+
 class Feedback(models.Model):
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -33,6 +46,20 @@ class Feedback(models.Model):
     note = models.PositiveSmallIntegerField()
 
     commentaire = models.TextField(blank=True, null=True)
+
+    sujet = models.CharField(max_length=255, blank=True, default="")
+
+    categorie = models.CharField(
+        max_length=20,
+        choices=CategorieFeedback.choices,
+        default=CategorieFeedback.AUTRE,
+    )
+
+    statut = models.CharField(
+        max_length=20,
+        choices=StatutFeedback.choices,
+        default=StatutFeedback.NON_LU,
+    )
 
     created_at = models.DateTimeField(auto_now_add=True)
 

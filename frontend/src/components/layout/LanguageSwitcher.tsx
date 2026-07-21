@@ -3,8 +3,6 @@
 import { Globe } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 
-import { Button } from "@/components/ui/button";
-
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,6 +20,7 @@ type Locale = "fr" | "en";
 
 
 export default function LanguageSwitcher() {
+
   const locale = useLocale() as Locale;
 
   const t = useTranslations("language");
@@ -32,33 +31,46 @@ export default function LanguageSwitcher() {
 
 
   function changeLocale(nextLocale: Locale) {
-    if (nextLocale === locale) return;
 
-    router.replace(pathname, {
+    if (nextLocale === locale) {
+      return;
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    router.replace(pathname as any, {
       locale: nextLocale,
     });
+
   }
 
 
   return (
+
     <DropdownMenu>
 
       <DropdownMenuTrigger
-        render={
-          <Button
-            type="button"
-            variant="ghost"
-            aria-label={t("change")}
-            className="gap-2"
-          >
-            <Globe className="size-4" />
+        className="
+          inline-flex
+          items-center
+          gap-2
+          rounded-md
+          px-3
+          py-2
+          text-sm
+          font-medium
+          hover:bg-accent
+          hover:text-accent-foreground
+        "
+        aria-label={t("change")}
+      >
 
-            <span className="text-sm font-medium uppercase">
-              {locale}
-            </span>
-          </Button>
-        }
-      />
+        <Globe className="size-4" />
+
+        <span className="uppercase">
+          {locale}
+        </span>
+
+      </DropdownMenuTrigger>
 
 
       <DropdownMenuContent
@@ -70,7 +82,7 @@ export default function LanguageSwitcher() {
           onClick={() => changeLocale("fr")}
           disabled={locale === "fr"}
         >
-          {t("fr")}
+          Français
         </DropdownMenuItem>
 
 
@@ -78,12 +90,14 @@ export default function LanguageSwitcher() {
           onClick={() => changeLocale("en")}
           disabled={locale === "en"}
         >
-          {t("en")}
+          English
         </DropdownMenuItem>
 
 
       </DropdownMenuContent>
 
+
     </DropdownMenu>
+
   );
 }

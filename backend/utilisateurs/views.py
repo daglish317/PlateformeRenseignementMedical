@@ -20,6 +20,15 @@ from .serializers import (
     LogoutSerializer,
 )
 from .services.auth_service import AuthService
+from .views_admin import (
+    RegisterAdminView,
+    AdminDashboardView,
+    AdminUsersListView,
+    AdminUserDetailView,
+    AdminManagersListView,
+    AdminManagerDetailView,
+    AdminStatisticsView,
+)
 from .services.invitation_service import InvitationService
 from .permissions import IsAdmin
 from .decorators import admin_required

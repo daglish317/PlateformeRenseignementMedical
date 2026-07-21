@@ -1,20 +1,38 @@
 import { useQuery } from "@tanstack/react-query";
+
 import { authService } from "@/features/auth/api/auth.service";
 import { useAuthStore } from "@/features/auth/store/auth-store";
 
 export const useCurrentUser = () => {
-  const user = useAuthStore((state) => state.user);
-  const setUser = useAuthStore((state) => state.setUser);
-  const authenticated = useAuthStore((state) => state.authenticated);
+  const {
+    user,
+    authenticated,
+    setUser,
+  } = useAuthStore();
+
 
   return useQuery({
-    queryKey: ["currentUser"],
+    queryKey: ["current-user"],
+
+
     queryFn: async () => {
-      const userData = await authService.getMe();
-      setUser(userData);
-      return userData;
+      const currentUser = await authService.getMe();
+
+      setUser(currentUser);
+
+      return currentUser;
     },
+
+
     initialData: user ?? undefined,
+
+
     enabled: authenticated && !user,
+
+
+    staleTime: 5 * 60 * 1000,
+
+
+    retry: false,
   });
 };

@@ -14,6 +14,8 @@ class UtilisateurSerializer(serializers.ModelSerializer):
             "role",
             "type_authentification",
             "email_verifie",
+            "is_active",
+            "is_staff",
             "date_joined",
         ]
         read_only_fields = fields

@@ -2,10 +2,10 @@ import { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Plateforme Renseignement Médical",
-    short_name: "PRM",
+    name: "SantéProx",
+    short_name: "SantéProx",
     description: "Trouvez les structures médicales autour de vous",
-    start_url: "/",
+    start_url: "/fr",
     display: "standalone",
     background_color: "#ffffff",
     theme_color: "#0f172a",

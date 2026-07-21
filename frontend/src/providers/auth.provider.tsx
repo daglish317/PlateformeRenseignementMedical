@@ -1,34 +1,33 @@
 "use client";
 
-import { useCurrentUser } from "@/features/auth/hooks/useCurrentUser";
+import type { ReactNode } from "react";
+
+import AuthInitializer from "@/features/auth/components/AuthInitializer";
 import { useAuthStore } from "@/features/auth/store/auth-store";
-import { useEffect } from "react";
-
-function AuthInitializer() {
-  const { authenticated, user } = useAuthStore();
-  const { data: fetchedUser } = useCurrentUser();
-
-  useEffect(() => {
-    // If authenticated but no user data, fetch it
-    if (authenticated && !user && fetchedUser) {
-      useAuthStore.getState().setUser(fetchedUser);
-    }
-  }, [authenticated, user, fetchedUser]);
-
-  return null;
-}
 
 type AuthProviderProps = {
-  children: React.ReactNode;
+  children: ReactNode;
 };
 
 export default function AuthProvider({
   children,
 }: AuthProviderProps) {
+
+  const hydrated = useAuthStore(
+    (state) => state.hydrated
+  );
+
   return (
     <>
       <AuthInitializer />
-      {children}
+
+      {hydrated ? (
+        children
+      ) : (
+        <div className="min-h-screen flex items-center justify-center">
+          Chargement...
+        </div>
+      )}
     </>
   );
 }

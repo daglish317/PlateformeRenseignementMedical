@@ -6,6 +6,7 @@ from .views import (
     AdminListFeedbackView,
     AdminStructureFeedbackView,
     FeedbackStatsView,
+    UpdateFeedbackStatusView,
     DeleteFeedbackView,
 )
 
@@ -13,6 +14,7 @@ urlpatterns = [
     path("create/", CreateFeedbackView.as_view()),
     path("<uuid:pk>/update/", UpdateFeedbackView.as_view()),
     path("admin/list/", AdminListFeedbackView.as_view()),
+    path("admin/<uuid:pk>/status/", UpdateFeedbackStatusView.as_view()),
     path("admin/structure/<uuid:structure_id>/", AdminStructureFeedbackView.as_view()),
     path("admin/stats/", FeedbackStatsView.as_view()),
     path("admin/<uuid:pk>/delete/", DeleteFeedbackView.as_view()),

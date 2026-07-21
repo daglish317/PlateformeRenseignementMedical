@@ -7,6 +7,7 @@ from .models import Structure, Favori, Horaire
 from .serializers import (
     StructureCreateSerializer,
     StructureListSerializer,
+    StructureAdminListSerializer,
     StructureDetailSerializer,
     StructureValidationSerializer,
     FavoriCreateSerializer,
@@ -50,12 +51,39 @@ class AdminListStructuresView(APIView):
 
     @admin_required
     def get(self, request):
+        from django.db.models import Q
 
-        structures = Structure.objects.all().order_by("-date_creation")
+        structures = Structure.objects.filter(est_supprimee=False).select_related("gestionnaire")
 
-        return Response(
-            StructureListSerializer(structures, many=True).data
-        )
+        search = request.query_params.get("search", "").strip()
+        if search:
+            structures = structures.filter(
+                Q(nom__icontains=search) | Q(adresse__icontains=search)
+            )
+
+        statut = request.query_params.get("statut")
+        if statut:
+            structures = structures.filter(statut=statut)
+
+        type_structure = request.query_params.get("type")
+        if type_structure:
+            structures = structures.filter(type=type_structure)
+
+        ordering = request.query_params.get("ordering", "-date_creation")
+        structures = structures.order_by(ordering)
+
+        page = max(int(request.query_params.get("page", 1)), 1)
+        page_size = min(int(request.query_params.get("page_size", 20)), 100)
+        total = structures.count()
+        start = (page - 1) * page_size
+        items = structures[start : start + page_size]
+
+        return Response({
+            "results": StructureAdminListSerializer(items, many=True).data,
+            "page": page,
+            "page_size": page_size,
+            "total": total,
+        })
 
 
 class StructureDetailView(APIView):

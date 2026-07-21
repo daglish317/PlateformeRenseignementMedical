@@ -1,15 +1,22 @@
 import { User } from "@/features/auth/types/user";
 
-export const getRedirectPath = (user: User): string => {
-  if (user.role === "ADMINISTRATEUR") {
-    return "/admin";
+type RedirectPath = "/" | "/admin" | "/gestionnaire";
+
+export const getRedirectPath = (user: User): RedirectPath => {
+
+  switch (user.role) {
+
+    case "ADMINISTRATEUR":
+      return "/admin";
+
+    case "GESTIONNAIRE":
+      return "/gestionnaire";
+
+    case "PATIENT":
+      return "/";
+
+    default:
+      return "/";
   }
 
-  if (user.role === "GESTIONNAIRE") {
-    // For now, since we don't have structure type, redirect to home
-    // TODO: Add structure type check when available
-    return "/";
-  }
-
-  return "/";
 };

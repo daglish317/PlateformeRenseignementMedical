@@ -15,7 +15,7 @@ export const getAuthErrorMessage = (error: unknown): string => {
     "detail" in (error as ErrorWithDetail) &&
     typeof (error as ErrorWithDetail).detail === "string"
   ) {
-    return (error as ErrorWithDetail).detail;
+    return (error as ErrorWithDetail).detail ?? "Une erreur est survenue";
   }
   return "Une erreur est survenue";
 };
