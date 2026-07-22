@@ -25,4 +25,22 @@ export const authService = {
     const response = await api.get<User>("/utilisateurs/me/");
     return response.data;
   },
+
+  checkGestionnaire: async (email: string): Promise<{ is_gestionnaire: boolean }> => {
+    const response = await api.post("/utilisateurs/gestionnaire/check/", { email });
+    return response.data;
+  },
+
+  activateGestionnaire: async (
+    email: string,
+    code: string,
+    password: string
+  ): Promise<AuthResponse> => {
+    const response = await api.post<AuthResponse>("/utilisateurs/gestionnaire/activate/", {
+      email,
+      code,
+      password,
+    });
+    return response.data;
+  },
 };

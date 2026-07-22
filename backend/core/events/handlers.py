@@ -1,5 +1,7 @@
 import logging
 
+from django.conf import settings
+
 from core.email.service import EmailService
 from core.email.templates import EmailTemplates
 
@@ -16,12 +18,10 @@ def handle_otp_generated(event):
     email = event["email"]
     code = event["code"]
 
-    EmailService.envoyer_email(
-        sujet="Code de vérification",
-        message=f"Votre code de vérification est : {code}",
-        destinataire=email,
-        html_message=f"<p>Votre code de vérification est : <strong>{code}</strong></p>",
-    )
+    logger.info("OTP généré pour %s: %s", email, code)
+
+    if getattr(settings, "DEBUG", False):
+        print(f"[DEV OTP] {email} -> {code}")
 
 
 def handle_user_invited(event):
@@ -29,7 +29,21 @@ def handle_user_invited(event):
     utilisateur = event["utilisateur"]
     email = event["email"]
 
-    template = EmailTemplates.invitation_gestionnaire(utilisateur.nom)
+    from core.verification.code import VerificationCode
+
+    code_obj = VerificationCode.objects.filter(
+        email=email, is_used=False
+    ).order_by("-created_at").first()
+    code = code_obj.code if code_obj else ""
+
+    if getattr(settings, "DEBUG", False):
+        print(f"[DEV] Invitation OTP pour {email}: {code}")
+
+    lien_activation = f"http://localhost:3000/fr/inscription"
+
+    template = EmailTemplates.invitation_gestionnaire(
+        utilisateur.nom, email, code, lien_activation=lien_activation
+    )
     EmailService.envoyer_email(
         sujet=template["sujet"],
         message=template["message"],
@@ -79,12 +93,13 @@ def handle_structure_rejected(event):
     structure = event["structure"]
     motif = event.get("motif", "Non précisé")
 
+    template = EmailTemplates.structure_refusee(structure.nom, motif)
+
     EmailService.envoyer_email(
-        sujet="Structure refusée",
-        message=(
-            f"Votre structure '{structure.nom}' a été refusée.\n\nMotif : {motif}"
-        ),
+        sujet=template["sujet"],
+        message=template["message"],
         destinataire=structure.gestionnaire.email,
+        html_message=template.get("html"),
     )
 
     NotificationService.envoyer(

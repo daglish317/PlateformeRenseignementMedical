@@ -5,6 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError
 from django.contrib.auth import authenticate
+from django.utils import timezone
 
 from .serializers import (
     RegisterSerializer,
@@ -15,6 +16,8 @@ from .serializers import (
     InviteGestionnaireSerializer,
     ValidateOtpSerializer,
     SetPasswordSerializer,
+    CheckGestionnaireSerializer,
+    ActivateGestionnaireSerializer,
     ChangePasswordSerializer,
     ResetPasswordSerializer,
     LogoutSerializer,
@@ -33,7 +36,9 @@ from .services.invitation_service import InvitationService
 from .permissions import IsAdmin
 from .decorators import admin_required
 from core.verification.service import VerificationService
+from core.verification.session import VerificationSession
 from core.utils.rate_limit import RateLimiter
+from utilisateurs.models import Utilisateur, RoleUtilisateur
 
 
 def _user_response(user):
@@ -219,4 +224,47 @@ class SetGestionnairePasswordView(APIView):
             )
         except ValueError as e:
             return Response({"detail": str(e)}, status=400)
+        return Response(_user_response(user), status=200)
+
+
+class CheckGestionnaireView(APIView):
+
+    def post(self, request):
+        serializer = CheckGestionnaireSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        email = serializer.validated_data["email"].lower().strip()
+        user = Utilisateur.objects.filter(email=email).first()
+        is_pending = (
+            user is not None
+            and user.role == RoleUtilisateur.GESTIONNAIRE
+            and user.is_active is False
+            and user.email_verifie is False
+        )
+        return Response({"is_gestionnaire": is_pending})
+
+
+class ActivateGestionnaireView(APIView):
+
+    def post(self, request):
+        serializer = ActivateGestionnaireSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        email = serializer.validated_data["email"].lower().strip()
+        code = serializer.validated_data["code"]
+        password = serializer.validated_data["password"]
+
+        user = Utilisateur.objects.filter(email=email).first()
+        if not user or user.role != RoleUtilisateur.GESTIONNAIRE:
+            return Response({"detail": "Utilisateur introuvable."}, status=404)
+
+        if user.is_active:
+            return Response({"detail": "Ce compte est déjà activé."}, status=400)
+
+        if not VerificationService.check(email=email, code=code):
+            return Response({"detail": "Code invalide ou expiré."}, status=400)
+
+        user.set_password(password)
+        user.is_active = True
+        user.email_verifie = True
+        user.save(update_fields=["password", "is_active", "email_verifie"])
+
         return Response(_user_response(user), status=200)

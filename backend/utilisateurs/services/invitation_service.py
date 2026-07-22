@@ -82,5 +82,4 @@ class InvitationService:
         utilisateur.email_verifie = True
         utilisateur.save(update_fields=["password", "is_active", "email_verifie"])
 
-        session.delete()
         return utilisateur

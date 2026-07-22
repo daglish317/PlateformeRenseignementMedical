@@ -13,6 +13,8 @@ from .views import (
     InviteGestionnaireView,
     ValidateGestionnaireOtpView,
     SetGestionnairePasswordView,
+    CheckGestionnaireView,
+    ActivateGestionnaireView,
 )
 from .views_admin import (
     RegisterAdminView,
@@ -44,4 +46,6 @@ urlpatterns = [
     path("admin/statistics/", AdminStatisticsView.as_view()),
     path("gestionnaire/validate-otp/", ValidateGestionnaireOtpView.as_view()),
     path("gestionnaire/set-password/", SetGestionnairePasswordView.as_view()),
+    path("gestionnaire/check/", CheckGestionnaireView.as_view()),
+    path("gestionnaire/activate/", ActivateGestionnaireView.as_view()),
 ]
