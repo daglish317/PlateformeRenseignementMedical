@@ -102,6 +102,32 @@ class StructureDetailView(APIView):
             StructureDetailSerializer(structure).data
         )
 
+    @gestionnaire_required
+    def patch(self, request, pk):
+        try:
+            structure = Structure.objects.get(
+                id=pk,
+                gestionnaire=request.user,
+                est_supprimee=False,
+            )
+        except Structure.DoesNotExist:
+            return Response(
+                {"detail": "Structure introuvable."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        allowed_fields = {"nom", "adresse", "telephone", "photo"}
+        data = {}
+        for key in allowed_fields:
+            if key in request.data:
+                data[key] = request.data[key]
+
+        serializer = StructureCreateSerializer(structure, data=data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(StructureDetailSerializer(structure).data)
+
 
 class ValidateStructureView(APIView):
 
@@ -390,3 +416,43 @@ class StructureMapView(APIView):
                 many=True
             ).data
         )
+
+
+class MyStructureView(APIView):
+
+    @gestionnaire_required
+    def get(self, request):
+        try:
+            structure = Structure.objects.get(
+                gestionnaire=request.user,
+                est_supprimee=False,
+            )
+        except Structure.DoesNotExist:
+            return Response(
+                {"detail": "Aucune structure associée à votre compte."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        return Response(StructureDetailSerializer(structure).data)
+
+    @gestionnaire_required
+    def patch(self, request, pk=None):
+        try:
+            structure = Structure.objects.get(
+                id=pk,
+                gestionnaire=request.user,
+                est_supprimee=False,
+            )
+        except Structure.DoesNotExist:
+            return Response(
+                {"detail": "Structure introuvable."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        allowed_fields = {"nom", "adresse", "telephone", "photo"}
+        data = {k: v for k, v in request.data.items() if k in allowed_fields}
+
+        serializer = StructureCreateSerializer(structure, data=data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(StructureDetailSerializer(structure).data)

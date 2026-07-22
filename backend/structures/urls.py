@@ -13,11 +13,13 @@ from .views import (
     ListHorairesView,
     SetHorairesView,
     UpdateSingleHoraireView,
+    MyStructureView,
 )
 from .views import StructuresProchesView
 from .form import StructureFormSubmitView
 
 urlpatterns = [
+    path("me/", MyStructureView.as_view(), name="structure-me"),
     path("create/", CreateStructureView.as_view(), name="structure-create"),
 
     path("admin/list/", AdminListStructuresView.as_view(), name="structure-admin-list"),
