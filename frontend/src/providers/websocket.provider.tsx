@@ -72,7 +72,9 @@ export default function WebSocketProvider({ children }: { children: React.ReactN
     };
 
     ws.onerror = () => {
-      ws.close();
+      if (ws.readyState === WebSocket.OPEN) {
+        ws.close();
+      }
     };
   }, [authenticated]);
 
@@ -83,7 +85,9 @@ export default function WebSocketProvider({ children }: { children: React.ReactN
       connect();
     } else {
       if (wsRef.current) {
-        wsRef.current.close();
+        if (wsRef.current.readyState === WebSocket.OPEN) {
+          wsRef.current.close();
+        }
         wsRef.current = null;
       }
       setConnected(false);
@@ -95,7 +99,9 @@ export default function WebSocketProvider({ children }: { children: React.ReactN
         clearTimeout(reconnectTimeoutRef.current);
       }
       if (wsRef.current) {
-        wsRef.current.close();
+        if (wsRef.current.readyState === WebSocket.OPEN) {
+          wsRef.current.close();
+        }
         wsRef.current = null;
       }
       setConnected(false);

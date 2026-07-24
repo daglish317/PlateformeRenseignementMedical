@@ -21,9 +21,7 @@ export const gestionnaireService = {
       formData.append("photo", payload.photo);
     }
 
-    const { data } = await api.post("/structures/submit/", formData, {
-      headers: { "Content-Type": "multipart/form-data" },
-    });
+    const { data } = await api.post("/structures/submit/", formData);
     return data;
   },
 };

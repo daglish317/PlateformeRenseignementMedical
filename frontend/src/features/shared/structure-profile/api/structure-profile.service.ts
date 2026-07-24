@@ -18,9 +18,7 @@ export const structureProfileService = {
   async uploadPhoto(id: string, file: File): Promise<StructureProfile> {
     const formData = new FormData();
     formData.append("photo", file);
-    const { data } = await api.patch(`/structures/${id}/`, formData, {
-      headers: { "Content-Type": "multipart/form-data" },
-    });
+    const { data } = await api.patch(`/structures/${id}/`, formData);
     return data;
   },
 

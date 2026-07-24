@@ -32,21 +32,7 @@ export default function Logo({
     setMounted(true);
   }, []);
 
-  /**
-   * Évite les erreurs d'hydratation de next-themes.
-   */
-  if (!mounted) {
-    return (
-      <div
-        className={cn(
-          "h-11 w-[170px] animate-pulse rounded-md bg-muted",
-          className
-        )}
-      />
-    );
-  }
-
-  const isDark = resolvedTheme === "dark";
+  const isDark = mounted && resolvedTheme === "dark";
 
   const horizontalLogo = isDark
     ? "/logos/logo-horizontal-dark.svg"
@@ -62,21 +48,22 @@ export default function Logo({
 
   let logo = horizontalLogo;
 
-switch (variant) {
-  case "vertical":
-    logo = verticalLogo;
-    break;
+  switch (variant) {
+    case "vertical":
+      logo = verticalLogo;
+      break;
 
-  case "icon":
-    logo = iconLogo;
-    break;
+    case "icon":
+      logo = iconLogo;
+      break;
 
-  case "horizontal":
-  case "auto":
-  default:
-    logo = horizontalLogo;
-    break;
-}
+    case "horizontal":
+    case "auto":
+    default:
+      logo = horizontalLogo;
+      break;
+  }
+
   const dimensions = {
     horizontal: {
       width: width ?? 180,
@@ -106,6 +93,7 @@ switch (variant) {
           width={180}
           height={48}
           priority={priority}
+          loading={priority ? "eager" : "lazy"}
           className="hidden h-auto w-auto md:block"
         />
 
@@ -116,6 +104,7 @@ switch (variant) {
           width={42}
           height={42}
           priority={priority}
+          loading={priority ? "eager" : "lazy"}
           className="block h-auto w-auto md:hidden"
         />
       </Link>
@@ -134,6 +123,7 @@ switch (variant) {
         width={dimensions[variant].width}
         height={dimensions[variant].height}
         priority={priority}
+        loading={priority ? "eager" : "lazy"}
         className="h-auto w-auto"
       />
     </Link>
