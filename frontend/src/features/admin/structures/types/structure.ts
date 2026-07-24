@@ -9,17 +9,13 @@ export interface StructureAdmin {
   photo: string | null;
   adresse: string;
   telephone?: string;
-  email?: string;
+  motif_refus?: string | null;
   latitude?: number | null;
   longitude?: number | null;
   date_creation: string;
   date_validation?: string | null;
-  description?: string;
-  gestionnaire?: {
-    id: string;
-    nom: string;
-    email: string;
-  } | null;
+  gestionnaire_nom?: string;
+  gestionnaire_email?: string;
 }
 
 export interface StructureFilters {

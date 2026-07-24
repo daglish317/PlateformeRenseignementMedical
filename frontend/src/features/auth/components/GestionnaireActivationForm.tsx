@@ -51,10 +51,10 @@ export function GestionnaireActivationForm({ onSuccess, onBackToRegister }: Gest
     setLoading(true);
     setError(null);
     try {
-      await authService.checkGestionnaire(email);
+      await authService.validateGestionnaireOtp(email, code);
       setStep("password");
     } catch {
-      setError("Erreur lors de la vérification.");
+      setError("Code OTP invalide ou expiré.");
     } finally {
       setLoading(false);
     }
@@ -105,7 +105,7 @@ export function GestionnaireActivationForm({ onSuccess, onBackToRegister }: Gest
     setLoading(true);
     setError(null);
     try {
-      const auth = await authService.activateGestionnaire(email, otpDigits.join(""), password);
+      const auth = await authService.activateGestionnaire(email, password);
       toast.success("Compte activé avec succès");
       setAuth(auth);
       onSuccess?.();

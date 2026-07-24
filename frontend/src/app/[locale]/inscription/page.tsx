@@ -11,7 +11,6 @@ import { Divider } from "@/features/auth/components/Divider";
 import { GoogleButton } from "@/features/auth/components/GoogleButton";
 import { Link } from "@/i18n/navigation";
 import { useAuthRedirect } from "@/features/auth/hooks/useAuthRedirect";
-import { GuestRoute } from "@/features/auth/components/GuestRoute";
 
 export default function RegisterPage() {
   const { redirectAfterAuth } = useAuthRedirect();
@@ -23,61 +22,59 @@ export default function RegisterPage() {
   };
 
   return (
-    <GuestRoute>
-      <PublicLayout showSearch={false} showFooter={true}>
-        <AuthLayout>
-          <AuthCard title={isGestionnaire ? "Activation du compte" : "Inscription"}>
-            <div className="space-y-6">
+    <PublicLayout showSearch={false} showFooter={true}>
+      <AuthLayout>
+        <AuthCard title={isGestionnaire ? "Activation du compte" : "Inscription"}>
+          <div className="space-y-6">
+            {isGestionnaire ? (
+              <GestionnaireActivationForm
+                onSuccess={handleGestionnaireSuccess}
+                onBackToRegister={() => setIsGestionnaire(false)}
+              />
+            ) : (
+              <>
+                <RegisterForm onSuccess={redirectAfterAuth} />
+
+                <Divider />
+
+                <GoogleButton onSuccess={redirectAfterAuth} />
+
+                <div className="text-center">
+                  <button
+                    type="button"
+                    onClick={() => setIsGestionnaire(true)}
+                    className="text-sm text-primary hover:underline"
+                  >
+                    Vous êtes gestionnaire ? Activez votre compte
+                  </button>
+                </div>
+              </>
+            )}
+
+            <p className="text-center text-sm text-muted-foreground">
               {isGestionnaire ? (
-                <GestionnaireActivationForm
-                  onSuccess={handleGestionnaireSuccess}
-                  onBackToRegister={() => setIsGestionnaire(false)}
-                />
+                <>
+                  Pas de compte gestionnaire?{" "}
+                  <button
+                    type="button"
+                    onClick={() => setIsGestionnaire(false)}
+                    className="text-primary hover:underline"
+                  >
+                    S&apos;inscrire normalement
+                  </button>
+                </>
               ) : (
                 <>
-                  <RegisterForm onSuccess={redirectAfterAuth} />
-
-                  <Divider />
-
-                  <GoogleButton onSuccess={redirectAfterAuth} />
-
-                  <div className="text-center">
-                    <button
-                      type="button"
-                      onClick={() => setIsGestionnaire(true)}
-                      className="text-sm text-primary hover:underline"
-                    >
-                      Vous êtes gestionnaire ? Activez votre compte
-                    </button>
-                  </div>
+                  Déjà un compte?{" "}
+                  <Link href="/connexion" className="text-primary hover:underline">
+                    Se connecter
+                  </Link>
                 </>
               )}
-
-              <p className="text-center text-sm text-muted-foreground">
-                {isGestionnaire ? (
-                  <>
-                    Pas de compte gestionnaire?{" "}
-                    <button
-                      type="button"
-                      onClick={() => setIsGestionnaire(false)}
-                      className="text-primary hover:underline"
-                    >
-                      S&apos;inscrire normalement
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    Déjà un compte?{" "}
-                    <Link href="/connexion" className="text-primary hover:underline">
-                      Se connecter
-                    </Link>
-                  </>
-                )}
-              </p>
-            </div>
-          </AuthCard>
-        </AuthLayout>
-      </PublicLayout>
-    </GuestRoute>
+            </p>
+          </div>
+        </AuthCard>
+      </AuthLayout>
+    </PublicLayout>
   );
 }

@@ -93,7 +93,6 @@ class CheckGestionnaireSerializer(serializers.Serializer):
 
 class ActivateGestionnaireSerializer(serializers.Serializer):
     email = serializers.EmailField()
-    code = serializers.CharField(max_length=4)
     password = serializers.CharField(write_only=True, min_length=8)
 
 

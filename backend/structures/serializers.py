@@ -62,6 +62,7 @@ class StructureAdminListSerializer(serializers.ModelSerializer):
             "adresse",
             "telephone",
             "statut",
+            "motif_refus",
             "gestionnaire_nom",
             "gestionnaire_email",
             "date_creation",

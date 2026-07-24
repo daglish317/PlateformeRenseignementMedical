@@ -2,7 +2,7 @@
 
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Mail, Phone, MapPin, User, Calendar } from "lucide-react";
+import { Phone, MapPin, Calendar } from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -66,41 +66,11 @@ export function StructureDetails({ structure, open, onOpenChange, onValidate, on
           <div className="flex flex-col gap-4">
             <InfoRow icon={MapPin} label="Adresse" value={structure.adresse} />
             <InfoRow icon={Phone} label="Téléphone" value={structure.telephone} />
-            <InfoRow icon={Mail} label="Email" value={structure.email} />
             <InfoRow icon={Calendar} label="Date de création" value={format(new Date(structure.date_creation), "dd MMMM yyyy", { locale: fr })} />
             {structure.date_validation && (
               <InfoRow icon={Calendar} label="Date de validation" value={format(new Date(structure.date_validation), "dd MMMM yyyy", { locale: fr })} />
             )}
           </div>
-
-          {structure.description && (
-            <>
-              <Separator />
-              <div>
-                <p className="text-xs text-muted-foreground">Description</p>
-                <p className="mt-1 text-sm">{structure.description}</p>
-              </div>
-            </>
-          )}
-
-          {structure.gestionnaire && (
-            <>
-              <Separator />
-              <div>
-                <p className="text-xs text-muted-foreground">Gestionnaire</p>
-                <div className="mt-2 flex flex-col gap-2">
-                  <div className="flex items-center gap-2">
-                    <User className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm">{structure.gestionnaire.nom}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Mail className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm text-muted-foreground">{structure.gestionnaire.email}</span>
-                  </div>
-                </div>
-              </div>
-            </>
-          )}
 
           {structure.statut === "EN_ATTENTE" && (
             <>

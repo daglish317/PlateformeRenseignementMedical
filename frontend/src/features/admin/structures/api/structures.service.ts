@@ -20,12 +20,12 @@ export const structuresService = {
   },
 
   validate: async (id: string): Promise<{ message: string; data: StructureAdmin }> => {
-    const response = await api.post(`/structures/admin/validate/${id}/`, { action: "validate" });
+    const response = await api.patch(`/structures/admin/validate/${id}/`, { action: "APPROVE" });
     return response.data;
   },
 
   reject: async (id: string, motif: string): Promise<{ message: string }> => {
-    const response = await api.post(`/structures/admin/validate/${id}/`, { action: "reject", motif });
+    const response = await api.patch(`/structures/admin/validate/${id}/`, { action: "REJECT", motif });
     return response.data;
   },
 };

@@ -23,6 +23,7 @@ from .serializers import (
     LogoutSerializer,
 )
 from .services.auth_service import AuthService
+from core.verification.session import VerificationSession
 from .views_admin import (
     RegisterAdminView,
     AdminDashboardView,
@@ -249,7 +250,6 @@ class ActivateGestionnaireView(APIView):
         serializer = ActivateGestionnaireSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         email = serializer.validated_data["email"].lower().strip()
-        code = serializer.validated_data["code"]
         password = serializer.validated_data["password"]
 
         user = Utilisateur.objects.filter(email=email).first()
@@ -259,8 +259,14 @@ class ActivateGestionnaireView(APIView):
         if user.is_active:
             return Response({"detail": "Ce compte est déjà activé."}, status=400)
 
-        if not VerificationService.check(email=email, code=code):
-            return Response({"detail": "Code invalide ou expiré."}, status=400)
+        session = VerificationSession.objects.filter(
+            email=email,
+            is_verified=True,
+            expires_at__gt=timezone.now(),
+        ).first()
+
+        if not session:
+            return Response({"detail": "Session expirée. Validez à nouveau votre code OTP."}, status=400)
 
         user.set_password(password)
         user.is_active = True

@@ -1,6 +1,6 @@
 import logging
 
-from django.core.mail import EmailMessage
+from django.core.mail import EmailMultiAlternatives
 from django.conf import settings
 
 logger = logging.getLogger("core.email")
@@ -20,18 +20,26 @@ class EmailService:
             logger.info("[DEV EMAIL] Corps:\n%s", message)
 
         try:
-            email_msg = EmailMessage(
+            from_email = getattr(settings, "EMAIL_HOST_USER", settings.DEFAULT_FROM_EMAIL)
+            reply_to = getattr(settings, "REPLY_TO_EMAIL", settings.DEFAULT_FROM_EMAIL)
+
+            email_msg = EmailMultiAlternatives(
                 subject=sujet,
-                body=html_message or message,
-                from_email=f"SantéProx <{settings.DEFAULT_FROM_EMAIL}>",
+                body=message,
+                from_email=from_email,
                 to=[destinataire],
-                reply_to=[getattr(settings, "REPLY_TO_EMAIL", settings.DEFAULT_FROM_EMAIL)],
+                reply_to=[reply_to],
             )
-            email_msg.extra_headers["List-Unsubscribe"] = f"<mailto:{settings.DEFAULT_FROM_EMAIL}?subject=unsubscribe>"
-            email_msg.extra_headers["X-Mailer"] = "SanteProx"
+
+            email_msg.extra_headers["List-Unsubscribe"] = f"<mailto:{from_email}?subject=unsubscribe>"
+            email_msg.extra_headers["List-Unsubscribe-Post"] = "List-Unsubscribe=One-Click"
+            email_msg.extra_headers["Precedence"] = "bulk"
+            email_msg.extra_headers["X-Mailer"] = "SanteProx/1.0"
+            email_msg.extra_headers["X-Auto-Response-Suppress"] = "All"
+            email_msg.extra_headers["Auto-Submitted"] = "auto-generated"
 
             if html_message:
-                email_msg.content_subtype = "html"
+                email_msg.attach_alternative(html_message, "text/html")
 
             email_msg.send(fail_silently=True)
         except Exception as e:

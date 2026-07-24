@@ -31,14 +31,17 @@ export const authService = {
     return response.data;
   },
 
+  validateGestionnaireOtp: async (email: string, code: string): Promise<{ message: string }> => {
+    const response = await api.post("/utilisateurs/gestionnaire/validate-otp/", { email, code });
+    return response.data;
+  },
+
   activateGestionnaire: async (
     email: string,
-    code: string,
     password: string
   ): Promise<AuthResponse> => {
     const response = await api.post<AuthResponse>("/utilisateurs/gestionnaire/activate/", {
       email,
-      code,
       password,
     });
     return response.data;

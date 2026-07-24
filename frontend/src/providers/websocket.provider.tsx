@@ -30,13 +30,18 @@ export default function WebSocketProvider({ children }: { children: React.ReactN
   const [lastMessage, setLastMessage] = useState<NotificationMessage | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<ReturnType<typeof setTimeout>>(null);
+  const mountedRef = useRef(true);
   const authenticated = useAuthStore((s) => s.authenticated);
 
   const connect = useCallback(() => {
-    if (!authenticated) return;
+    if (!authenticated || !mountedRef.current) return;
 
     const token = authStorage.getAccessToken();
     if (!token) return;
+
+    if (wsRef.current && (wsRef.current.readyState === WebSocket.OPEN || wsRef.current.readyState === WebSocket.CONNECTING)) {
+      return;
+    }
 
     const wsUrl = process.env.NEXT_PUBLIC_API_URL?.replace("http", "ws").replace("/api", "")
       || "ws://localhost:8000";
@@ -45,22 +50,24 @@ export default function WebSocketProvider({ children }: { children: React.ReactN
     wsRef.current = ws;
 
     ws.onopen = () => {
-      setConnected(true);
+      if (mountedRef.current) setConnected(true);
     };
 
     ws.onmessage = (event) => {
       try {
         const data: NotificationMessage = JSON.parse(event.data);
-        setLastMessage(data);
+        if (mountedRef.current) setLastMessage(data);
       } catch {
         // ignore malformed messages
       }
     };
 
     ws.onclose = () => {
-      setConnected(false);
-      if (authenticated) {
-        reconnectTimeoutRef.current = setTimeout(connect, 5000);
+      if (mountedRef.current) {
+        setConnected(false);
+        if (authenticated && mountedRef.current) {
+          reconnectTimeoutRef.current = setTimeout(connect, 5000);
+        }
       }
     };
 
@@ -70,16 +77,26 @@ export default function WebSocketProvider({ children }: { children: React.ReactN
   }, [authenticated]);
 
   useEffect(() => {
+    mountedRef.current = true;
+
     if (authenticated) {
       connect();
+    } else {
+      if (wsRef.current) {
+        wsRef.current.close();
+        wsRef.current = null;
+      }
+      setConnected(false);
     }
 
     return () => {
+      mountedRef.current = false;
       if (reconnectTimeoutRef.current) {
         clearTimeout(reconnectTimeoutRef.current);
       }
       if (wsRef.current) {
         wsRef.current.close();
+        wsRef.current = null;
       }
       setConnected(false);
     };

@@ -79,9 +79,9 @@ export function SuccessPage() {
 
       <Button
         className="w-full"
-        onClick={() => router.push("/gestionnaire")}
+        onClick={() => router.push("/")}
       >
-        Retour au tableau de bord
+        Retour à l&apos;accueil
       </Button>
     </div>
   );
