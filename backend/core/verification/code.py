@@ -26,4 +26,4 @@ class VerificationCode(models.Model):
 
     @staticmethod
     def generate_expiry():
-        return timezone.now() + timedelta(minutes=10)
+        return timezone.now() + timedelta(hours=24)

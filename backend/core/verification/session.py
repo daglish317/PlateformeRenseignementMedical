@@ -18,4 +18,4 @@ class VerificationSession(models.Model):
 
     @staticmethod
     def generate_expiry():
-        return timezone.now() + timedelta(minutes=30)
+        return timezone.now() + timedelta(hours=24)

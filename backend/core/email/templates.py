@@ -36,6 +36,7 @@ class EmailTemplates:
                 f"Votre code OTP à 4 chiffres est : {code}\n\n"
                 "Rendez-vous sur la page d'inscription et entrez votre email pour activer votre compte :\n"
                 f"{lien_activation}\n\n"
+                "Ce code est valable pendant 24 heures.\n"
                 "Si vous n'avez pas demandé cette création, ignorez cet email."
             ),
             "html": (
@@ -81,6 +82,7 @@ class EmailTemplates:
       <div class="otp-code">{code}</div>
     </div>
     <a href="{lien_activation}" class="cta">Aller à l'inscription</a>
+    <p style="font-size:13px;color:#777;">Ce code est valable pendant <strong>24 heures</strong>.</p>
     <p style="font-size:13px;color:#777;">Si vous n'avez pas demandé cette création, ignorez cet email.</p>
   </div>
   <div class="footer">

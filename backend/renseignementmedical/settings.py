@@ -66,11 +66,13 @@ if RENDER_EXTERNAL_HOSTNAME:
 # Applications
 # ---------------------------------------------------------------------------
 INSTALLED_APPS = [
+    'daphne',
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
+    
     "django.contrib.staticfiles",
     "rest_framework",
     "rest_framework.authtoken",
@@ -99,7 +101,7 @@ INSTALLED_APPS = [
     "messagerie",
     "channels",
 ]
-
+ASGI_APPLICATION = 'renseignementmedical.asgi.application'
 if IS_PRODUCTION:
     INSTALLED_APPS.insert(6, "whitenoise.runserver_nostatic")
 
@@ -215,7 +217,8 @@ GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET", "")
 # ---------------------------------------------------------------------------
 # Email
 # ---------------------------------------------------------------------------
-DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "noreply@localhost")
+DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "noreply@santeprox.com")
+REPLY_TO_EMAIL = os.getenv("REPLY_TO_EMAIL", "support@santeprox.com")
 EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", DEFAULT_FROM_EMAIL)
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
 
