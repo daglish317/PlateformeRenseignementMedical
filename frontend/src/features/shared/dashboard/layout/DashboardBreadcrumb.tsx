@@ -39,14 +39,14 @@ export function DashboardBreadcrumb() {
 
         if (isLast) {
           return (
-            <span key={crumb.label} className="font-medium text-foreground">
+            <span key={index} className="font-medium text-foreground">
               {crumb.label}
             </span>
           );
         }
 
         return (
-          <span key={crumb.label} className="flex items-center gap-1">
+          <span key={index} className="flex items-center gap-1">
             {crumb.href ? (
               <Link href={crumb.href} className="hover:text-foreground transition-colors">
                 {crumb.label}

@@ -13,11 +13,10 @@ class StructureFormSubmitView(APIView):
     def post(self, request):
 
         serializer = StructureCreateSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
 
-        if not request.data.get("latitude") or not request.data.get("longitude"):
+        if not serializer.is_valid():
             return Response(
-                {"detail": "La localisation GPS (latitude/longitude) est obligatoire."},
+                serializer.errors,
                 status=status.HTTP_400_BAD_REQUEST,
             )
 

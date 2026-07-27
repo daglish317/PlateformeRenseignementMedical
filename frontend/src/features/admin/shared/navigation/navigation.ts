@@ -18,19 +18,20 @@ export type AdminNavItem = {
   href: "/admin" | "/admin/structures" | "/admin/managers" | "/admin/users" | "/admin/catalog" | "/admin/map" | "/admin/statistics" | "/admin/feedback" | "/admin/chat" | "/admin/notifications" | "/admin/settings";
   icon: LucideIcon;
   permission: "ADMIN";
+  navItem?: string;
 };
 
 export const adminNavigation: AdminNavItem[] = [
   { label: "Dashboard", href: "/admin", icon: LayoutDashboard, permission: "ADMIN" },
-  { label: "Structures", href: "/admin/structures", icon: Building2, permission: "ADMIN" },
-  { label: "Gestionnaires", href: "/admin/managers", icon: UserCog, permission: "ADMIN" },
-  { label: "Utilisateurs", href: "/admin/users", icon: Users, permission: "ADMIN" },
+  { label: "Structures", href: "/admin/structures", icon: Building2, permission: "ADMIN", navItem: "structures" },
+  { label: "Gestionnaires", href: "/admin/managers", icon: UserCog, permission: "ADMIN", navItem: "managers" },
+  { label: "Utilisateurs", href: "/admin/users", icon: Users, permission: "ADMIN", navItem: "users" },
   { label: "Catalogue", href: "/admin/catalog", icon: BookOpen, permission: "ADMIN" },
   { label: "Carte", href: "/admin/map", icon: Map, permission: "ADMIN" },
   { label: "Statistiques", href: "/admin/statistics", icon: BarChart3, permission: "ADMIN" },
-  { label: "Feedback", href: "/admin/feedback", icon: MessageSquare, permission: "ADMIN" },
-  { label: "Messagerie", href: "/admin/chat", icon: MessagesSquare, permission: "ADMIN" },
-  { label: "Notifications", href: "/admin/notifications", icon: Bell, permission: "ADMIN" },
+  { label: "Feedback", href: "/admin/feedback", icon: MessageSquare, permission: "ADMIN", navItem: "feedback" },
+  { label: "Messagerie", href: "/admin/chat", icon: MessagesSquare, permission: "ADMIN", navItem: "messages" },
+  { label: "Notifications", href: "/admin/notifications", icon: Bell, permission: "ADMIN", navItem: "notifications" },
   { label: "Paramètres", href: "/admin/settings", icon: Settings, permission: "ADMIN" },
 ];
 

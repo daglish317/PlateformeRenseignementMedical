@@ -11,6 +11,7 @@ class NotificationSerializer(serializers.ModelSerializer):
             "titre",
             "message",
             "type",
+            "nav_item",
             "est_lue",
             "date_creation",
             "structure",

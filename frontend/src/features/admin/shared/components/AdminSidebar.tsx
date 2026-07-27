@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { Link, usePathname } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
+import { useNotifications } from "@/providers/notification.provider";
 import { adminNavigation, isActiveRoute } from "../navigation/navigation";
 import { useSidebar } from "../hooks/useSidebar";
 import { ADMIN_SIDEBAR } from "../constants/sidebar";
@@ -15,12 +16,14 @@ import {
 
 function SidebarNav({ collapsed }: { collapsed: boolean }) {
   const pathname = usePathname();
+  const { getUnreadCount } = useNotifications();
 
   return (
     <nav className="flex flex-1 flex-col gap-1 p-3">
       {adminNavigation.map((item) => {
         const active = isActiveRoute(pathname, item.href, "");
         const Icon = item.icon;
+        const badgeCount = item.navItem ? getUnreadCount(item.navItem) : 0;
 
         return (
           <Link
@@ -36,6 +39,11 @@ function SidebarNav({ collapsed }: { collapsed: boolean }) {
           >
             <Icon className="h-5 w-5 shrink-0" />
             {!collapsed && <span>{item.label}</span>}
+            {!collapsed && badgeCount > 0 && (
+              <span className="ml-auto rounded-full bg-destructive/10 px-1.5 py-0.5 text-xs font-medium text-destructive">
+                {badgeCount > 99 ? "99+" : badgeCount}
+              </span>
+            )}
           </Link>
         );
       })}

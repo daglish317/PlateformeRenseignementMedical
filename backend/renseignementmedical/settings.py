@@ -99,6 +99,7 @@ INSTALLED_APPS = [
     "feedback",
     "service_medical",
     "messagerie",
+    "analyses",
     "channels",
 ]
 ASGI_APPLICATION = 'core.asgi.application'

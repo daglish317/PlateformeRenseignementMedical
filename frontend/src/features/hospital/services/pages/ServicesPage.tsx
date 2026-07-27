@@ -7,13 +7,13 @@ import { useCreateService } from "../hooks/useCreateService";
 import { useDeleteService } from "../hooks/useDeleteService";
 import { ServiceTable } from "../components/ServiceTable";
 import { ServiceForm } from "../components/ServiceForm";
-
-const STRUCTURE_ID = "placeholder-structure-id";
+import { useMyStructureId } from "@/features/shared/dashboard/hooks/useMyStructureId";
 
 export default function ServicesPage() {
-  const { services, catalogues } = useServices(STRUCTURE_ID);
-  const createMutation = useCreateService(STRUCTURE_ID);
-  const deleteMutation = useDeleteService(STRUCTURE_ID);
+  const { data: structureId } = useMyStructureId();
+  const { services, catalogues } = useServices(structureId ?? "");
+  const createMutation = useCreateService(structureId ?? "");
+  const deleteMutation = useDeleteService(structureId ?? "");
 
   return (
     <PageContainer>

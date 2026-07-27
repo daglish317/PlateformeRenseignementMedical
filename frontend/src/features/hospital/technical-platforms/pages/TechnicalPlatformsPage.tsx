@@ -7,13 +7,13 @@ import { useCreateTechnicalPlatform } from "../hooks/useCreateTechnicalPlatform"
 import { useDeleteTechnicalPlatform } from "../hooks/useDeleteTechnicalPlatform";
 import { TechnicalPlatformTable } from "../components/TechnicalPlatformTable";
 import { TechnicalPlatformForm } from "../components/TechnicalPlatformForm";
-
-const STRUCTURE_ID = "placeholder-structure-id";
+import { useMyStructureId } from "@/features/shared/dashboard/hooks/useMyStructureId";
 
 export default function TechnicalPlatformsPage() {
-  const { platforms, catalogues } = useTechnicalPlatforms(STRUCTURE_ID);
-  const createMutation = useCreateTechnicalPlatform(STRUCTURE_ID);
-  const deleteMutation = useDeleteTechnicalPlatform(STRUCTURE_ID);
+  const { data: structureId } = useMyStructureId();
+  const { platforms, catalogues } = useTechnicalPlatforms(structureId ?? "");
+  const createMutation = useCreateTechnicalPlatform(structureId ?? "");
+  const deleteMutation = useDeleteTechnicalPlatform(structureId ?? "");
 
   return (
     <PageContainer>

@@ -115,6 +115,8 @@ class LogoutView(APIView):
             token.blacklist()
         except TokenError:
             return Response({"detail": "Token invalide"}, status=400)
+        except Exception:
+            pass
         return Response({"message": "Déconnexion réussie"})
 
 

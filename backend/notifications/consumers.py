@@ -33,6 +33,7 @@ class NotificationConsumer(AsyncWebsocketConsumer):
             "titre": event["titre"],
             "message": event["message"],
             "type": event["type_notif"],
+            "nav_item": event.get("nav_item", ""),
         }))
 
     async def _authenticate(self):

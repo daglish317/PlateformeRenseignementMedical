@@ -7,13 +7,13 @@ import { useCreateAnalysis } from "../hooks/useCreateAnalysis";
 import { useDeleteAnalysis } from "../hooks/useDeleteAnalysis";
 import { AnalysisTable } from "../components/AnalysisTable";
 import { AnalysisForm } from "../components/AnalysisForm";
-
-const STRUCTURE_ID = "placeholder-structure-id";
+import { useMyStructureId } from "@/features/shared/dashboard/hooks/useMyStructureId";
 
 export default function AnalysesPage() {
-  const { analyses, catalogues } = useAnalyses(STRUCTURE_ID);
-  const createMutation = useCreateAnalysis(STRUCTURE_ID);
-  const deleteMutation = useDeleteAnalysis(STRUCTURE_ID);
+  const { data: structureId } = useMyStructureId();
+  const { analyses, catalogues } = useAnalyses(structureId ?? "");
+  const createMutation = useCreateAnalysis(structureId ?? "");
+  const deleteMutation = useDeleteAnalysis(structureId ?? "");
 
   return (
     <PageContainer>

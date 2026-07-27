@@ -25,4 +25,9 @@ export const notificationsService = {
     const response = await api.post<{ message: string }>("/notifications/admin/send/", data);
     return response.data;
   },
+
+  unreadCounts: async (): Promise<Record<string, number>> => {
+    const response = await api.get<Record<string, number>>("/notifications/unread-counts/");
+    return response.data;
+  },
 };

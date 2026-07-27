@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useRef, useState, useCallback } from "react";
 import { authStorage } from "@/features/auth/utils/auth-storage";
 import { useAuthStore } from "@/features/auth/store/auth-store";
+import { tokenService } from "@/features/auth/api/token.service";
 
 interface WebSocketContextValue {
   connected: boolean;
@@ -14,6 +15,7 @@ export interface NotificationMessage {
   titre: string;
   message: string;
   type: string;
+  nav_item?: string;
 }
 
 const WebSocketContext = createContext<WebSocketContextValue>({
@@ -31,6 +33,7 @@ export default function WebSocketProvider({ children }: { children: React.ReactN
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<ReturnType<typeof setTimeout>>(null);
   const mountedRef = useRef(true);
+  const intentionalCloseRef = useRef(false);
   const authenticated = useAuthStore((s) => s.authenticated);
 
   const connect = useCallback(() => {
@@ -42,6 +45,8 @@ export default function WebSocketProvider({ children }: { children: React.ReactN
     if (wsRef.current && (wsRef.current.readyState === WebSocket.OPEN || wsRef.current.readyState === WebSocket.CONNECTING)) {
       return;
     }
+
+    intentionalCloseRef.current = false;
 
     const wsUrl = process.env.NEXT_PUBLIC_API_URL?.replace("http", "ws").replace("/api", "")
       || "ws://localhost:8000";
@@ -63,20 +68,39 @@ export default function WebSocketProvider({ children }: { children: React.ReactN
     };
 
     ws.onclose = () => {
-      if (mountedRef.current) {
-        setConnected(false);
-        if (authenticated && mountedRef.current) {
-          reconnectTimeoutRef.current = setTimeout(connect, 5000);
-        }
+      if (intentionalCloseRef.current || !mountedRef.current) return;
+      setConnected(false);
+      if (authenticated && mountedRef.current) {
+        reconnectTimeoutRef.current = setTimeout(async () => {
+          if (!mountedRef.current || !authenticated) return;
+          try {
+            const tokens = await tokenService.refreshToken();
+            useAuthStore.getState().setTokens(tokens);
+          } catch {
+            // refresh failed, will retry with current token
+          }
+          if (mountedRef.current) connect();
+        }, 5000);
       }
     };
 
     ws.onerror = () => {
-      if (ws.readyState === WebSocket.OPEN) {
+      if (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING) {
         ws.close();
       }
     };
   }, [authenticated]);
+
+  const safeClose = useCallback(() => {
+    intentionalCloseRef.current = true;
+    if (wsRef.current) {
+      const state = wsRef.current.readyState;
+      if (state === WebSocket.OPEN || state === WebSocket.CONNECTING) {
+        wsRef.current.close();
+      }
+      wsRef.current = null;
+    }
+  }, []);
 
   useEffect(() => {
     mountedRef.current = true;
@@ -84,12 +108,7 @@ export default function WebSocketProvider({ children }: { children: React.ReactN
     if (authenticated) {
       connect();
     } else {
-      if (wsRef.current) {
-        if (wsRef.current.readyState === WebSocket.OPEN) {
-          wsRef.current.close();
-        }
-        wsRef.current = null;
-      }
+      safeClose();
       setConnected(false);
     }
 
@@ -98,15 +117,10 @@ export default function WebSocketProvider({ children }: { children: React.ReactN
       if (reconnectTimeoutRef.current) {
         clearTimeout(reconnectTimeoutRef.current);
       }
-      if (wsRef.current) {
-        if (wsRef.current.readyState === WebSocket.OPEN) {
-          wsRef.current.close();
-        }
-        wsRef.current = null;
-      }
+      safeClose();
       setConnected(false);
     };
-  }, [authenticated, connect]);
+  }, [authenticated, connect, safeClose]);
 
   return (
     <WebSocketContext.Provider value={{ connected, lastMessage }}>

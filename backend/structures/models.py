@@ -49,15 +49,15 @@ class Structure(models.Model):
     )
 
     latitude = models.DecimalField(
-        max_digits=9,
-        decimal_places=6,
+        max_digits=12,
+        decimal_places=8,
         null=True,
         blank=True,
     )
 
     longitude = models.DecimalField(
-        max_digits=9,
-        decimal_places=6,
+        max_digits=12,
+        decimal_places=8,
         null=True,
         blank=True,
     )

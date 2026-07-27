@@ -93,7 +93,6 @@ export default function Logo({
           width={180}
           height={48}
           priority={priority}
-          loading={priority ? "eager" : "lazy"}
           className="hidden h-auto w-auto md:block"
         />
 
@@ -104,7 +103,6 @@ export default function Logo({
           width={42}
           height={42}
           priority={priority}
-          loading={priority ? "eager" : "lazy"}
           className="block h-auto w-auto md:hidden"
         />
       </Link>

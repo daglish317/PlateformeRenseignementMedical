@@ -16,13 +16,13 @@ export function ProfileLocation({ latitude, longitude }: ProfileLocationProps) {
           <MapPin className="h-4 w-4" />
           Position GPS
         </Label>
-        {latitude !== null && longitude !== null ? (
+        {latitude != null && longitude != null ? (
           <div className="rounded-md bg-muted p-3">
             <p className="text-sm">
-              <span className="font-medium">Latitude:</span> {latitude.toFixed(6)}
+              <span className="font-medium">Latitude:</span> {Number(latitude).toFixed(6)}
             </p>
             <p className="text-sm">
-              <span className="font-medium">Longitude:</span> {longitude.toFixed(6)}
+              <span className="font-medium">Longitude:</span> {Number(longitude).toFixed(6)}
             </p>
           </div>
         ) : (

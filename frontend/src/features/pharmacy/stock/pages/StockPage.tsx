@@ -11,13 +11,13 @@ import { StockTable } from "../components/StockTable";
 import { StockForm } from "../components/StockForm";
 import { StockFilters } from "../components/StockFilters";
 import { DeleteStockDialog } from "../components/DeleteStockDialog";
-
-const STRUCTURE_ID = "placeholder-structure-id";
+import { useMyStructureId } from "@/features/shared/dashboard/hooks/useMyStructureId";
 
 export default function StockPage() {
-  const { data: items, isLoading, error } = useStock(STRUCTURE_ID);
-  const createMutation = useCreateStock(STRUCTURE_ID);
-  const deleteMutation = useDeleteStock(STRUCTURE_ID);
+  const { data: structureId, isLoading: structureLoading } = useMyStructureId();
+  const { data: items, isLoading, error } = useStock(structureId ?? "");
+  const createMutation = useCreateStock(structureId ?? "");
+  const deleteMutation = useDeleteStock(structureId ?? "");
 
   const [showForm, setShowForm] = useState(false);
   const [editingItem, setEditingItem] = useState<StockItem | null>(null);

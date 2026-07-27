@@ -13,6 +13,7 @@ urlpatterns = [
     path("api/search/", include("search.urls")),
     path("api/feedback/", include("feedback.urls")),
     path("api/service-medical/", include("service_medical.urls")),
+    path("api/analyses/", include("analyses.urls")),
     path("api/messagerie/", include("messagerie.urls")),
     path("api/core/", include("core.urls")),
 ]

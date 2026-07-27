@@ -11,7 +11,17 @@ import { toast } from "sonner";
 import { getCurrentLocation } from "@/services/map/geolocalisation";
 import { gestionnaireService } from "../api/gestionnaire.service";
 
-type AxiosError = { response?: { data?: { detail?: string; message?: string } } };
+type AxiosError = { response?: { data?: Record<string, unknown> | string } };
+
+function extractErrorMessage(data: Record<string, unknown> | string | undefined): string {
+  if (!data) return "Erreur lors de la soumission.";
+  if (typeof data === "string") return data;
+  if (data.detail && typeof data.detail === "string") return data.detail;
+  if (data.message && typeof data.message === "string") return data.message;
+  const first = Object.values(data).find(Array.isArray);
+  if (Array.isArray(first) && first.length > 0 && typeof first[0] === "string") return first[0];
+  return "Erreur lors de la soumission.";
+}
 
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
@@ -87,7 +97,8 @@ export function StructureSetupForm() {
       toast.success("Structure soumise avec succès !");
       router.push("/gestionnaire/success");
     } catch (err) {
-      const msg = (err as AxiosError).response?.data?.detail || (err as AxiosError).response?.data?.message || "Erreur lors de la soumission.";
+      const data = (err as AxiosError).response?.data;
+      const msg = extractErrorMessage(typeof data === "string" ? data : data as Record<string, unknown>);
       toast.error(msg);
     } finally {
       setLoading(false);

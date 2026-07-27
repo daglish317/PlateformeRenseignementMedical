@@ -18,6 +18,11 @@ class StructureCreateSerializer(serializers.ModelSerializer):
             "latitude",
             "longitude",
         ]
+        extra_kwargs = {
+            "photo": {"required": False, "allow_null": True},
+            "latitude": {"required": True},
+            "longitude": {"required": True},
+        }
 
     def validate_nom(self, value):
         value = value.strip()

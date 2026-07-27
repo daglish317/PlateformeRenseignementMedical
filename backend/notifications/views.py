@@ -1,3 +1,4 @@
+from django.db.models import Count, Q
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
@@ -87,3 +88,24 @@ class AdminSendNotificationView(APIView):
         )
 
         return Response(NotificationSerializer(notif).data, status=201)
+
+
+class UnreadCountsByNavItemView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        counts = (
+            Notification.objects.filter(
+                utilisateur=request.user,
+                est_lue=False,
+            )
+            .values("nav_item")
+            .annotate(count=Count("id"))
+        )
+        result = {}
+        for entry in counts:
+            nav_item = entry["nav_item"] or ""
+            result[nav_item] = entry["count"]
+        total = sum(result.values())
+        result["total"] = total
+        return Response(result)

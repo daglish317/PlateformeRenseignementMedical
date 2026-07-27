@@ -64,6 +64,7 @@ def handle_structure_created(event):
             message=f"La structure '{structure.nom}' attend votre validation.",
             type=TypeNotification.ADMIN,
             structure=structure,
+            nav_item="structures",
         )
 
 
@@ -85,6 +86,7 @@ def handle_structure_validated(event):
         message=f"Votre structure '{structure.nom}' a été validée.",
         type=TypeNotification.SYSTEM,
         structure=structure,
+        nav_item="profil",
     )
 
 
@@ -108,6 +110,7 @@ def handle_structure_rejected(event):
         message=f"Votre structure '{structure.nom}' a été refusée.\n\nMotif : {motif}",
         type=TypeNotification.SYSTEM,
         structure=structure,
+        nav_item="profil",
     )
 
 

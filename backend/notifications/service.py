@@ -15,6 +15,7 @@ class NotificationService:
         message,
         type="SYSTEM",
         structure=None,
+        nav_item="",
     ):
 
         notif = Notification.objects.create(
@@ -23,6 +24,7 @@ class NotificationService:
             message=message,
             type=type,
             structure=structure,
+            nav_item=nav_item,
         )
 
         NotificationService._push_websocket(notif)
@@ -42,6 +44,7 @@ class NotificationService:
                     "titre": notif.titre,
                     "message": notif.message,
                     "type_notif": notif.type,
+                    "nav_item": notif.nav_item,
                 },
             )
         except Exception:

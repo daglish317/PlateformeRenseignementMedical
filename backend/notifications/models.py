@@ -26,6 +26,14 @@ class Notification(models.Model):
         choices=TypeNotification.choices
     )
 
+    nav_item = models.CharField(
+        max_length=50,
+        blank=True,
+        default="",
+        db_index=True,
+        help_text="Identifiant de l'élément de navigation concerné (ex: structures, profil, messages, notifications)",
+    )
+
     est_lue = models.BooleanField(default=False)
 
     date_creation = models.DateTimeField(default=timezone.now)

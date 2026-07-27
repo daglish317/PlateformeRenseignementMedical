@@ -18,6 +18,7 @@ export type HospitalNavItem = {
   href: string;
   icon: LucideIcon;
   permission: "GESTIONNAIRE";
+  navItem?: string;
 };
 
 export const hospitalNavigation: HospitalNavItem[] = [
@@ -32,48 +33,56 @@ export const hospitalNavigation: HospitalNavItem[] = [
     href: "/hospital/profile",
     icon: Building2,
     permission: "GESTIONNAIRE",
+    navItem: "profil",
   },
   {
     label: "Services",
     href: "/hospital/services",
     icon: Stethoscope,
     permission: "GESTIONNAIRE",
+    navItem: "services",
   },
   {
     label: "Analyses",
     href: "/hospital/analyses",
     icon: FlaskConical,
     permission: "GESTIONNAIRE",
+    navItem: "analyses",
   },
   {
     label: "Plateaux techniques",
     href: "/hospital/technical-platforms",
     icon: Monitor,
     permission: "GESTIONNAIRE",
+    navItem: "plateaux-techniques",
   },
   {
     label: "Prises en charge",
     href: "/hospital/care-services",
     icon: HeartPulse,
     permission: "GESTIONNAIRE",
+    navItem: "prises-en-charge",
   },
   {
     label: "Horaires",
     href: "/hospital/schedules",
     icon: Clock,
     permission: "GESTIONNAIRE",
+    navItem: "horaires",
   },
   {
     label: "Messages",
     href: "/hospital/chat",
     icon: MessagesSquare,
     permission: "GESTIONNAIRE",
+    navItem: "messages",
   },
   {
     label: "Notifications",
     href: "/hospital/notifications",
     icon: Bell,
     permission: "GESTIONNAIRE",
+    navItem: "notifications",
   },
   {
     label: "Statistiques",

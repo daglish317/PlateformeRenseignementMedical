@@ -7,13 +7,13 @@ import { useCreateCareService } from "../hooks/useCreateCareService";
 import { useDeleteCareService } from "../hooks/useDeleteCareService";
 import { CareServiceTable } from "../components/CareServiceTable";
 import { CareServiceForm } from "../components/CareServiceForm";
-
-const STRUCTURE_ID = "placeholder-structure-id";
+import { useMyStructureId } from "@/features/shared/dashboard/hooks/useMyStructureId";
 
 export default function CareServicesPage() {
-  const { careServices, catalogues } = useCareServices(STRUCTURE_ID);
-  const createMutation = useCreateCareService(STRUCTURE_ID);
-  const deleteMutation = useDeleteCareService(STRUCTURE_ID);
+  const { data: structureId } = useMyStructureId();
+  const { careServices, catalogues } = useCareServices(structureId ?? "");
+  const createMutation = useCreateCareService(structureId ?? "");
+  const deleteMutation = useDeleteCareService(structureId ?? "");
 
   return (
     <PageContainer>

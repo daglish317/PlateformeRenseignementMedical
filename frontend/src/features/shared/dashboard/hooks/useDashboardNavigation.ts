@@ -1,4 +1,5 @@
 import { usePathname } from "@/i18n/navigation";
+import { useNotifications } from "@/providers/notification.provider";
 import {
   hospitalNavigation,
   type HospitalNavItem,
@@ -21,9 +22,15 @@ function isActiveRoute(pathname: string, href: string): boolean {
 
 export function useDashboardNavigation(type: DashboardType) {
   const pathname = usePathname();
+  const { getUnreadCount } = useNotifications();
 
-  const navigation =
+  const baseNavigation =
     type === "HOPITAL" ? hospitalNavigation : pharmacyNavigation;
+
+  const navigation = baseNavigation.map((item) => ({
+    ...item,
+    badge: item.navItem ? getUnreadCount(item.navItem) : undefined,
+  }));
 
   const activeItem = navigation.find((item) =>
     isActiveRoute(pathname, item.href)
