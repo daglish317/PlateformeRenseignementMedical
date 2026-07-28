@@ -35,9 +35,10 @@ export default function WebSocketProvider({ children }: { children: React.ReactN
   const mountedRef = useRef(true);
   const intentionalCloseRef = useRef(false);
   const authenticated = useAuthStore((s) => s.authenticated);
+  const hydrated = useAuthStore((s) => s.hydrated);
 
   const connect = useCallback(() => {
-    if (!authenticated || !mountedRef.current) return;
+    if (!authenticated || !hydrated || !mountedRef.current) return;
 
     const token = authStorage.getAccessToken();
     if (!token) return;
@@ -89,7 +90,7 @@ export default function WebSocketProvider({ children }: { children: React.ReactN
         ws.close();
       }
     };
-  }, [authenticated]);
+  }, [authenticated, hydrated]);
 
   const safeClose = useCallback(() => {
     intentionalCloseRef.current = true;

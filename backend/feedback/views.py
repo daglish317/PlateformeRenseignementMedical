@@ -6,13 +6,17 @@ from .models import Feedback, TypeFeedback
 from .serializers import FeedbackSerializer, FeedbackCreateSerializer, FeedbackUpdateSerializer
 from .services import FeedbackService
 
-from utilisateurs.decorators import admin_required, patient_required
+from utilisateurs.decorators import admin_required
 
 
 class CreateFeedbackView(APIView):
 
-    @patient_required
     def post(self, request):
+        if not request.user.is_authenticated:
+            return Response(
+                {"detail": "Non authentifié"},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
 
         serializer = FeedbackCreateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -37,8 +41,12 @@ class CreateFeedbackView(APIView):
 
 class UpdateFeedbackView(APIView):
 
-    @patient_required
     def patch(self, request, pk):
+        if not request.user.is_authenticated:
+            return Response(
+                {"detail": "Non authentifié"},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
 
         try:
             feedback = Feedback.objects.get(

@@ -31,18 +31,19 @@ export default function NotificationProvider({ children }: { children: React.Rea
   const { lastMessage } = useWebSocket();
   const queryClient = useQueryClient();
   const authenticated = useAuthStore((s) => s.authenticated);
+  const hydrated = useAuthStore((s) => s.hydrated);
   const [notifications, setNotifications] = useState<NotificationMessage[]>([]);
   const [unreadByNavItem, setUnreadByNavItem] = useState<Record<string, number>>({});
 
   const fetchUnreadCounts = useCallback(async () => {
-    if (!authenticated) return;
+    if (!hydrated || !authenticated) return;
     try {
       const counts = await notificationsService.unreadCounts();
       setUnreadByNavItem(counts);
     } catch {
       // silently fail
     }
-  }, [authenticated]);
+  }, [hydrated, authenticated]);
 
   useEffect(() => {
     fetchUnreadCounts();
