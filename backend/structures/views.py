@@ -297,7 +297,18 @@ class ListFavorisView(APIView):
             utilisateur=request.user,
         ).select_related("structure").order_by("-date_ajout")
 
-        return Response(FavoriSerializer(favoris, many=True).data)
+        page = max(int(request.query_params.get("page", 1)), 1)
+        page_size = min(int(request.query_params.get("page_size", 20)), 100)
+        total = favoris.count()
+        start = (page - 1) * page_size
+        items = favoris[start : start + page_size]
+
+        return Response({
+            "results": FavoriSerializer(items, many=True).data,
+            "page": page,
+            "page_size": page_size,
+            "total": total,
+        })
 
 
 class CheckFavoriView(APIView):

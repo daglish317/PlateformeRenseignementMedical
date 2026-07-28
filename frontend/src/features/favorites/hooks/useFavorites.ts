@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { getFavorites } from "../api/favorites.service";
+import { favoritesService } from "../api/favorites.service";
 import { useFavoritesStore } from "../store/favorites-store";
 
 export function useFavorites() {
@@ -9,6 +9,6 @@ export function useFavorites() {
 
   return useQuery({
     queryKey: ["favorites", lastUpdated],
-    queryFn: getFavorites,
+    queryFn: () => favoritesService.list(),
   });
 }

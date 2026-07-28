@@ -7,9 +7,10 @@ export function useDeleteNotification() {
 
   return useMutation({
     mutationFn: (id: string) => notificationsService.delete(id),
-    onSuccess: (data) => {
-      toast.success(data.message || "Notification supprimée");
-      queryClient.invalidateQueries({ queryKey: ["admin", "notifications"] });
+    onSuccess: () => {
+      toast.success("Notification supprimée");
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+      queryClient.invalidateQueries({ queryKey: ["unread-counts"] });
     },
     onError: () => {
       toast.error("Impossible de supprimer la notification");

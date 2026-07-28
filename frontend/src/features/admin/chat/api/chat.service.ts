@@ -1,13 +1,6 @@
 import api from "@/lib/axios";
 import type { ChatConversation, ChatMessage } from "../types/chat";
 
-interface ConversationsResponse {
-  results: ChatConversation[];
-  page: number;
-  page_size: number;
-  total: number;
-}
-
 interface MessagesResponse {
   results: ChatMessage[];
   page: number;
@@ -17,9 +10,9 @@ interface MessagesResponse {
 
 export const chatService = {
   getConversations: async (
-    params: Record<string, string | number> = {}
-  ): Promise<ConversationsResponse> => {
-    const response = await api.get("/messagerie/conversations/", { params });
+    _params: Record<string, string | number> = {}
+  ): Promise<ChatConversation[]> => {
+    const response = await api.get("/messagerie/conversations/");
     return response.data;
   },
 
@@ -44,10 +37,10 @@ export const chatService = {
   },
 
   markAsRead: async (messageId: string): Promise<void> => {
-    await api.post(`/messagerie/read/${messageId}/`);
+    await api.patch(`/messagerie/read/${messageId}/`);
   },
 
-  getUnreadCount: async (): Promise<{ count: number }> => {
+  getUnreadCount: async (): Promise<{ total_non_lus: number }> => {
     const response = await api.get("/messagerie/unread-count/");
     return response.data;
   },

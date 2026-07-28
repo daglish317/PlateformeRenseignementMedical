@@ -32,7 +32,7 @@ export function ConversationList() {
   const setSelectedConversation = useChatStore((s) => s.setSelectedConversation);
   const { data, isLoading } = useConversations();
 
-  const conversations = data?.results ?? [];
+  const conversations = data ?? [];
 
   return (
     <div className="flex h-full flex-col border-r">

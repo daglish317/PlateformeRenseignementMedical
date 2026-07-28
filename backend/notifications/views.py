@@ -7,6 +7,7 @@ from rest_framework import status
 from .models import Notification
 from .serializers import NotificationSerializer
 from .service import NotificationService
+from utilisateurs.models import Utilisateur
 from utilisateurs.decorators import admin_required
 
 
@@ -65,8 +66,6 @@ class AdminSendNotificationView(APIView):
     @admin_required
     def post(self, request):
 
-        from utilisateurs.models import Utilisateur
-
         utilisateur_id = request.data.get("utilisateur_id")
         titre = request.data.get("titre")
         message = request.data.get("message")
@@ -109,3 +108,52 @@ class UnreadCountsByNavItemView(APIView):
         total = sum(result.values())
         result["total"] = total
         return Response(result)
+
+
+class AdminBroadcastNotificationView(APIView):
+    @admin_required
+    def post(self, request):
+        titre = request.data.get("titre")
+        message = request.data.get("message")
+        notif_type = request.data.get("type", "ADMIN")
+        nav_item = request.data.get("nav_item", "notifications")
+
+        if not all([titre, message]):
+            return Response({"detail": "Champs requis manquants"}, status=400)
+
+        gestionnaires = Utilisateur.objects.filter(role="GESTIONNAIRE", is_active=True)
+
+        created = []
+        for g in gestionnaires:
+            notif = NotificationService.envoyer(
+                utilisateur=g,
+                titre=titre,
+                message=message,
+                type=notif_type,
+                nav_item=nav_item,
+            )
+            created.append(notif)
+
+        return Response(
+            {"message": f"Notification envoyée à {len(created)} gestionnaire(s)"},
+            status=201,
+        )
+
+
+class AdminTriggerWeeklyReminderView(APIView):
+    @admin_required
+    def post(self, request):
+        from django.core.management import call_command
+        call_command("weekly_reminder")
+        return Response({"message": "Rappels hebdomadaires envoyés"}, status=200)
+
+
+class MarkAllAsReadView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        updated = Notification.objects.filter(
+            utilisateur=request.user,
+            est_lue=False,
+        ).update(est_lue=True)
+        return Response({"message": f"{updated} notification(s) marquée(s) comme lue(s)"})

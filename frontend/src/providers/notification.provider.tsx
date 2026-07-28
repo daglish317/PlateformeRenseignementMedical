@@ -32,7 +32,6 @@ export default function NotificationProvider({ children }: { children: React.Rea
   const queryClient = useQueryClient();
   const authenticated = useAuthStore((s) => s.authenticated);
   const [notifications, setNotifications] = useState<NotificationMessage[]>([]);
-  const [readIds, setReadIds] = useState<Set<string>>(new Set());
   const [unreadByNavItem, setUnreadByNavItem] = useState<Record<string, number>>({});
 
   const fetchUnreadCounts = useCallback(async () => {
@@ -72,16 +71,22 @@ export default function NotificationProvider({ children }: { children: React.Rea
       duration: 5000,
     });
 
-    queryClient.invalidateQueries({ queryKey: ["admin", "notifications"] });
+    queryClient.invalidateQueries({ queryKey: ["notifications"] });
+    queryClient.invalidateQueries({ queryKey: ["unread-counts"] });
     queryClient.invalidateQueries({ queryKey: ["admin", "dashboard"] });
     queryClient.invalidateQueries({ queryKey: ["admin", "structures"] });
   }, [lastMessage, queryClient]);
 
-  const markAllRead = useCallback(() => {
-    const allIds = new Set(notifications.map((n) => n.id));
-    setReadIds(allIds);
-    fetchUnreadCounts();
-  }, [notifications, fetchUnreadCounts]);
+  const markAllRead = useCallback(async () => {
+    try {
+      await notificationsService.markAllAsRead();
+    } catch {
+      // silently fail
+    }
+    setUnreadByNavItem({});
+    queryClient.invalidateQueries({ queryKey: ["notifications"] });
+    queryClient.invalidateQueries({ queryKey: ["unread-counts"] });
+  }, [queryClient]);
 
   const unreadCount = unreadByNavItem.total || 0;
 

@@ -77,7 +77,7 @@ export default function WebSocketProvider({ children }: { children: React.ReactN
             const tokens = await tokenService.refreshToken();
             useAuthStore.getState().setTokens(tokens);
           } catch {
-            // refresh failed, will retry with current token
+            return;
           }
           if (mountedRef.current) connect();
         }, 5000);

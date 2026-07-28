@@ -42,7 +42,7 @@ function groupByDate(
 export function MessageList() {
   const { data, isLoading } = useMessages();
   const bottomRef = useRef<HTMLDivElement>(null);
-  const messages = data?.results ?? [];
+  const messages = (data as any)?.messages ?? data?.results ?? [];
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });

@@ -9,5 +9,5 @@ export type FavoriteStructure = {
 export type Favorite = {
   id: string;
   structure: FavoriteStructure;
-  dateAjout: string;
+  date_ajout: string;
 };

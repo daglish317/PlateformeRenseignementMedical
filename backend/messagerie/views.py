@@ -195,7 +195,7 @@ class ListConversationsView(APIView):
                 expediteur=request.user
             ).count()
 
-            conv_data = ConversationListItemSerializer(conv).data
+            conv_data = ConversationListItemSerializer(conv, context={"request": request}).data
             conv_data["messages_non_lus"] = non_lus
             if dernier:
                 conv_data["dernier_message"] = {

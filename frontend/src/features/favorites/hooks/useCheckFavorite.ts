@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { checkFavorite } from "../api/favorites.service";
+import { favoritesService } from "../api/favorites.service";
 import { useFavoritesStore } from "../store/favorites-store";
 
 export function useCheckFavorite(structureId: string) {
@@ -9,7 +9,7 @@ export function useCheckFavorite(structureId: string) {
 
   return useQuery({
     queryKey: ["favorite-check", structureId, lastUpdated],
-    queryFn: () => checkFavorite(structureId),
+    queryFn: () => favoritesService.check(structureId),
     enabled: !!structureId,
   });
 }

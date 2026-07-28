@@ -29,7 +29,7 @@ export function MessageBubble({ message }: MessageBubbleProps) {
             {message.expediteur.nom}
           </p>
         )}
-        <p className="whitespace-pre-wrap break-words">{message.content}</p>
+        <p className="whitespace-pre-wrap break-words">{message.contenu}</p>
         <p
           className={cn(
             "mt-1 text-[10px]",

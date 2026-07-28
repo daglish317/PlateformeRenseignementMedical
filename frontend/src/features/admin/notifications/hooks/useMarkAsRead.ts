@@ -8,7 +8,8 @@ export function useMarkAsRead() {
   return useMutation({
     mutationFn: (id: string) => notificationsService.markAsRead(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["admin", "notifications"] });
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+      queryClient.invalidateQueries({ queryKey: ["unread-counts"] });
     },
     onError: () => {
       toast.error("Impossible de marquer la notification comme lue");

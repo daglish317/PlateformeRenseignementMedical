@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { addFavorite } from "../api/favorites.service";
+import { favoritesService } from "../api/favorites.service";
 import { useFavoritesStore } from "../store/favorites-store";
 
 export function useAddFavorite() {
@@ -9,7 +9,7 @@ export function useAddFavorite() {
   const triggerUpdate = useFavoritesStore((state) => state.triggerUpdate);
 
   return useMutation({
-    mutationFn: addFavorite,
+    mutationFn: (structureId: string) => favoritesService.add(structureId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["favorites"] });
       queryClient.invalidateQueries({ queryKey: ["favorite-check"] });

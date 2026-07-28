@@ -79,6 +79,8 @@ export const useAuthStore = create<AuthState>((set) => ({
 
 
   clearAuth: () => {
+    const wasAuthenticated = useAuthStore.getState().authenticated;
+
     authStorage.removeTokens();
 
     set({
@@ -87,5 +89,12 @@ export const useAuthStore = create<AuthState>((set) => ({
       refreshToken: null,
       authenticated: false,
     });
+
+    if (typeof window !== "undefined" && wasAuthenticated) {
+      const pathname = window.location.pathname;
+      if (!pathname.includes("/connexion") && !pathname.includes("/inscription")) {
+        window.location.href = "/fr/connexion";
+      }
+    }
   },
 }));

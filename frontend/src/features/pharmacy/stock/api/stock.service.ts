@@ -44,3 +44,20 @@ export async function getAlerts(structureId: string): Promise<StockItem[]> {
   const { data } = await api.get(`/stocks/structure/${structureId}/alertes/`);
   return data;
 }
+
+export async function importStock(
+  structureId: string,
+  file: File
+): Promise<{
+  message: string;
+  imported: number;
+  errors_count: number;
+  errors: Array<{ ligne: number; erreur: string }>;
+}> {
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("structure_id", structureId);
+
+  const { data } = await api.post("/stocks/import/", formData);
+  return data;
+}

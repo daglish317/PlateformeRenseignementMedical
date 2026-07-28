@@ -104,8 +104,18 @@ class MessagerieService:
     @staticmethod
     def conversations_utilisateur(*, utilisateur):
         if utilisateur.role == "ADMINISTRATEUR":
+            from structures.models import Structure
+            active_structures = Structure.objects.filter(
+                statut="ACTIVE",
+                est_supprimee=False,
+            )
+            for structure in active_structures:
+                MessagerieService.get_or_create_conversation(structure=structure)
+
             conversations = Conversation.objects.filter(
                 structure__isnull=False,
+                structure__statut="ACTIVE",
+                structure__est_supprimee=False,
             ).select_related("structure", "structure__gestionnaire")
         elif utilisateur.role == "GESTIONNAIRE":
             conversations = Conversation.objects.filter(

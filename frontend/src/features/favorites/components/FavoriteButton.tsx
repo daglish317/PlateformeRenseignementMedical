@@ -15,7 +15,7 @@ export default function FavoriteButton({ structureId }: FavoriteButtonProps) {
   const { mutate: addFavorite, isPending: adding } = useAddFavorite();
   const { mutate: removeFavorite, isPending: removing } = useRemoveFavorite();
 
-  const isFavorite = data?.isFavorite ?? false;
+  const isFavorite = data?.is_favori ?? false;
   const loading = isLoading || adding || removing;
 
   const handleToggle = (e: React.MouseEvent) => {

@@ -8,6 +8,7 @@ from .views import (
     EntreeStockView,
     StockMovementsView,
     StockAlertesView,
+    ImportStockView,
 )
 
 urlpatterns = [
@@ -18,4 +19,5 @@ urlpatterns = [
     path("<uuid:pk>/entree/", EntreeStockView.as_view()),
     path("<uuid:pk>/mouvements/", StockMovementsView.as_view()),
     path("structure/<uuid:structure_id>/alertes/", StockAlertesView.as_view()),
+    path("import/", ImportStockView.as_view()),
 ]

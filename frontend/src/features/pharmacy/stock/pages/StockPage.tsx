@@ -11,6 +11,7 @@ import { StockTable } from "../components/StockTable";
 import { StockForm } from "../components/StockForm";
 import { StockFilters } from "../components/StockFilters";
 import { DeleteStockDialog } from "../components/DeleteStockDialog";
+import { ImportStockDialog } from "../components/ImportStockDialog";
 import { useMyStructureId } from "@/features/shared/dashboard/hooks/useMyStructureId";
 
 export default function StockPage() {
@@ -53,12 +54,15 @@ export default function StockPage() {
         title="Stock"
         subtitle="Gérer le stock de la structure"
         actions={
-          <button
-            onClick={() => { setShowForm(true); setEditingItem(null); }}
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-          >
-            + Ajouter
-          </button>
+          <div className="flex items-center gap-2">
+            {structureId && <ImportStockDialog structureId={structureId} />}
+            <button
+              onClick={() => { setShowForm(true); setEditingItem(null); }}
+              className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+            >
+              + Ajouter
+            </button>
+          </div>
         }
       />
 

@@ -9,8 +9,9 @@ export interface FeedbackAdmin {
   sujet: string;
   message: string;
   statut: FeedbackStatut;
+  note: number;
   date_creation: string;
-  structure?: string | null;
+  structure: string | null;
 }
 
 export interface FeedbackFilters {

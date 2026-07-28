@@ -5,10 +5,25 @@ from structures.models import Structure
 
 
 class FeedbackSerializer(serializers.ModelSerializer):
+    utilisateur_nom = serializers.CharField(source="utilisateur.nom", read_only=True)
+    utilisateur_email = serializers.CharField(source="utilisateur.email", read_only=True)
+    message = serializers.CharField(source="commentaire", read_only=True)
+    date_creation = serializers.DateTimeField(source="created_at", read_only=True)
 
     class Meta:
         model = Feedback
-        fields = "__all__"
+        fields = [
+            "id",
+            "utilisateur_nom",
+            "utilisateur_email",
+            "categorie",
+            "sujet",
+            "message",
+            "statut",
+            "date_creation",
+            "structure",
+            "note",
+        ]
 
 
 class FeedbackCreateSerializer(serializers.Serializer):

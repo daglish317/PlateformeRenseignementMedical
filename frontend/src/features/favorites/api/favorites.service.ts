@@ -1,21 +1,30 @@
-import axios from "@/lib/axios";
+import api from "@/lib/axios";
 import type { Favorite } from "../types/favorite";
 
-export const getFavorites = async (): Promise<Favorite[]> => {
-  const { data } = await axios.get<Favorite[]>("/api/favoris/");
-  return data;
-};
+interface FavoritesListResponse {
+  results: Favorite[];
+  page: number;
+  page_size: number;
+  total: number;
+}
 
-export const addFavorite = async (structureId: string): Promise<Favorite> => {
-  const { data } = await axios.post<Favorite>("/api/favoris/add/", { structure_id: structureId });
-  return data;
-};
+export const favoritesService = {
+  list: async (params?: Record<string, string | number>): Promise<FavoritesListResponse> => {
+    const response = await api.get<FavoritesListResponse>("/structures/favoris/", { params });
+    return response.data;
+  },
 
-export const removeFavorite = async (structureId: string): Promise<void> => {
-  await axios.delete(`/api/favoris/${structureId}/remove/`);
-};
+  add: async (structureId: string): Promise<Favorite> => {
+    const response = await api.post<{ message: string; data: Favorite }>("/structures/favoris/add/", { structure_id: structureId });
+    return response.data.data;
+  },
 
-export const checkFavorite = async (structureId: string): Promise<{ isFavorite: boolean }> => {
-  const { data } = await axios.get<{ isFavorite: boolean }>(`/api/favoris/${structureId}/check/`);
-  return data;
+  remove: async (structureId: string): Promise<void> => {
+    await api.delete(`/structures/favoris/${structureId}/remove/`);
+  },
+
+  check: async (structureId: string): Promise<{ is_favori: boolean }> => {
+    const response = await api.get<{ is_favori: boolean }>(`/structures/favoris/${structureId}/check/`);
+    return response.data;
+  },
 };

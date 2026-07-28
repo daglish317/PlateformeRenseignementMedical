@@ -10,10 +10,10 @@ export function useMessages() {
       "admin",
       "chat",
       "messages",
-      selectedConversation?.structure.id,
+      selectedConversation?.structure?.id ?? selectedConversation?.id,
     ],
     queryFn: () =>
-      chatService.getMessages(selectedConversation!.structure.id, {
+      chatService.getMessages(selectedConversation!.structure?.id ?? selectedConversation!.id, {
         page_size: 100,
       }),
     enabled: !!selectedConversation,

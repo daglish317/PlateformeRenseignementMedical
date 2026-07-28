@@ -59,6 +59,8 @@ class ConversationDetailSerializer(serializers.ModelSerializer):
 class ConversationListItemSerializer(serializers.ModelSerializer):
 
     structure_nom = serializers.CharField(source="structure.nom", read_only=True, default=None)
+    structure_type = serializers.CharField(source="structure.type", read_only=True, default=None)
+    structure_photo = serializers.SerializerMethodField()
     messages_non_lus = serializers.IntegerField(read_only=True, default=0)
     dernier_message = serializers.SerializerMethodField()
 
@@ -68,10 +70,20 @@ class ConversationListItemSerializer(serializers.ModelSerializer):
             "id",
             "structure",
             "structure_nom",
+            "structure_type",
+            "structure_photo",
             "messages_non_lus",
             "dernier_message",
             "updated_at",
         ]
+
+    def get_structure_photo(self, obj):
+        if obj.structure and obj.structure.photo:
+            request = self.context.get("request")
+            if request:
+                return request.build_absolute_uri(obj.structure.photo.url)
+            return obj.structure.photo.url
+        return None
 
     def get_dernier_message(self, obj):
         msg = getattr(obj, "dernier_message", None)

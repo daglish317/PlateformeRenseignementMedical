@@ -7,7 +7,7 @@ export const schedulesService = {
   },
 
   setSchedules(structureId: string, schedules: SchedulePayload[]) {
-    return api.put(`/structures/${structureId}/horaires/set/`, schedules);
+    return api.put(`/structures/${structureId}/horaires/set/`, { horaires: schedules });
   },
 
   updateSchedule(scheduleId: string, payload: Partial<SchedulePayload>) {

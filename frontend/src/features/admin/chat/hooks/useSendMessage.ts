@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { chatService } from "../api/chat.service";
 import { useChatStore } from "../store/chat-store";
+import { useAuthStore } from "@/features/auth/store/auth-store";
 
 export function useSendMessage() {
   const queryClient = useQueryClient();
@@ -15,34 +16,37 @@ export function useSendMessage() {
     onMutate: async (content) => {
       if (!selectedConversation) return;
 
+      const user = useAuthStore.getState().user;
+      const structureId = selectedConversation.structure?.id ?? selectedConversation.id;
+
       await queryClient.cancelQueries({
-        queryKey: ["admin", "chat", "messages", selectedConversation.structure.id],
+        queryKey: ["admin", "chat", "messages", structureId],
       });
 
       const previous = queryClient.getQueryData([
         "admin",
         "chat",
         "messages",
-        selectedConversation.structure.id,
+        structureId,
       ]);
 
       const optimisticMessage = {
         id: `temp-${Date.now()}`,
-        content,
+        contenu: content,
         created_at: new Date().toISOString(),
-        expediteur: { id: "admin", nom: "Admin", role: "ADMINISTRATEUR" },
+        expediteur: { id: user?.id ?? "me", nom: user?.nom ?? "Moi", role: user?.role ?? "GESTIONNAIRE" },
         is_read: false,
       };
 
       queryClient.setQueryData(
-        ["admin", "chat", "messages", selectedConversation.structure.id],
-        (old: { results: unknown[] } | undefined) => {
-          if (!old) return { results: [optimisticMessage], page: 1, page_size: 100, total: 1 };
-          return { ...old, results: [...old.results, optimisticMessage] };
+        ["admin", "chat", "messages", structureId],
+        (old: { messages: unknown[]; results: unknown[] } | undefined) => {
+          if (!old) return { messages: [optimisticMessage], results: [optimisticMessage], page: 1, page_size: 100, total: 1 };
+          return { ...old, messages: [...(old.messages ?? []), optimisticMessage], results: [...(old.results ?? []), optimisticMessage] };
         }
       );
 
-      return { previous, structureId: selectedConversation.structure.id };
+      return { previous, structureId };
     },
     onError: (_err, _content, context) => {
       if (context?.previous) {

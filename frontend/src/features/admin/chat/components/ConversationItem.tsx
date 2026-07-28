@@ -1,8 +1,9 @@
 "use client";
 
-import { Hospital, Pill } from "lucide-react";
+import { Hospital, Pill, Shield } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
+import { useAuthStore } from "@/features/auth/store/auth-store";
 import type { ChatConversation } from "../types/chat";
 
 interface ConversationItemProps {
@@ -38,7 +39,22 @@ export function ConversationItem({
   isSelected,
   onClick,
 }: ConversationItemProps) {
-  const { structure, last_message, unread_count } = conversation;
+  const user = useAuthStore((s) => s.user);
+  const isGestionnaire = user?.role === "GESTIONNAIRE";
+
+  const displayName = isGestionnaire
+    ? "SantéProx Admin"
+    : (conversation.structure_nom ?? conversation.structure?.nom ?? "Unknown");
+  
+  const displayPhoto = isGestionnaire
+    ? null
+    : (conversation.structure_photo ?? conversation.structure?.photo ?? null);
+
+  const displayType = isGestionnaire
+    ? null
+    : (conversation.structure_type ?? conversation.structure?.type ?? null);
+
+  const lastMessage = conversation.dernier_message;
 
   return (
     <button
@@ -49,9 +65,11 @@ export function ConversationItem({
       )}
     >
       <Avatar className="h-10 w-10 shrink-0">
-        <AvatarImage src={structure.photo ?? undefined} alt={structure.nom} />
+        <AvatarImage src={displayPhoto ?? undefined} alt={displayName} />
         <AvatarFallback>
-          {structure.type === "HOPITAL" ? (
+          {isGestionnaire ? (
+            <Shield className="h-4 w-4" />
+          ) : displayType === "HOPITAL" ? (
             <Hospital className="h-4 w-4" />
           ) : (
             <Pill className="h-4 w-4" />
@@ -61,27 +79,27 @@ export function ConversationItem({
 
       <div className="flex min-w-0 flex-1 flex-col gap-1">
         <div className="flex items-center justify-between gap-2">
-          <span className="truncate text-sm font-medium">{structure.nom}</span>
-          {last_message && (
+          <span className="truncate text-sm font-medium">{displayName}</span>
+          {lastMessage && (
             <span className="shrink-0 text-xs text-muted-foreground">
-              {formatTime(last_message.created_at)}
+              {formatTime(lastMessage.created_at)}
             </span>
           )}
         </div>
 
         <div className="flex items-center justify-between gap-2">
-          {last_message ? (
+          {lastMessage ? (
             <span className="truncate text-xs text-muted-foreground">
-              {truncate(last_message.content, 45)}
+              {truncate(lastMessage.contenu, 45)}
             </span>
           ) : (
             <span className="text-xs italic text-muted-foreground">
               Aucun message
             </span>
           )}
-          {unread_count > 0 && (
+          {conversation.messages_non_lus > 0 && (
             <span className="flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-primary px-1.5 text-[10px] font-semibold text-primary-foreground">
-              {unread_count > 99 ? "99+" : unread_count}
+              {conversation.messages_non_lus > 99 ? "99+" : conversation.messages_non_lus}
             </span>
           )}
         </div>

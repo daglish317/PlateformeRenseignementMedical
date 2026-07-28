@@ -1,27 +1,17 @@
 export interface AdminNotification {
   id: string;
   titre: string;
-  contenu: string;
+  message: string;
   type: string;
+  nav_item: string;
   date_creation: string;
   est_lue: boolean;
-  destinataire: {
-    id: string;
-    nom: string;
-    email: string;
-  } | null;
-}
-
-export interface NotificationsListResponse {
-  results: AdminNotification[];
-  page: number;
-  page_size: number;
-  total: number;
+  structure: string | null;
 }
 
 export interface SendNotificationPayload {
-  destinataire_id: string;
   titre: string;
-  contenu: string;
-  type: string;
+  message: string;
+  type?: string;
+  nav_item?: string;
 }

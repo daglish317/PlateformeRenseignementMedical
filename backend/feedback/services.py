@@ -63,15 +63,16 @@ class FeedbackService:
 
     @staticmethod
     def statistiques():
-        structure_stats = (
-            Feedback.objects.filter(type=TypeFeedback.STRUCTURE)
-            .values("structure__nom", "structure_id")
-            .annotate(moyenne=Avg("note"), total=Count("id"))
-        )
-        plateforme = Feedback.objects.filter(type=TypeFeedback.PLATEFORME).aggregate(
-            moyenne=Avg("note"), total=Count("id")
-        )
+        base = Feedback.objects.filter(type=TypeFeedback.PLATEFORME)
+        total = base.count()
+        non_lus = base.filter(statut="NON_LU").count()
+        lus = base.filter(statut="LU").count()
+        traites = base.filter(statut="TRAITE").count()
+        avg = base.aggregate(moyenne=Avg("note"))["moyenne"]
         return {
-            "plateforme": plateforme,
-            "structures": list(structure_stats),
+            "total": total,
+            "non_lus": non_lus,
+            "lus": lus,
+            "traites": traites,
+            "moyenne": round(avg, 1) if avg else 0,
         }
