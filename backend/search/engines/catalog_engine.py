@@ -1,4 +1,4 @@
-from catalogues.models import Catalogue
+from structures.models import StructureService
 
 from search.utils.normalizer import normalize_query
 
@@ -10,7 +10,7 @@ class CatalogEngine:
         query = normalize_query(query)
         if not query:
             return None
-        return Catalogue.objects.filter(
+        return StructureService.objects.filter(
             est_actif=True,
             nom__icontains=query,
         ).first()

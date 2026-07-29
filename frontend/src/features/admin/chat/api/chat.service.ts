@@ -31,7 +31,7 @@ export const chatService = {
     content: string
   ): Promise<ChatMessage> => {
     const response = await api.post(`/messagerie/send/${conversationId}/`, {
-      content,
+      contenu: content,
     });
     return response.data;
   },

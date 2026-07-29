@@ -122,6 +122,48 @@ class Structure(models.Model):
         return f"{self.nom} ({self.get_type_display()})"
 
 
+class TypeService(models.TextChoices):
+    MALADIE = "MALADIE", "Maladie"
+    ANALYSE = "ANALYSE", "Analyse"
+    EXAMEN = "EXAMEN", "Examen"
+    SERVICE_MEDICAL = "SERVICE_MEDICAL", "Service médical"
+
+
+class StructureService(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    nom = models.CharField(max_length=255, db_index=True)
+    type = models.CharField(max_length=30, choices=TypeService.choices, db_index=True)
+    description = models.TextField(blank=True)
+    slug = models.SlugField(max_length=255, blank=True)
+    categorie = models.CharField(max_length=100, blank=True)
+    est_actif = models.BooleanField(default=True, db_index=True)
+    date_creation = models.DateTimeField(auto_now_add=True)
+    date_modification = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Service"
+        verbose_name_plural = "Services"
+        ordering = ["type", "nom"]
+        constraints = [
+            models.UniqueConstraint(fields=["nom", "type"], name="unique_nom_type_service")
+        ]
+        indexes = [
+            models.Index(fields=["type", "nom"]),
+            models.Index(fields=["est_actif"]),
+        ]
+
+    def save(self, *args, **kwargs):
+        self.nom = self.nom.strip()
+        if not self.slug:
+            from django.utils.text import slugify
+            base = slugify(f"{self.nom}-{self.type}")
+            self.slug = base
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.nom} ({self.get_type_display()})"
+
+
 class Favori(models.Model):
 
     id = models.UUIDField(

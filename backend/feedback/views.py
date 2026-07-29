@@ -18,14 +18,14 @@ class CreateFeedbackView(APIView):
                 status=status.HTTP_401_UNAUTHORIZED,
             )
 
-        serializer = FeedbackCreateSerializer(data=request.data)
+        serializer = FeedbackCreateSerializer(data=request.data, context={"request": request})
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
 
         feedback = FeedbackService.ajouter_feedback(
             utilisateur=request.user,
             structure_id=data.get("structure_id"),
-            note=data["note"],
+            note=data.get("note"),
             commentaire=data.get("commentaire"),
             feedback_type=data["type"],
         )

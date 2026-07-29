@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Structure, Favori, Horaire
+from .models import Structure, StructureService, Favori, Horaire
 
 
 class StructureCreateSerializer(serializers.ModelSerializer):
@@ -218,3 +218,46 @@ class StructurePublicMapSerializer(serializers.ModelSerializer):
             "latitude",
             "longitude",
         ]
+
+
+class StructureServiceSerializer(serializers.ModelSerializer):
+    type_display = serializers.CharField(source="get_type_display", read_only=True)
+
+    class Meta:
+        model = StructureService
+        fields = [
+            "id",
+            "nom",
+            "type",
+            "type_display",
+            "description",
+            "slug",
+            "categorie",
+            "est_actif",
+            "date_creation",
+            "date_modification",
+        ]
+        read_only_fields = ["id", "slug", "date_creation", "date_modification"]
+
+
+class StructureServiceCreateUpdateSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = StructureService
+        fields = ["nom", "type", "description", "categorie", "est_actif"]
+
+    def validate_nom(self, value):
+        value = " ".join(value.strip().split())
+        if len(value) < 2:
+            raise serializers.ValidationError("Le nom est trop court.")
+        return value
+
+    def validate(self, attrs):
+        nom = attrs["nom"]
+        type_svc = attrs["type"]
+        queryset = StructureService.objects.filter(nom__iexact=nom, type=type_svc)
+        if self.instance:
+            queryset = queryset.exclude(pk=self.instance.pk)
+        if queryset.exists():
+            raise serializers.ValidationError({"nom": "Un service portant ce nom existe déjà pour ce type."})
+        return attrs

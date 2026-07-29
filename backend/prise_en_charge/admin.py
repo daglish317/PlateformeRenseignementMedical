@@ -8,11 +8,11 @@ class PriseEnChargeAdmin(admin.ModelAdmin):
 
     ordering = (
         "structure__nom",
-        "catalogue__nom",
+        "service__nom",
     )
 
     list_display = (
-        "catalogue",
+        "service",
         "structure",
         "niveau",
         "date_ajout",
@@ -24,7 +24,7 @@ class PriseEnChargeAdmin(admin.ModelAdmin):
     )
 
     search_fields = (
-        "catalogue__nom",
+        "service__nom",
         "structure__nom",
         "niveau",
     )
@@ -36,7 +36,7 @@ class PriseEnChargeAdmin(admin.ModelAdmin):
 
     list_select_related = (
         "structure",
-        "catalogue",
+        "service",
     )
 
     fieldsets = (
@@ -46,7 +46,7 @@ class PriseEnChargeAdmin(admin.ModelAdmin):
                 "fields": (
                     "id",
                     "structure",
-                    "catalogue",
+                    "service",
                     "niveau",
                 )
             },

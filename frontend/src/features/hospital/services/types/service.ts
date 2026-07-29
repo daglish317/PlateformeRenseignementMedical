@@ -1,12 +1,12 @@
 export interface MedicalService {
   id: string;
   structure: string;
-  catalogue: { id: string; nom: string; type: string };
+  service: { id: string; nom: string; type: string };
   actif: boolean;
   date_ajout: string;
 }
 
-export interface CatalogueItem {
+export interface ServiceItem {
   id: string;
   nom: string;
   type: string;

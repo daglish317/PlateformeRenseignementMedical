@@ -3,7 +3,6 @@ import {
   Building2,
   UserCog,
   Users,
-  BookOpen,
   Map,
   BarChart3,
   MessageSquare,
@@ -15,7 +14,7 @@ import {
 
 export type AdminNavItem = {
   label: string;
-  href: "/admin" | "/admin/structures" | "/admin/managers" | "/admin/users" | "/admin/catalog" | "/admin/map" | "/admin/statistics" | "/admin/feedback" | "/admin/chat" | "/admin/notifications" | "/admin/settings";
+  href: "/admin" | "/admin/structures" | "/admin/managers" | "/admin/users" | "/admin/catalog" | "/admin/services" | "/admin/map" | "/admin/statistics" | "/admin/feedback" | "/admin/chat" | "/admin/notifications" | "/admin/settings";
   icon: LucideIcon;
   permission: "ADMIN";
   navItem?: string;
@@ -26,7 +25,6 @@ export const adminNavigation: AdminNavItem[] = [
   { label: "Structures", href: "/admin/structures", icon: Building2, permission: "ADMIN", navItem: "structures" },
   { label: "Gestionnaires", href: "/admin/managers", icon: UserCog, permission: "ADMIN", navItem: "managers" },
   { label: "Utilisateurs", href: "/admin/users", icon: Users, permission: "ADMIN", navItem: "users" },
-  { label: "Catalogue", href: "/admin/catalog", icon: BookOpen, permission: "ADMIN" },
   { label: "Carte", href: "/admin/map", icon: Map, permission: "ADMIN" },
   { label: "Statistiques", href: "/admin/statistics", icon: BarChart3, permission: "ADMIN" },
   { label: "Feedback", href: "/admin/feedback", icon: MessageSquare, permission: "ADMIN", navItem: "feedback" },

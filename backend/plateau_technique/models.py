@@ -12,10 +12,11 @@ class PlateauTechnique(models.Model):
         related_name="plateau_technique"
     )
 
-    catalogue = models.ForeignKey(
-        "catalogues.Catalogue",
+    service = models.ForeignKey(
+        "structures.StructureService",
         on_delete=models.CASCADE,
         related_name="plateau_technique",
+        null=True,
     )
 
     disponible = models.BooleanField(default=True)
@@ -23,7 +24,7 @@ class PlateauTechnique(models.Model):
     date_ajout = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ("structure", "catalogue")
+        unique_together = ("structure", "service")
 
     def __str__(self):
-        return f"{self.structure.nom} - {self.catalogue.nom}"
+        return f"{self.structure.nom} - {self.service.nom}"

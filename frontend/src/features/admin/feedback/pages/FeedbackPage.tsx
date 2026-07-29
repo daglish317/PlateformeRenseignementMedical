@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { ChevronLeft, ChevronRight, Inbox, MailOpen, CheckCircle, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AdminPageTitle } from "../../shared/components/AdminPageTitle";
@@ -10,9 +12,14 @@ import { useFeedbacks } from "../hooks/useFeedbacks";
 import { useFeedbackStats } from "../hooks/useFeedbackStats";
 
 export function FeedbackPage() {
+  const queryClient = useQueryClient();
   const { filters, setFilters } = useFeedbacksStore();
   useFeedbacks(filters);
   const { data: stats } = useFeedbackStats();
+
+  useEffect(() => {
+    queryClient.invalidateQueries({ queryKey: ["unread-counts"] });
+  }, [queryClient]);
 
   const total = stats?.total ?? 0;
   const totalPages = Math.ceil(total / filters.pageSize);

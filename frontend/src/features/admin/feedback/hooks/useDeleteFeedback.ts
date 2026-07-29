@@ -10,6 +10,7 @@ export function useDeleteFeedback() {
     onSuccess: () => {
       toast.success("Feedback supprimé avec succès");
       queryClient.invalidateQueries({ queryKey: ["admin", "feedbacks"] });
+      queryClient.invalidateQueries({ queryKey: ["unread-counts"] });
     },
     onError: () => {
       toast.error("Impossible de supprimer ce feedback");

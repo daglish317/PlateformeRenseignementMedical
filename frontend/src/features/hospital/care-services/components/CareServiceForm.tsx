@@ -1,41 +1,33 @@
 "use client";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Plus } from "lucide-react";
-import { CatalogueItem } from "../types/care-service";
 
 interface CareServiceFormProps {
-  catalogues: CatalogueItem[];
-  onSubmit: (catalogueId: string) => void;
+  onSubmit: (nom: string) => void;
   isSubmitting: boolean;
 }
 
-export function CareServiceForm({ catalogues, onSubmit, isSubmitting }: CareServiceFormProps) {
-  const [selected, setSelected] = useState("");
+export function CareServiceForm({ onSubmit, isSubmitting }: CareServiceFormProps) {
+  const [nom, setNom] = useState("");
 
   const handleSubmit = () => {
-    if (!selected) return;
-    onSubmit(selected);
-    setSelected("");
+    if (!nom.trim()) return;
+    onSubmit(nom.trim());
+    setNom("");
   };
 
   return (
     <div className="flex items-end gap-4">
       <div className="flex-1">
-        <select
-          value={selected}
-          onChange={(e) => setSelected(e.target.value)}
-          className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-        >
-          <option value="">Sélectionner une prise en charge</option>
-          {catalogues.map((item) => (
-            <option key={item.id} value={item.id}>
-              {item.nom} ({item.type})
-            </option>
-          ))}
-        </select>
+        <Input
+          placeholder="Nom de la prise en charge"
+          value={nom}
+          onChange={(e) => setNom(e.target.value)}
+        />
       </div>
-      <Button onClick={handleSubmit} disabled={!selected || isSubmitting}>
+      <Button onClick={handleSubmit} disabled={!nom.trim() || isSubmitting}>
         <Plus className="mr-2 h-4 w-4" />
         Ajouter
       </Button>

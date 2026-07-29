@@ -1,7 +1,6 @@
 import {
   LayoutDashboard,
   Building2,
-  Stethoscope,
   FlaskConical,
   Monitor,
   HeartPulse,
@@ -34,13 +33,6 @@ export const hospitalNavigation: HospitalNavItem[] = [
     icon: Building2,
     permission: "GESTIONNAIRE",
     navItem: "profil",
-  },
-  {
-    label: "Services",
-    href: "/hospital/services",
-    icon: Stethoscope,
-    permission: "GESTIONNAIRE",
-    navItem: "services",
   },
   {
     label: "Analyses",

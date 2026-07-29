@@ -4,11 +4,7 @@ from django.db import models
 
 class PriseEnCharge(models.Model):
 
-    id = models.UUIDField(
-        primary_key=True,
-        default=uuid.uuid4,
-        editable=False
-    )
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
     structure = models.ForeignKey(
         "structures.Structure",
@@ -16,10 +12,11 @@ class PriseEnCharge(models.Model):
         related_name="prises_en_charge"
     )
 
-    catalogue = models.ForeignKey(
-        "catalogues.Catalogue",
+    service = models.ForeignKey(
+        "structures.StructureService",
         on_delete=models.CASCADE,
         related_name="prises_en_charge",
+        null=True,
     )
 
     niveau = models.CharField(
@@ -38,10 +35,10 @@ class PriseEnCharge(models.Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=["structure", "catalogue"],
-                name="unique_structure_catalogue"
+                fields=["structure", "service"],
+                name="unique_structure_service_pec"
             )
         ]
 
     def __str__(self):
-        return f"{self.structure.nom} - {self.catalogue.nom}"
+        return f"{self.structure.nom} - {self.service.nom}"

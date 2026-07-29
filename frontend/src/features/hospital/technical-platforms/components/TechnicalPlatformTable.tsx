@@ -36,11 +36,11 @@ export function TechnicalPlatformTable({
       <TableBody>
         {platforms.map((platform) => (
           <TableRow key={platform.id}>
-            <TableCell>{platform.catalogue.nom}</TableCell>
-            <TableCell>{platform.catalogue.type}</TableCell>
+            <TableCell>{platform.service.nom}</TableCell>
+            <TableCell>{platform.service.type}</TableCell>
             <TableCell>
-              <Badge variant={platform.actif ? "default" : "secondary"}>
-                {platform.actif ? "Actif" : "Inactif"}
+              <Badge variant={platform.disponible ? "default" : "secondary"}>
+                {platform.disponible ? "Disponible" : "Indisponible"}
               </Badge>
             </TableCell>
             <TableCell className="text-right">
@@ -48,7 +48,7 @@ export function TechnicalPlatformTable({
                 variant="ghost"
                 size="icon"
                 onClick={() => onDelete(platform.id)}
-                disabled={isDeleting || !platform.actif}
+                disabled={isDeleting || !platform.disponible}
               >
                 <Trash2 className="h-4 w-4" />
               </Button>

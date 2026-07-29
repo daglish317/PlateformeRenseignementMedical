@@ -1,4 +1,4 @@
-from catalogues.models import Catalogue
+from structures.models import StructureService
 
 from .normalizer import normalize_query
 
@@ -16,16 +16,16 @@ def _score(query: str, candidate: str) -> float:
     return SequenceMatcher(None, query, candidate).ratio()
 
 
-def _catalogue_choices():
+def _service_choices():
     return list(
-        Catalogue.objects.filter(est_actif=True).values_list("nom", flat=True)
+        StructureService.objects.filter(est_actif=True).values_list("nom", flat=True)
     )
 
 
-def _catalogue_by_name():
+def _service_by_name():
     return {
-        c.nom.lower(): c
-        for c in Catalogue.objects.filter(est_actif=True)
+        s.nom.lower(): s
+        for s in StructureService.objects.filter(est_actif=True)
     }
 
 
@@ -34,17 +34,17 @@ def best_match(query: str, min_score: float = 0.55):
     if not query:
         return None
 
-    catalogues = Catalogue.objects.filter(est_actif=True)
+    services = StructureService.objects.filter(est_actif=True)
     best_item = None
     best_score = 0.0
 
-    for cat in catalogues:
-        score = _score(query, cat.nom.lower())
-        if query in cat.nom.lower():
+    for svc in services:
+        score = _score(query, svc.nom.lower())
+        if query in svc.nom.lower():
             score = max(score, 0.85)
         if score > best_score:
             best_score = score
-            best_item = cat
+            best_item = svc
 
     if best_score >= min_score:
         return best_item
@@ -57,27 +57,27 @@ def suggest(query: str, limit: int = 5, min_score: float = 0.35):
         return []
 
     if HAS_RAPIDFUZZ:
-        choices = _catalogue_choices()
+        choices = _service_choices()
         results = process.extract(
             query,
             choices,
             scorer=fuzz.partial_ratio,
             limit=limit,
         )
-        by_name = _catalogue_by_name()
+        by_name = _service_by_name()
         items = []
         for name, score, _ in results:
             if score / 100.0 >= min_score:
-                cat = by_name.get(name.lower())
-                if cat:
-                    items.append(cat)
+                svc = by_name.get(name.lower())
+                if svc:
+                    items.append(svc)
         return items
 
-    catalogues = Catalogue.objects.filter(est_actif=True)
+    services = StructureService.objects.filter(est_actif=True)
     scored = []
-    for cat in catalogues:
-        score = _score(query, cat.nom.lower())
+    for svc in services:
+        score = _score(query, svc.nom.lower())
         if score >= min_score:
-            scored.append((score, cat))
+            scored.append((score, svc))
     scored.sort(key=lambda x: x[0], reverse=True)
-    return [cat for _, cat in scored[:limit]]
+    return [svc for _, svc in scored[:limit]]

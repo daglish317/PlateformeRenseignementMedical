@@ -5,6 +5,7 @@ from .views import (
     ListPlateauStructureView,
     AdminListPlateauView,
     DeactivatePlateauView,
+    ImportPlateauTechniqueView,
 )
 
 urlpatterns = [
@@ -12,4 +13,5 @@ urlpatterns = [
     path("structure/<uuid:structure_id>/", ListPlateauStructureView.as_view()),
     path("admin/list/", AdminListPlateauView.as_view()),
     path("<uuid:pk>/deactivate/", DeactivatePlateauView.as_view()),
+    path("import/", ImportPlateauTechniqueView.as_view()),
 ]

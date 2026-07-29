@@ -7,12 +7,12 @@ from plateau_technique.models import PlateauTechnique
 class StructureEngine:
 
     @staticmethod
-    def get_structures(catalogue):
+    def get_structures(service):
         structure_ids = set()
 
         for model in (PriseEnCharge, ServiceMedical, PlateauTechnique):
             ids = model.objects.filter(
-                catalogue=catalogue,
+                service=service,
             ).values_list("structure_id", flat=True)
             structure_ids.update(ids)
 
@@ -23,18 +23,18 @@ class StructureEngine:
         ).distinct()
 
     @staticmethod
-    def get_matched_services(structure, catalogue):
+    def get_matched_services(structure, service):
         services = []
         if ServiceMedical.objects.filter(
-            structure=structure, catalogue=catalogue, actif=True
+            structure=structure, service=service, actif=True
         ).exists():
-            services.append(catalogue.nom)
+            services.append(service.nom)
         if PlateauTechnique.objects.filter(
-            structure=structure, catalogue=catalogue, disponible=True
+            structure=structure, service=service, disponible=True
         ).exists():
-            services.append(f"Plateau: {catalogue.nom}")
+            services.append(f"Plateau: {service.nom}")
         if PriseEnCharge.objects.filter(
-            structure=structure, catalogue=catalogue
+            structure=structure, service=service
         ).exists():
-            services.append(f"Prise en charge: {catalogue.nom}")
+            services.append(f"Prise en charge: {service.nom}")
         return services

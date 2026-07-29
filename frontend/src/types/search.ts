@@ -7,11 +7,10 @@ export type Structure = {
   telephone: string;
   latitude: number;
   longitude: number;
-  
+
 };
 
-
-export type Catalogue = {
+export type ServiceItem = {
   id: string;
   nom: string;
   type: string;
@@ -31,13 +30,13 @@ export type SearchResult = {
   distance_km: number | null;
   walking_time: number | null;
   driving_time: number | null;
-  services_matches: string[];
+  service_matches: string[];
 };
 
 
 export type SearchResponse = {
   query: string;
-  catalogue: Catalogue | null;
+  service: ServiceItem | null;
 
   results: SearchResult[];
 

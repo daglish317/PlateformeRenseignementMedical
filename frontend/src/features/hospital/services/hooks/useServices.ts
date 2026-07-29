@@ -1,6 +1,6 @@
 "use client";
 import { useQuery } from "@tanstack/react-query";
-import { getServices, getCatalogues } from "../api/services.service";
+import { getServices } from "../api/services.service";
 
 export function useServices(structureId: string) {
   const services = useQuery({
@@ -9,10 +9,5 @@ export function useServices(structureId: string) {
     enabled: !!structureId,
   });
 
-  const catalogues = useQuery({
-    queryKey: ["catalogues", "service"],
-    queryFn: () => getCatalogues("service"),
-  });
-
-  return { services, catalogues };
+  return { services };
 }

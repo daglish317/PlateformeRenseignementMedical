@@ -1,26 +1,25 @@
 from django.db import transaction
 
 from .models import PriseEnCharge
-from structures.models import Structure
-from catalogues.models import Catalogue
+from structures.models import Structure, StructureService
 
 
 class PriseEnChargeService:
 
     @staticmethod
     @transaction.atomic
-    def ajouter_ou_mettre_a_jour(*, structure_id, catalogue_id, niveau=None):
+    def ajouter_ou_mettre_a_jour(*, structure_id, service_id, niveau=None):
 
         structure = Structure.objects.get(id=structure_id)
-        catalogue = Catalogue.objects.get(id=catalogue_id)
+        service = StructureService.objects.get(id=service_id)
 
-        prise, created = PriseEnCharge.objects.update_or_create(
+        obj, created = PriseEnCharge.objects.update_or_create(
             structure=structure,
-            catalogue=catalogue,
+            service=service,
             defaults={"niveau": niveau}
         )
 
-        return prise
+        return obj
 
     @staticmethod
     @transaction.atomic

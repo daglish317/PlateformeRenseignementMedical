@@ -1,23 +1,22 @@
 from django.db import transaction
 
 from .models import PlateauTechnique
-from structures.models import Structure
-from catalogues.models import Catalogue
+from structures.models import Structure, StructureService
 
 
 class PlateauTechniqueService:
 
     @staticmethod
     @transaction.atomic
-    def ajouter_ou_mettre_a_jour(*, structure_id, catalogue_id, disponible=True):
+    def ajouter_ou_mettre_a_jour(*, structure_id, service_id, disponible=True):
 
         structure = Structure.objects.get(id=structure_id)
-        catalogue = Catalogue.objects.get(id=catalogue_id)
+        service = StructureService.objects.get(id=service_id)
 
-        plateau, created = PlateauTechnique.objects.update_or_create(
+        obj, created = PlateauTechnique.objects.update_or_create(
             structure=structure,
-            catalogue=catalogue,
+            service=service,
             defaults={"disponible": disponible}
         )
 
-        return plateau
+        return obj

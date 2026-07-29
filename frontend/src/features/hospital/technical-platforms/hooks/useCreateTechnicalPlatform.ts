@@ -6,8 +6,8 @@ export function useCreateTechnicalPlatform(structureId: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (catalogueId: string) =>
-      createTechnicalPlatform(structureId, catalogueId),
+    mutationFn: (serviceId: string) =>
+      createTechnicalPlatform(structureId, serviceId),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["technical-platforms", structureId],

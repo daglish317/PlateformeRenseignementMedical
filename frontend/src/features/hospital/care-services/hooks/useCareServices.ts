@@ -1,6 +1,6 @@
 "use client";
 import { useQuery } from "@tanstack/react-query";
-import { getCareServices, getCatalogues } from "../api/care-services.service";
+import { getCareServices } from "../api/care-services.service";
 
 export function useCareServices(structureId: string) {
   const careServices = useQuery({
@@ -9,10 +9,5 @@ export function useCareServices(structureId: string) {
     enabled: !!structureId,
   });
 
-  const catalogues = useQuery({
-    queryKey: ["catalogues", "prise-en-charge"],
-    queryFn: () => getCatalogues("prise-en-charge"),
-  });
-
-  return { careServices, catalogues };
+  return { careServices };
 }

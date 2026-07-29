@@ -1,41 +1,33 @@
 "use client";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Plus } from "lucide-react";
-import { CatalogueItem } from "../types/service";
 
 interface ServiceFormProps {
-  catalogues: CatalogueItem[];
-  onSubmit: (catalogueId: string) => void;
+  onSubmit: (nom: string) => void;
   isSubmitting: boolean;
 }
 
-export function ServiceForm({ catalogues, onSubmit, isSubmitting }: ServiceFormProps) {
-  const [selectedCatalogue, setSelectedCatalogue] = useState<string>("");
+export function ServiceForm({ onSubmit, isSubmitting }: ServiceFormProps) {
+  const [nom, setNom] = useState("");
 
   const handleSubmit = () => {
-    if (!selectedCatalogue) return;
-    onSubmit(selectedCatalogue);
-    setSelectedCatalogue("");
+    if (!nom.trim()) return;
+    onSubmit(nom.trim());
+    setNom("");
   };
 
   return (
     <div className="flex items-end gap-4">
       <div className="flex-1">
-        <select
-          value={selectedCatalogue}
-          onChange={(e) => setSelectedCatalogue(e.target.value)}
-          className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-        >
-          <option value="">Sélectionner un service du catalogue</option>
-          {catalogues.map((item) => (
-            <option key={item.id} value={item.id}>
-              {item.nom} ({item.type})
-            </option>
-          ))}
-        </select>
+        <Input
+          placeholder="Nom du service"
+          value={nom}
+          onChange={(e) => setNom(e.target.value)}
+        />
       </div>
-      <Button onClick={handleSubmit} disabled={!selectedCatalogue || isSubmitting}>
+      <Button onClick={handleSubmit} disabled={!nom.trim() || isSubmitting}>
         <Plus className="mr-2 h-4 w-4" />
         Ajouter
       </Button>

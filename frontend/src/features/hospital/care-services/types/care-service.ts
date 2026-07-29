@@ -1,12 +1,12 @@
 export interface CareService {
   id: string;
   structure: string;
-  catalogue: { id: string; nom: string; type: string };
-  actif: boolean;
+  service: { id: string; nom: string; type: string };
+  niveau: string | null;
   date_ajout: string;
 }
 
-export interface CatalogueItem {
+export interface ServiceItem {
   id: string;
   nom: string;
   type: string;

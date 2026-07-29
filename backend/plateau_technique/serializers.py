@@ -1,25 +1,25 @@
 from rest_framework import serializers
 
 from .models import PlateauTechnique
-from catalogues.models import Catalogue
+from structures.models import StructureService
 
 
-class CatalogueSerializer(serializers.ModelSerializer):
+class StructureServiceSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Catalogue
+        model = StructureService
         fields = ["id", "nom", "type"]
 
 
 class PlateauTechniqueSerializer(serializers.ModelSerializer):
 
-    catalogue = CatalogueSerializer(read_only=True)
+    service = StructureServiceSerializer(read_only=True)
 
     class Meta:
         model = PlateauTechnique
         fields = [
             "id",
             "structure",
-            "catalogue",
+            "service",
             "disponible",
             "date_ajout",
         ]
@@ -28,5 +28,11 @@ class PlateauTechniqueSerializer(serializers.ModelSerializer):
 class PlateauTechniqueCreateSerializer(serializers.Serializer):
 
     structure_id = serializers.UUIDField()
-    catalogue_id = serializers.UUIDField()
+    service_id = serializers.UUIDField(required=False)
+    nom = serializers.CharField(max_length=255, required=False)
     disponible = serializers.BooleanField(default=True)
+
+    def validate(self, data):
+        if not data.get("service_id") and not data.get("nom"):
+            raise serializers.ValidationError("Fournissez service_id ou nom.")
+        return data

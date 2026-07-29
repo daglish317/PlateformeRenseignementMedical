@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Structure, Favori, Horaire
+from .models import Structure, StructureService, Favori, Horaire
 
 
 @admin.register(Structure)
@@ -104,6 +104,41 @@ class FavoriAdmin(admin.ModelAdmin):
         "utilisateur",
         "structure",
     )
+
+
+@admin.register(StructureService)
+class StructureServiceAdmin(admin.ModelAdmin):
+
+    ordering = ("type", "nom")
+
+    list_display = (
+        "nom",
+        "type",
+        "categorie",
+        "est_actif",
+        "date_creation",
+    )
+
+    list_filter = (
+        "type",
+        "est_actif",
+    )
+
+    search_fields = (
+        "nom",
+        "categorie",
+    )
+
+    readonly_fields = (
+        "id",
+        "slug",
+        "date_creation",
+        "date_modification",
+    )
+
+    prepopulated_fields = {
+        "slug": ("nom",),
+    }
 
 
 @admin.register(Horaire)

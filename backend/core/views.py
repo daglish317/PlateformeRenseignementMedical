@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser
 
 from utilisateurs.permissions import IsAdmin
-from catalogues.models import Catalogue
+from structures.models import StructureService
 from core.imports.service import ImportService
 
 
@@ -28,7 +28,7 @@ class CatalogueImportView(APIView):
 
         result = ImportService.importer(
             tmp_path,
-            Catalogue,
+            StructureService,
             required_fields=["nom", "type"],
         )
 

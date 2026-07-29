@@ -11,6 +11,7 @@ export function useUpdateFeedbackStatus() {
     onSuccess: () => {
       toast.success("Statut mis à jour avec succès");
       queryClient.invalidateQueries({ queryKey: ["admin", "feedbacks"] });
+      queryClient.invalidateQueries({ queryKey: ["unread-counts"] });
     },
     onError: () => {
       toast.error("Impossible de mettre à jour le statut");

@@ -8,11 +8,11 @@ class ServiceMedicalAdmin(admin.ModelAdmin):
 
     ordering = (
         "structure__nom",
-        "catalogue__nom",
+        "service__nom",
     )
 
     list_display = (
-        "catalogue",
+        "service",
         "structure",
         "actif",
         "date_ajout",
@@ -24,7 +24,7 @@ class ServiceMedicalAdmin(admin.ModelAdmin):
     )
 
     search_fields = (
-        "catalogue__nom",
+        "service__nom",
         "structure__nom",
     )
 
@@ -39,7 +39,7 @@ class ServiceMedicalAdmin(admin.ModelAdmin):
 
     list_select_related = (
         "structure",
-        "catalogue",
+        "service",
     )
 
     fieldsets = (
@@ -49,7 +49,7 @@ class ServiceMedicalAdmin(admin.ModelAdmin):
                 "fields": (
                     "id",
                     "structure",
-                    "catalogue",
+                    "service",
                 )
             },
         ),

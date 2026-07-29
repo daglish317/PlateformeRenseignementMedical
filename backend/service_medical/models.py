@@ -1,16 +1,10 @@
-from django.db import models
-
 import uuid
 from django.db import models
 
 
 class ServiceMedical(models.Model):
 
-    id = models.UUIDField(
-        primary_key=True,
-        default=uuid.uuid4,
-        editable=False
-    )
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
     structure = models.ForeignKey(
         "structures.Structure",
@@ -18,10 +12,11 @@ class ServiceMedical(models.Model):
         related_name="services_medicaux"
     )
 
-    catalogue = models.ForeignKey(
-        "catalogues.Catalogue",
+    service = models.ForeignKey(
+        "structures.StructureService",
         on_delete=models.CASCADE,
         related_name="services_medicaux",
+        null=True,
     )
 
     actif = models.BooleanField(default=True)
@@ -29,7 +24,8 @@ class ServiceMedical(models.Model):
     date_ajout = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ("structure", "catalogue")
+        unique_together = ("structure", "service")
+
 
     def __str__(self):
-        return f"{self.structure.nom} - {self.catalogue.nom}"
+        return f"{self.structure.nom} - {self.service.nom}"

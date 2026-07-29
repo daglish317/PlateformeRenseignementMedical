@@ -37,15 +37,29 @@ export default function WebSocketProvider({ children }: { children: React.ReactN
   const authenticated = useAuthStore((s) => s.authenticated);
   const hydrated = useAuthStore((s) => s.hydrated);
 
-  const connect = useCallback(() => {
+  const connect = useCallback(async () => {
     if (!authenticated || !hydrated || !mountedRef.current) return;
-
-    const token = authStorage.getAccessToken();
-    if (!token) return;
 
     if (wsRef.current && (wsRef.current.readyState === WebSocket.OPEN || wsRef.current.readyState === WebSocket.CONNECTING)) {
       return;
     }
+
+    // refresh token if expired before connecting
+    let token = authStorage.getAccessToken();
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split(".")[1]));
+        const isExpired = payload.exp * 1000 < Date.now();
+        if (isExpired) {
+          const tokens = await tokenService.refreshToken();
+          useAuthStore.getState().setTokens(tokens);
+          token = tokens.access;
+        }
+      } catch {
+        // if token parsing fails, use it as-is
+      }
+    }
+    if (!token) return;
 
     intentionalCloseRef.current = false;
 
@@ -72,14 +86,7 @@ export default function WebSocketProvider({ children }: { children: React.ReactN
       if (intentionalCloseRef.current || !mountedRef.current) return;
       setConnected(false);
       if (authenticated && mountedRef.current) {
-        reconnectTimeoutRef.current = setTimeout(async () => {
-          if (!mountedRef.current || !authenticated) return;
-          try {
-            const tokens = await tokenService.refreshToken();
-            useAuthStore.getState().setTokens(tokens);
-          } catch {
-            return;
-          }
+        reconnectTimeoutRef.current = setTimeout(() => {
           if (mountedRef.current) connect();
         }, 5000);
       }

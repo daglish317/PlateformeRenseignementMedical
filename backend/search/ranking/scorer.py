@@ -6,32 +6,28 @@ from plateau_technique.models import PlateauTechnique
 class Scorer:
 
     @staticmethod
-    def score(structure, catalogue, user_lat=None, user_lon=None):
+    def score(structure, service, user_lat=None, user_lon=None):
 
         score = 0
 
-        # Pertinence catalogue
         score += 50
 
-        # Mots-clés / services actifs
         if ServiceMedical.objects.filter(
-            structure=structure, catalogue=catalogue, actif=True
+            structure=structure, service=service, actif=True
         ).exists():
             score += 15
 
         if PlateauTechnique.objects.filter(
-            structure=structure, catalogue=catalogue, disponible=True
+            structure=structure, service=service, disponible=True
         ).exists():
             score += 10
 
-        # Stock disponible
         stock_count = StockItem.objects.filter(
             structure=structure,
             disponible=True,
         ).count()
         score += min(stock_count * 5, 25)
 
-        # Distance géographique
         distance_km = None
         if user_lat and user_lon and structure.latitude and structure.longitude:
             from core.utils.distance import DistanceService
@@ -53,7 +49,6 @@ class Scorer:
                 else:
                     score -= 10
 
-        # Structure active
         if structure.statut == "ACTIVE":
             score += 10
 

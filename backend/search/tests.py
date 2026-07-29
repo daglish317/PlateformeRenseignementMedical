@@ -1,7 +1,6 @@
 from django.test import TestCase
 
-from catalogues.models import Catalogue, TypeCatalogue
-from structures.models import Structure, StatutStructure, TypeStructure
+from structures.models import StructureService, Structure, StatutStructure, TypeStructure
 from utilisateurs.models import Utilisateur, RoleUtilisateur, TypeAuthentification
 from prise_en_charge.models import PriseEnCharge
 from search.services.search_service import SearchService
@@ -10,9 +9,9 @@ from search.services.search_service import SearchService
 class SearchTests(TestCase):
 
     def setUp(self):
-        self.catalogue = Catalogue.objects.create(
+        self.service_entry = StructureService.objects.create(
             nom="Paludisme",
-            type=TypeCatalogue.MALADIE,
+            type="MALADIE",
         )
         self.gestionnaire = Utilisateur.objects.create_user(
             email="g@test.com",
@@ -33,11 +32,11 @@ class SearchTests(TestCase):
         )
         PriseEnCharge.objects.create(
             structure=self.structure,
-            catalogue=self.catalogue,
+            service=self.service_entry,
             niveau="COMPLET",
         )
 
     def test_fuzzy_search(self):
         result = SearchService.search("palu")
-        self.assertIsNotNone(result["catalogue"])
+        self.assertIsNotNone(result["service"])
         self.assertGreaterEqual(result["total"], 1)

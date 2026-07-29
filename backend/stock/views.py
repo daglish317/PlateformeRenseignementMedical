@@ -155,6 +155,70 @@ class StockAlertesView(APIView):
         return Response(StockSerializer(items, many=True).data)
 
 
+class ImportMedicamentView(APIView):
+
+    @gestionnaire_required
+    def post(self, request):
+        structure_id = request.data.get("structure_id")
+        assert_gestionnaire_owns_structure(request.user, structure_id)
+        structure = Structure.objects.get(id=structure_id)
+
+        file = request.FILES.get("file")
+        if not file:
+            return Response({"detail": "Aucun fichier fourni"}, status=status.HTTP_400_BAD_REQUEST)
+
+        filename = file.name.lower()
+        if filename.endswith(".csv"):
+            rows = _parse_csv(file)
+        elif filename.endswith((".xlsx", ".xls")):
+            rows = _parse_excel(file)
+        else:
+            return Response({"detail": "Format non supporté. Utilisez CSV ou Excel (.xlsx)"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not rows:
+            return Response({"detail": "Le fichier est vide ou mal formaté"}, status=status.HTTP_400_BAD_REQUEST)
+
+        imported = []
+        errors = []
+
+        for i, row in enumerate(rows, start=2):
+            try:
+                nom = (row.get("nom") or "").strip()
+                if not nom:
+                    errors.append({"ligne": i, "erreur": "Nom manquant"})
+                    continue
+
+                quantite_raw = row.get("quantite") or "0"
+                try:
+                    quantite = int(float(quantite_raw))
+                except (ValueError, TypeError):
+                    quantite = 0
+
+                if quantite < 0:
+                    errors.append({"ligne": i, "erreur": "Quantité négative"})
+                    continue
+
+                item = StockService.ajouter_ou_mettre_a_jour(
+                    structure=structure,
+                    nom=nom,
+                    type_item="MEDICAMENT",
+                    quantite=quantite,
+                    disponible=True,
+                    seuil_alerte=5,
+                )
+                imported.append({"id": str(item.id), "nom": item.nom, "type_item": item.type_item})
+
+            except Exception as e:
+                errors.append({"ligne": i, "erreur": str(e)})
+
+        return Response({
+            "message": f"{len(imported)} médicament(s) importé(s)",
+            "imported": len(imported),
+            "errors_count": len(errors),
+            "errors": errors[:20],
+        }, status=status.HTTP_200_OK)
+
+
 class ImportStockView(APIView):
 
     @gestionnaire_required

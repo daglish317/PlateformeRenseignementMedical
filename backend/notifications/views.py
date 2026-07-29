@@ -106,6 +106,16 @@ class UnreadCountsByNavItemView(APIView):
             nav_item = entry["nav_item"] or ""
             result[nav_item] = entry["count"]
         total = sum(result.values())
+
+        if request.user.role == "ADMINISTRATEUR":
+            from feedback.models import Feedback, TypeFeedback, StatutFeedback
+            feedback_unread = Feedback.objects.filter(
+                type=TypeFeedback.PLATEFORME,
+                statut=StatutFeedback.NON_LU,
+            ).count()
+            result["feedback"] = feedback_unread
+            total += feedback_unread
+
         result["total"] = total
         return Response(result)
 

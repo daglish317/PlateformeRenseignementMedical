@@ -9,6 +9,7 @@ from .views import (
     StockMovementsView,
     StockAlertesView,
     ImportStockView,
+    ImportMedicamentView,
 )
 
 urlpatterns = [
@@ -20,4 +21,5 @@ urlpatterns = [
     path("<uuid:pk>/mouvements/", StockMovementsView.as_view()),
     path("structure/<uuid:structure_id>/alertes/", StockAlertesView.as_view()),
     path("import/", ImportStockView.as_view()),
+    path("import/medicaments/", ImportMedicamentView.as_view()),
 ]

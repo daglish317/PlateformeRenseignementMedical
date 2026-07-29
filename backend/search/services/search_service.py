@@ -28,16 +28,16 @@ class SearchService:
             return cached
 
 
-        catalogue = FuzzyEngine.best_match(normalized)
+        service = FuzzyEngine.best_match(normalized)
 
 
-        if not catalogue:
+        if not service:
 
             suggestions = FallbackEngine.suggest(normalized)
 
             result = {
                 "query": query,
-                "catalogue": None,
+                "service": None,
                 "results": [],
                 "suggestions": [
                     {
@@ -64,7 +64,7 @@ class SearchService:
 
 
 
-        structures = StructureEngine.get_structures(catalogue)
+        structures = StructureEngine.get_structures(service)
 
         results = []
 
@@ -74,7 +74,7 @@ class SearchService:
 
             score, distance_km = Scorer.score(
                 structure,
-                catalogue,
+                service,
                 user_lat=user_lat,
                 user_lon=user_lon,
             )
@@ -139,10 +139,10 @@ class SearchService:
                 "driving_time": times["driving_time"],
 
 
-                "services_matches": (
+                "service_matches": (
                     StructureEngine.get_matched_services(
                         structure,
-                        catalogue
+                        service
                     )
                 ),
             })
@@ -173,13 +173,13 @@ class SearchService:
             "query": query,
 
 
-            "catalogue": {
+            "service": {
 
-                "id": str(catalogue.id),
+                "id": str(service.id),
 
-                "nom": catalogue.nom,
+                "nom": service.nom,
 
-                "type": catalogue.type,
+                "type": service.type,
 
             },
 
