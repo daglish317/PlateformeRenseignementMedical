@@ -5,5 +5,9 @@ export default function PharmacyLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <DashboardLayout type="PHARMACIE">{children}</DashboardLayout>;
+  return (
+    <div className="theme-pharmacy">
+      <DashboardLayout type="PHARMACIE">{children}</DashboardLayout>
+    </div>
+  );
 }

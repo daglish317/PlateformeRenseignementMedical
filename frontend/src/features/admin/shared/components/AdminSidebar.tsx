@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import Image from "next/image";
+import { useTheme } from "next-themes";
 import { Link, usePathname } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import { useNotifications } from "@/providers/notification.provider";
@@ -51,23 +53,31 @@ function SidebarNav({ collapsed }: { collapsed: boolean }) {
   );
 }
 
-function SidebarContent({ collapsed }: { collapsed: boolean }) {
+function SidebarContent({ collapsed, isDark }: { collapsed: boolean; isDark: boolean }) {
   return (
     <div className="flex h-full flex-col">
       <div
         className={cn(
-          "flex h-16 shrink-0 items-center border-b px-4",
-          collapsed ? "justify-center" : "gap-2"
+          "flex h-20 shrink-0 items-center justify-center border-b px-4",
+          collapsed ? "justify-center" : ""
         )}
       >
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-sm font-bold text-primary-foreground">
-          SP
-        </div>
-        {!collapsed && (
-          <div className="min-w-0">
-            <p className="truncate text-sm font-semibold">SantéProx</p>
-            <p className="truncate text-xs text-muted-foreground">Administration</p>
-          </div>
+        {collapsed ? (
+          <Image
+            src={isDark ? "/logos/logo-icon-dark.svg" : "/logos/logo-icon-light.svg"}
+            alt="SantéProx"
+            width={32}
+            height={34}
+            className="shrink-0"
+          />
+        ) : (
+          <Image
+            src={isDark ? "/logos/logo-vertical-dark.svg" : "/logos/logo-vertical-light.svg"}
+            alt="SantéProx"
+            width={140}
+            height={124}
+            className="shrink-0"
+          />
         )}
       </div>
       <SidebarNav collapsed={collapsed} />
@@ -77,6 +87,14 @@ function SidebarContent({ collapsed }: { collapsed: boolean }) {
 
 export function AdminSidebar() {
   const { open, collapsed, isMobile, setOpen, setCollapsed, setIsMobile } = useSidebar();
+  const { resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const isDark = mounted && resolvedTheme === "dark";
 
   useEffect(() => {
     const handleResize = () => {
@@ -105,7 +123,7 @@ export function AdminSidebar() {
           <SheetHeader className="sr-only">
             <SheetTitle>Navigation administrateur</SheetTitle>
           </SheetHeader>
-          <SidebarContent collapsed={false} />
+          <SidebarContent collapsed={false} isDark={isDark} />
         </SheetContent>
       </Sheet>
     );
@@ -118,7 +136,7 @@ export function AdminSidebar() {
       className="hidden shrink-0 border-r bg-background transition-[width] duration-200 md:flex md:flex-col"
       style={{ width }}
     >
-      <SidebarContent collapsed={collapsed} />
+      <SidebarContent collapsed={collapsed} isDark={isDark} />
     </aside>
   );
 }

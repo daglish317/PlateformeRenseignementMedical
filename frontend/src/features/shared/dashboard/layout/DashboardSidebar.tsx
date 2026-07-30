@@ -1,11 +1,13 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useTheme } from "next-themes";
 import {
   Menu,
   PanelLeftClose,
   PanelLeft,
 } from "lucide-react";
+import Image from "next/image";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
@@ -23,6 +25,14 @@ export function DashboardSidebar({ type }: DashboardSidebarProps) {
   const { open, collapsed, isMobile, setOpen, setCollapsed, setIsMobile } =
     useDashboardSidebar();
   const { navigation } = useDashboardNavigation(type);
+  const { resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const isDark = mounted && resolvedTheme === "dark";
 
   useEffect(() => {
     function handleResize() {
@@ -44,15 +54,23 @@ export function DashboardSidebar({ type }: DashboardSidebarProps) {
 
   const sidebarContent = (
     <div className="flex h-full flex-col">
-      <div className="flex h-16 items-center gap-3 border-b px-4">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground text-sm font-bold">
-          SP
-        </div>
-        {!collapsed && (
-          <div className="flex flex-col">
-            <span className="text-sm font-semibold leading-none">SantéProx</span>
-            <span className="text-xs text-muted-foreground">{subtitle}</span>
-          </div>
+      <div className="flex h-20 items-center justify-center border-b px-4">
+        {collapsed ? (
+          <Image
+            src={isDark ? "/logos/logo-icon-dark.svg" : "/logos/logo-icon-light.svg"}
+            alt="SantéProx"
+            width={32}
+            height={34}
+            className="shrink-0"
+          />
+        ) : (
+          <Image
+            src={isDark ? "/logos/logo-vertical-dark.svg" : "/logos/logo-vertical-light.svg"}
+            alt="SantéProx"
+            width={140}
+            height={124}
+            className="shrink-0"
+          />
         )}
       </div>
 
