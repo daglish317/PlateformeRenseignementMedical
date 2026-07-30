@@ -97,7 +97,7 @@ class MessagerieService:
     def lister_messages(conversation, page=1, page_size=50):
         start = (page - 1) * page_size
         end = start + page_size
-        qs = conversation.messages.select_related("expediteur").order_by("-created_at")
+        qs = conversation.messages.select_related("expediteur").order_by("created_at")
         total = qs.count()
         return qs[start:end], total
 

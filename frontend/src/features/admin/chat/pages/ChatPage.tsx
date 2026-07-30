@@ -50,7 +50,7 @@ export function ChatPage() {
 
         {/* Right panel - Messages */}
         <div
-          className={`flex flex-1 flex-col ${
+          className={`flex flex-1 flex-col min-h-0 ${
             !selectedConversation || !mobileShowChat
               ? "hidden md:flex"
               : "flex"

@@ -31,15 +31,15 @@ export function MessageBubble({ message }: MessageBubbleProps) {
           </p>
         )}
         <p className="whitespace-pre-wrap break-words">{message.contenu}</p>
-        <div className={cn("mt-1 flex items-center gap-1", isAdmin ? "justify-end" : "justify-start")}>
+        <div className={cn("mt-1 flex items-center gap-0.5", isAdmin ? "justify-end" : "justify-start")}>
+          {isAdmin && (
+            message.is_read
+              ? <CheckCheck className="h-3 w-3 text-blue-400" />
+              : <Check className="h-3 w-3 text-primary-foreground/50" />
+          )}
           <span className="text-[10px] leading-none">
             {format(new Date(message.created_at), "HH:mm", { locale: fr })}
           </span>
-          {isAdmin && (
-            message.is_read
-              ? <CheckCheck className="h-3.5 w-3.5 text-blue-400" />
-              : <Check className="h-3.5 w-3.5 text-primary-foreground/60" />
-          )}
         </div>
       </div>
     </div>
