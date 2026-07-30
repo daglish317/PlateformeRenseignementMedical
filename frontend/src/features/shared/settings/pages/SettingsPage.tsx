@@ -5,6 +5,7 @@ import { PageContainer } from "@/features/shared/dashboard/components/PageContai
 import { Button } from "@/components/ui/button";
 import { useProfile } from "../hooks/useProfile";
 import { ProfileCard } from "../components/ProfileCard";
+import { PreferencesForm } from "../components/PreferencesForm";
 import { PasswordForm } from "../components/PasswordForm";
 
 export function SettingsPage() {
@@ -39,6 +40,7 @@ export function SettingsPage() {
 
       <div className="grid gap-6 lg:grid-cols-2">
         <ProfileCard profile={profile} />
+        <PreferencesForm />
       </div>
 
       <PasswordForm />

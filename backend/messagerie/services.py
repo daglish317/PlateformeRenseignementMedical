@@ -1,9 +1,6 @@
 from django.db import transaction
-from django.db.models import Count, Q
 
 from .models import Conversation, Message
-from notifications.service import NotificationService
-from notifications.models import TypeNotification
 from core.events.dispatcher import EventDispatcher
 from core.events.registry import EventTypes
 
@@ -27,26 +24,6 @@ class MessagerieService:
         )
 
         conversation.save(update_fields=["updated_at"])
-
-        structure = conversation.structure
-        destinataire = None
-
-        if expediteur.role == "ADMINISTRATEUR" and structure:
-            destinataire = structure.gestionnaire
-        elif expediteur.role == "GESTIONNAIRE":
-            from utilisateurs.models import Utilisateur, RoleUtilisateur
-            destinataire = Utilisateur.objects.filter(
-                role=RoleUtilisateur.ADMINISTRATEUR
-            ).first()
-
-        if destinataire and destinataire != expediteur:
-            NotificationService.envoyer(
-                utilisateur=destinataire,
-                titre="Nouveau message",
-                message=contenu[:200],
-                type=TypeNotification.SYSTEM,
-                structure=structure,
-            )
 
         EventDispatcher.dispatch(
             EventTypes.MESSAGE_SENT,

@@ -70,6 +70,15 @@ export function DashboardHeader({ type }: DashboardHeaderProps) {
           )}
         </Link>
 
+        <button
+          onClick={handleLogout}
+          className="inline-flex h-9 items-center gap-1.5 rounded-md px-2.5 text-sm font-medium text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+          title="Déconnexion"
+        >
+          <LogOut className="h-4 w-4" />
+          <span className="hidden sm:inline">Déconnexion</span>
+        </button>
+
         <DropdownMenu>
           <DropdownMenuTrigger className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-muted">
             <Avatar className="h-8 w-8">

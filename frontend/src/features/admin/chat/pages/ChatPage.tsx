@@ -30,27 +30,23 @@ export function ChatPage() {
         subtitle="Communication en temps réel avec les structures"
       />
 
-      <div className="flex h-[calc(100vh-220px)] overflow-hidden rounded-lg border bg-background">
+      <div className="flex h-[calc(100vh-220px)] rounded-lg border bg-background">
         {/* Left panel - Conversations */}
         <div
-          className={`w-full shrink-0 md:w-[320px] ${
+          className={`flex w-full shrink-0 flex-col overflow-hidden md:w-[320px] ${
             mobileShowChat && selectedConversation ? "hidden md:flex" : "flex"
-          } flex-col`}
+          }`}
+          onClick={() => {
+            if (!selectedConversation) return;
+            handleSelect();
+          }}
         >
-          <div
-            className="flex-1"
-            onClick={() => {
-              if (!selectedConversation) return;
-              handleSelect();
-            }}
-          >
-            <ConversationList />
-          </div>
+          <ConversationList />
         </div>
 
         {/* Right panel - Messages */}
         <div
-          className={`flex flex-1 flex-col min-h-0 ${
+          className={`flex min-h-0 flex-1 flex-col overflow-hidden ${
             !selectedConversation || !mobileShowChat
               ? "hidden md:flex"
               : "flex"

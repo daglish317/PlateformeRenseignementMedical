@@ -3,7 +3,6 @@
 import { useEffect, useRef } from "react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MessageBubble } from "./MessageBubble";
 import { useMessages } from "../hooks/useMessages";
@@ -50,9 +49,9 @@ export function MessageList() {
 
   if (isLoading) {
     return (
-      <ScrollArea className="flex-1">
+      <div className="flex-1 overflow-y-auto">
         <MessageSkeleton />
-      </ScrollArea>
+      </div>
     );
   }
 
@@ -69,7 +68,7 @@ export function MessageList() {
   const grouped = groupByDate(messages);
 
   return (
-    <ScrollArea className="flex-1">
+    <div className="flex-1 overflow-y-auto">
       <div className="flex flex-col gap-4 px-4 py-4">
         {Array.from(grouped.entries()).map(([dateLabel, msgs]) => (
           <div key={dateLabel} className="flex flex-col gap-3">
@@ -85,6 +84,6 @@ export function MessageList() {
         ))}
         <div ref={bottomRef} />
       </div>
-    </ScrollArea>
+    </div>
   );
 }
