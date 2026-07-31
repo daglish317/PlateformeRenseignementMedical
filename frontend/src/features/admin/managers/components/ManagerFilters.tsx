@@ -3,11 +3,10 @@
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
 import { useManagersStore } from "../store/managers-store";
 
 export function ManagerFilters() {
-  const { filters, setFilters, resetFilters } = useManagersStore();
+  const { filters, setFilters } = useManagersStore();
 
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -36,9 +35,6 @@ export function ManagerFilters() {
         <option value="HOPITAL">Hôpitaux</option>
         <option value="PHARMACIE">Pharmacies</option>
       </Select>
-      <Button variant="outline" size="sm" onClick={resetFilters}>
-        Réinitialiser
-      </Button>
     </div>
   );
 }

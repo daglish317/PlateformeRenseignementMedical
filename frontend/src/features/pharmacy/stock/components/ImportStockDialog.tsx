@@ -61,9 +61,9 @@ export function ImportStockDialog({ structureId }: ImportStockDialogProps) {
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Importer du stock</DialogTitle>
+          <DialogTitle>Importer des médicaments</DialogTitle>
           <DialogDescription>
-            Importez un fichier CSV ou Excel (.xlsx) avec les colonnes : nom, type_item, quantite, seuil_alerte, disponible
+            Importez un fichier CSV ou Excel (.xlsx) avec les colonnes : nom, quantite (optionnelle)
           </DialogDescription>
         </DialogHeader>
 
@@ -116,7 +116,8 @@ export function ImportStockDialog({ structureId }: ImportStockDialogProps) {
 
           <div className="rounded-md bg-muted p-3 text-xs text-muted-foreground">
             <p className="font-medium mb-1">Format attendu :</p>
-            <p>nom, type_item (MEDICAMENT/EQUIPEMENT/CONSOMMABLE), quantite, seuil_alerte, disponible (true/false)</p>
+            <p className="mb-1">nom (obligatoire) , quantite (optionnelle)</p>
+            <p className="text-xs opacity-60">Si la quantité est vide, elle sera à 0 par défaut.</p>
           </div>
         </div>
 

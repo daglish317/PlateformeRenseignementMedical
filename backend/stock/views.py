@@ -54,13 +54,23 @@ class CreateStockView(APIView):
         assert_gestionnaire_owns_structure(request.user, structure_id)
         structure = Structure.objects.get(id=structure_id)
 
+        nom = request.data.get("nom")
+        if not nom:
+            return Response({"detail": "Nom manquant"}, status=status.HTTP_400_BAD_REQUEST)
+
+        quantite_raw = request.data.get("quantite", 0)
+        try:
+            quantite = int(float(quantite_raw))
+        except (ValueError, TypeError):
+            quantite = 0
+
         item = StockService.ajouter_ou_mettre_a_jour(
             structure=structure,
-            nom=request.data.get("nom"),
-            type_item=request.data.get("type_item"),
-            quantite=request.data.get("quantite", 0),
+            nom=nom,
+            type_item=request.data.get("type_item", "MEDICAMENT"),
+            quantite=quantite,
             disponible=request.data.get("disponible", True),
-            seuil_alerte=request.data.get("seuil_alerte", 5),
+            seuil_alerte=int(request.data.get("seuil_alerte", 5)),
         )
 
         return Response(StockSerializer(item).data, status=status.HTTP_201_CREATED)

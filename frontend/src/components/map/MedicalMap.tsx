@@ -2,12 +2,12 @@
 
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import type { UserLocation } from "@/services/map/geolocalisation";
 import { useCurrentLocation } from "@/hooks/map/useCurrentLocation";
 import MapControls from "./MapControls";
 import { useSearchStore } from "@/store/search-store";
 
-// Use dynamic imports for markers because they evaluate Leaflet icons at module level
 const UserMarker = dynamic(() => import("./UserMarker"), { ssr: false });
 const StructureMarker = dynamic(() => import("./StructureMarker"), { ssr: false });
 
@@ -34,7 +34,7 @@ const RouteLayer = dynamic(() => import("./RouteLayer"), { ssr: false });
 
 export default function MedicalMap() {
   const [location, setLocation] = useState<UserLocation | null>(null);
-  const { locateUser } = useCurrentLocation();
+  const { locateUser, error: locationError } = useCurrentLocation();
   const results = useSearchStore((state) => state.results);
 
   const structures = results?.results.map((item) => item.structure) ?? [];
@@ -48,6 +48,12 @@ export default function MedicalMap() {
     }
     initializeLocation();
   }, [locateUser]);
+
+  useEffect(() => {
+    if (locationError) {
+      toast.warning("Géolocalisation non disponible. La carte est centrée par défaut.");
+    }
+  }, [locationError]);
 
   return (
     <div className="relative h-full w-full">

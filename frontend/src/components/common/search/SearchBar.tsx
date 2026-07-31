@@ -26,7 +26,9 @@ export default function SearchBar() {
 
   const setQuery = useSearchStore((state) => state.setQuery);
 
-  useSearch({ query });
+  const page = useSearchStore((state) => state.page);
+
+  useSearch({ query, page });
 
   useEffect(() => {
     setInputValue(query);

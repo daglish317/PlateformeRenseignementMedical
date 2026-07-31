@@ -1,28 +1,46 @@
-import { LucideIcon, Brain, AlertTriangle, HeartPulse, Flame } from "lucide-react";
-import type { Emergency } from "../types/emergency";
+"use client";
 
-const icons: Record<string, LucideIcon> = {
-  Brain,
-  AlertTriangle,
-  HeartPulse,
-  Flame,
-};
+import { cn } from "@/lib/utils";
+import type { EmergencyItem } from "@/constants/emergency";
 
 type EmergencyCardProps = {
-  emergency: Emergency;
-  onClick: (emergency: Emergency) => void;
+  emergency: EmergencyItem;
+  selected?: boolean;
+  onClick?: (id: EmergencyItem["id"]) => void;
 };
 
-export default function EmergencyCard({ emergency, onClick }: EmergencyCardProps) {
-  const Icon = icons[emergency.icon] || AlertTriangle;
+export default function EmergencyCard({
+  emergency,
+  selected = false,
+  onClick,
+}: EmergencyCardProps) {
+  const Icon = emergency.icon;
 
   return (
     <button
-      onClick={() => onClick(emergency)}
-      className="flex flex-col items-center justify-center gap-3 rounded-xl border border-destructive/20 bg-destructive/5 p-4 text-center transition-all hover:bg-destructive/10"
+      type="button"
+      onClick={() => onClick?.(emergency.id)}
+     className={cn(
+  "group flex items-center gap-1.5 rounded-lg border px-2 py-1.5",
+  "transition-all duration-150 hover:-translate-y-0.5 hover:shadow-sm",
+  emergency.color.background,
+  emergency.color.border,
+  selected && cn("ring-2", emergency.color.ring)
+)}
     >
-      <Icon className="h-8 w-8 text-destructive" />
-      <span className="text-sm font-semibold text-destructive">{emergency.nom}</span>
+      <Icon
+        className={cn(
+          "mb-1 h-4 w-4 transition-transform duration-200",
+          emergency.color.icon,
+          "group-hover:scale-110"
+        )}
+      />
+
+      <span className="text-[10px] font-semibold uppercase tracking-wide text-foreground">
+        {emergency.title.length > 5
+          ? emergency.title.substring(0, 5)
+          : emergency.title}
+      </span>
     </button>
   );
 }

@@ -26,11 +26,12 @@ export default function Container({
   return (
     <div
       className={cn(
-        "w-full mx-auto px-4 sm:px-6 lg:px-8",
-        !fluid && sizes[size],
-        fluid && "max-w-none",
-        className
-      )}
+  "w-full mx-auto",
+  !fluid && "px-4 sm:px-6 lg:px-8",
+  !fluid && sizes[size],
+  fluid && "max-w-none",
+  className
+)}
     >
       {children}
     </div>

@@ -3,11 +3,10 @@
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
 import { useMapStore } from "../store/map-store";
 
 export function MapFilters() {
-  const { filters, setFilters, resetFilters } = useMapStore();
+  const { filters, setFilters } = useMapStore();
 
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -37,9 +36,6 @@ export function MapFilters() {
         <option value="ACTIVE">Active</option>
         <option value="REFUSEE">Refusée</option>
       </Select>
-      <Button variant="outline" size="sm" onClick={resetFilters}>
-        Réinitialiser
-      </Button>
     </div>
   );
 }

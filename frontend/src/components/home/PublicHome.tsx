@@ -5,18 +5,91 @@ import MedicalMap from "@/components/map/MedicalMap";
 
 export default function PublicHome() {
   return (
-    <div className="flex flex-col lg:flex-row h-full min-h-0 w-full">
-      {/* Sidebar résultats */}
-      <aside className="w-full h-1/2 lg:h-full lg:w-[390px] xl:w-[420px] shrink-0 border-b lg:border-b-0 lg:border-r border-border bg-background flex flex-col">
+    <div
+      className="
+        flex
+        min-h-0
+        w-full
+        flex-col
+        overflow-visible
+
+        md:h-full
+        md:flex-row
+        md:overflow-hidden
+      "
+    >
+      {/* 
+        Desktop :
+        - résultats fixes à gauche
+        - carte à droite
+
+        Mobile :
+        - la sidebar apparaît en premier
+        - la carte vient ensuite naturellement
+      */}
+      <aside
+        className="
+          order-1
+          w-full
+          border-b
+          border-border
+          bg-background
+
+          md:flex
+          md:h-full
+          md:w-[390px]
+          md:shrink-0
+          md:flex-col
+          md:border-b-0
+          md:border-r
+
+          xl:w-[420px]
+        "
+      >
         <Sidebar />
       </aside>
 
-      {/* Carte */}
-      <section className="flex-1 h-1/2 lg:h-full bg-muted/15 p-0 lg:p-4 xl:p-5">
-        <div className="relative h-full overflow-hidden lg:rounded-3xl border-0 lg:border border-border bg-background shadow-sm">
+
+      {/* 
+        Carte :
+
+        Desktop :
+        prend tout l'espace restant.
+
+        Mobile :
+        hauteur contrôlée.
+        Elle ne prend jamais tout l'écran.
+      */}
+      <section
+        className="
+          order-2
+          h-[420px]
+          w-full
+          shrink-0
+          bg-muted/10
+          
+          md:h-full
+          md:flex-1
+          md:p-4
+          xl:p-5
+        "
+      >
+        <div
+          className="
+            h-full
+            w-full
+            overflow-hidden
+            bg-background
+
+            md:rounded-3xl
+            md:border
+            md:border-border
+            md:shadow-sm
+          "
+        >
           <MedicalMap />
         </div>
       </section>
     </div>
   );
-}
+}

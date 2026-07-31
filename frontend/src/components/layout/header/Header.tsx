@@ -17,8 +17,9 @@ export default function Header({
         w-full
         border-b
         border-border
-        bg-background/80
+        bg-background/85
         backdrop-blur-xl
+        shadow-sm
       "
     >
       <div

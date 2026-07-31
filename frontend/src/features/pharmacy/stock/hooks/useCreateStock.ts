@@ -7,7 +7,7 @@ export function useCreateStock(structureId: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (payload: CreateStockPayload) => createStock(payload),
+    mutationFn: (payload: CreateStockPayload) => createStock(structureId, payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["stock", structureId] });
     },

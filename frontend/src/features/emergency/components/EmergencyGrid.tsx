@@ -1,28 +1,45 @@
 "use client";
 
-import { useState } from "react";
-import { emergencies } from "../constants/emergency-types";
+import { Activity } from "lucide-react";
+
 import EmergencyCard from "./EmergencyCard";
-import { useSearchStore } from "@/store/search-store";
-import { useEmergencySearch } from "../hooks/useEmergencySearch";
-import type { Emergency } from "../types/emergency";
 
-export default function EmergencyGrid() {
-  const setSearchMode = useSearchStore((state) => state.setSearchMode);
-  const [searchTerm, setSearchTerm] = useState<string | undefined>();
-  
-  useEmergencySearch(searchTerm);
+import {
+  emergencies,
+  EmergencyType,
+} from "@/constants/emergency";
 
-  const handleSelect = (emergency: Emergency) => {
-    setSearchMode("emergency");
-    setSearchTerm(emergency.searchTerm);
-  };
+type EmergencyGridProps = {
+  onSelect?: (type: EmergencyType) => void;
+};
 
+export default function EmergencyGrid({
+  onSelect,
+}: EmergencyGridProps) {
   return (
-    <div className="grid grid-cols-2 gap-4 px-6 py-4">
-      {emergencies.map((emergency) => (
-        <EmergencyCard key={emergency.id} emergency={emergency} onClick={handleSelect} />
-      ))}
-    </div>
+    <section className="px-5 pb-3">
+      <div className="mb-3 flex items-center gap-2">
+        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-red-500/10">
+          <Activity className="h-4 w-4 text-red-500" />
+        </div>
+        <br />
+        <br />
+      
+        <br />
+        <h3 className="text-xs font-semibold tracking-wide text-foreground">
+          Urgences médicales cliquez ici pour rechercher rapidement
+        </h3>
+      </div>
+
+      <div className="grid grid-cols-4 gap-2 md:grid-cols-4 grid-cols-2">
+        {emergencies.map((emergency) => (
+          <EmergencyCard
+            key={emergency.id}
+            emergency={emergency}
+            onClick={onSelect}
+          />
+        ))}
+      </div>
+    </section>
   );
 }

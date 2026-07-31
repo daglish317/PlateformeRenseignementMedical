@@ -19,9 +19,10 @@ import { SidebarMenu } from "../components/SidebarMenu";
 
 interface DashboardSidebarProps {
   type: "HOPITAL" | "PHARMACIE";
+  className?: string;
 }
 
-export function DashboardSidebar({ type }: DashboardSidebarProps) {
+export function DashboardSidebar({ type, className }: DashboardSidebarProps) {
   const { open, collapsed, isMobile, setOpen, setCollapsed, setIsMobile } =
     useDashboardSidebar();
   const { navigation } = useDashboardNavigation(type);
@@ -78,25 +79,6 @@ export function DashboardSidebar({ type }: DashboardSidebarProps) {
         <SidebarMenu items={navigation} collapsed={collapsed} />
       </div>
 
-      {!isMobile && (
-        <div className="border-t p-3">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="w-full justify-start"
-            onClick={() => setCollapsed(!collapsed)}
-          >
-            {collapsed ? (
-              <PanelLeft className="h-4 w-4" />
-            ) : (
-              <>
-                <PanelLeftClose className="h-4 w-4" />
-                <span className="ml-2">Réduire</span>
-              </>
-            )}
-          </Button>
-        </div>
-      )}
     </div>
   );
 
@@ -116,7 +98,8 @@ export function DashboardSidebar({ type }: DashboardSidebarProps) {
   return (
     <aside
       className={cn(
-        "relative flex h-full shrink-0 border-r bg-background transition-all duration-300"
+        "relative flex h-full shrink-0 border-r bg-background transition-all duration-300",
+        className
       )}
       style={{
         width: collapsed ? DASHBOARD_SIDEBAR.collapsedWidth : DASHBOARD_SIDEBAR.width,

@@ -2,6 +2,7 @@
 
 import { Menu, PanelLeftClose, PanelLeft, Bell, LogOut, User } from "lucide-react";
 import { Link, useRouter } from "@/i18n/navigation";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -21,9 +22,10 @@ import { useNotifications } from "@/providers/notification.provider";
 
 interface DashboardHeaderProps {
   type: "HOPITAL" | "PHARMACIE";
+  className?: string;
 }
 
-export function DashboardHeader({ type }: DashboardHeaderProps) {
+export function DashboardHeader({ type, className }: DashboardHeaderProps) {
   const { collapsed, isMobile, toggle } = useDashboardSidebar();
   const { user, clearAuth } = useAuthStore();
   const router = useRouter();
@@ -40,7 +42,7 @@ export function DashboardHeader({ type }: DashboardHeaderProps) {
 
   return (
     <header
-      className="flex shrink-0 items-center gap-3 border-b bg-background px-4"
+      className={cn("flex shrink-0 items-center gap-3 border-b bg-background px-4", className)}
       style={{ height: DASHBOARD_HEADER.height }}
     >
       <Button variant="ghost" size="icon" onClick={toggle}>

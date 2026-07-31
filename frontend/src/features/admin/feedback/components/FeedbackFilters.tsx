@@ -3,11 +3,10 @@
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
 import { useFeedbacksStore } from "../store/feedback-store";
 
 export function FeedbackFilters() {
-  const { filters, setFilters, resetFilters } = useFeedbacksStore();
+  const { filters, setFilters } = useFeedbacksStore();
 
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -39,9 +38,6 @@ export function FeedbackFilters() {
         <option value="SIGNALEMENT">Signalement</option>
         <option value="AUTRE">Autre</option>
       </Select>
-      <Button variant="outline" size="sm" onClick={resetFilters}>
-        Réinitialiser
-      </Button>
     </div>
   );
 }

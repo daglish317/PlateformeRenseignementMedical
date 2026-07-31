@@ -3,11 +3,10 @@
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
 import { useStructuresStore } from "../store/structures-store";
 
 export function StructureFilters() {
-  const { filters, setFilters, resetFilters } = useStructuresStore();
+  const { filters, setFilters } = useStructuresStore();
 
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -46,9 +45,6 @@ export function StructureFilters() {
         <option value="nom">Nom A-Z</option>
         <option value="-nom">Nom Z-A</option>
       </Select>
-      <Button variant="outline" size="sm" onClick={resetFilters}>
-        Réinitialiser
-      </Button>
     </div>
   );
 }

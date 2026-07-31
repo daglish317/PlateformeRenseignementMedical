@@ -2,13 +2,13 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { importStock } from "../api/stock.service";
+import { importMedicaments } from "../api/stock.service";
 
 export function useImportStock(structureId: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (file: File) => importStock(structureId, file),
+    mutationFn: (file: File) => importMedicaments(structureId, file),
     onSuccess: (result) => {
       toast.success(result.message);
       if (result.errors_count > 0) {

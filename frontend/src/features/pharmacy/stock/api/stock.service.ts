@@ -10,8 +10,11 @@ export async function getStock(structureId: string): Promise<StockItem[]> {
   return data;
 }
 
-export async function createStock(payload: CreateStockPayload): Promise<StockItem> {
-  const { data } = await api.post("/stocks/create/", payload);
+export async function createStock(structureId: string, payload: CreateStockPayload): Promise<StockItem> {
+  const { data } = await api.post("/stocks/create/", {
+    ...payload,
+    structure_id: structureId,
+  });
   return data;
 }
 
@@ -45,7 +48,7 @@ export async function getAlerts(structureId: string): Promise<StockItem[]> {
   return data;
 }
 
-export async function importStock(
+export async function importMedicaments(
   structureId: string,
   file: File
 ): Promise<{
@@ -58,6 +61,6 @@ export async function importStock(
   formData.append("file", file);
   formData.append("structure_id", structureId);
 
-  const { data } = await api.post("/stocks/import/", formData);
+  const { data } = await api.post("/stocks/import/medicaments/", formData);
   return data;
 }

@@ -23,8 +23,5 @@ export interface StockMovement {
 
 export interface CreateStockPayload {
   nom: string;
-  type_item: StockItemType;
   quantite: number;
-  seuil_alerte: number;
-  disponible?: boolean;
 }

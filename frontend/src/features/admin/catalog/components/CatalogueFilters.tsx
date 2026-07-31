@@ -1,12 +1,11 @@
 "use client";
 
-import { Search, RotateCcw } from "lucide-react";
+import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { useCatalogStore } from "../store/catalog-store";
 
 export function CatalogueFilters() {
-  const { filters, setFilters, resetFilters } = useCatalogStore();
+  const { filters, setFilters } = useCatalogStore();
 
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -30,10 +29,6 @@ export function CatalogueFilters() {
         <option value="EXAMEN">Examen</option>
         <option value="SERVICE_MEDICAL">Service médical</option>
       </select>
-      <Button variant="outline" size="sm" onClick={resetFilters}>
-        <RotateCcw className="mr-1 h-3 w-3" />
-        Réinitialiser
-      </Button>
     </div>
   );
 }

@@ -33,6 +33,10 @@ export function useSearch({
     (state) => state.setLoading
   );
 
+  const storePage = useSearchStore(
+    (state) => state.page
+  );
+
   const searchQuery = useQuery<SearchResponse>({
     queryKey: [
       "search",

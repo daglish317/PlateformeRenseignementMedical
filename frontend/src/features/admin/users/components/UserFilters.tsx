@@ -1,12 +1,11 @@
 "use client";
 
-import { Search, RotateCcw } from "lucide-react";
+import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { useUsersStore } from "../store/users-store";
 
 export function UserFilters() {
-  const { filters, setFilters, resetFilters } = useUsersStore();
+  const { filters, setFilters } = useUsersStore();
 
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -38,10 +37,6 @@ export function UserFilters() {
         <option value="nom">Nom A-Z</option>
         <option value="-nom">Nom Z-A</option>
       </select>
-      <Button variant="outline" size="sm" onClick={resetFilters}>
-        <RotateCcw className="mr-1 h-3 w-3" />
-        Réinitialiser
-      </Button>
     </div>
   );
 }

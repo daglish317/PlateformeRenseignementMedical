@@ -1,7 +1,7 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { StockItem, CreateStockPayload, StockItemType } from "../types/stock";
+import { StockItem, CreateStockPayload } from "../types/stock";
 
 interface StockFormProps {
   item?: StockItem | null;
@@ -12,28 +12,11 @@ interface StockFormProps {
 
 export function StockForm({ item, onSubmit, onCancel, isSubmitting }: StockFormProps) {
   const [nom, setNom] = useState(item?.nom ?? "");
-  const [typeItem, setTypeItem] = useState<StockItemType>(item?.type_item ?? "MEDICAMENT");
   const [quantite, setQuantite] = useState(item?.quantite ?? 0);
-  const [seuilAlerte, setSeuilAlerte] = useState(item?.seuil_alerte ?? 0);
-
-  useEffect(() => {
-    if (item) {
-      setNom(item.nom);
-      setTypeItem(item.type_item);
-      setQuantite(item.quantite);
-      setSeuilAlerte(item.seuil_alerte);
-    }
-  }, [item]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit({
-      nom,
-      type_item: typeItem,
-      quantite,
-      seuil_alerte: seuilAlerte,
-      disponible: true,
-    });
+    onSubmit({ nom, quantite });
   };
 
   return (
@@ -50,37 +33,13 @@ export function StockForm({ item, onSubmit, onCancel, isSubmitting }: StockFormP
           />
         </div>
         <div>
-          <label className="text-sm font-medium">Type</label>
-          <select
-            value={typeItem}
-            onChange={(e) => setTypeItem(e.target.value as StockItemType)}
-            className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm mt-1"
-          >
-            <option value="MEDICAMENT">Médicament</option>
-            <option value="EQUIPEMENT">Équipement</option>
-            <option value="CONSOMMABLE">Consommable</option>
-          </select>
-        </div>
-        <div>
-          <label className="text-sm font-medium">Quantité</label>
+          <label className="text-sm font-medium">Quantité <span className="text-muted-foreground font-normal">(optionnelle)</span></label>
           <input
             type="number"
             value={quantite}
             onChange={(e) => setQuantite(Number(e.target.value))}
             min={0}
             className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm mt-1"
-            required
-          />
-        </div>
-        <div>
-          <label className="text-sm font-medium">Seuil d&apos;alerte</label>
-          <input
-            type="number"
-            value={seuilAlerte}
-            onChange={(e) => setSeuilAlerte(Number(e.target.value))}
-            min={0}
-            className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm mt-1"
-            required
           />
         </div>
       </div>
