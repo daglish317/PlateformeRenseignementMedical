@@ -1,78 +1,55 @@
 "use client";
 
+import { useState } from "react";
+import { cn } from "@/lib/utils";
+
 import Sidebar from "./sidebar/Sidebar";
 import MedicalMap from "@/components/map/MedicalMap";
+import MobileViewNav, { MobileView } from "./mobile/MobileViewNav";
 
 export default function PublicHome() {
+  const [view, setView] = useState<MobileView>("recherche");
+
   return (
     <div
       className="
+        relative
         flex
-        min-h-0
+        h-full
         w-full
-        flex-col
-        overflow-visible
+        min-h-0
+        overflow-hidden
 
-        md:h-full
         md:flex-row
-        md:overflow-hidden
       "
     >
       {/* 
-        Desktop :
-        - résultats fixes à gauche
-        - carte à droite
-
-        Mobile :
-        - la sidebar apparaît en premier
-        - la carte vient ensuite naturellement
+        Vue Recherche (sidebar) :
+        - Mobile : plein écran, seul le résultat est visible selon la vue active.
+        - Desktop : fixe à gauche.
       */}
       <aside
-        className="
-          order-1
-          w-full
-          border-b
-          border-border
-          bg-background
-
-          md:flex
-          md:h-full
-          md:w-[390px]
-          md:shrink-0
-          md:flex-col
-          md:border-b-0
-          md:border-r
-
-          xl:w-[420px]
-        "
+        className={cn(
+          "absolute inset-0 flex flex-col border-b border-border bg-background",
+          view === "recherche" ? "visible" : "invisible",
+          "md:visible md:static md:h-full md:w-[390px] md:shrink-0 md:border-b-0 md:border-r",
+          "xl:w-[420px]"
+        )}
       >
         <Sidebar />
       </aside>
 
-
       {/* 
-        Carte :
-
-        Desktop :
-        prend tout l'espace restant.
-
-        Mobile :
-        hauteur contrôlée.
-        Elle ne prend jamais tout l'écran.
+        Vue Carte :
+        - Mobile : plein écran quand elle est active.
+        - Desktop : occupe tout l'espace restant.
       */}
       <section
-        className="
-          order-2
-          h-[420px]
-          w-full
-          shrink-0
-          bg-muted/10
-          
-          md:h-full
-          md:flex-1
-          md:p-4
-          xl:p-5
-        "
+        className={cn(
+          "absolute inset-0 shrink-0 bg-background",
+          view === "carte" ? "visible" : "invisible",
+          "md:visible md:static md:h-full md:flex-1"
+        )}
       >
         <div
           className="
@@ -80,16 +57,17 @@ export default function PublicHome() {
             w-full
             overflow-hidden
             bg-background
-
-            md:rounded-3xl
-            md:border
-            md:border-border
-            md:shadow-sm
           "
         >
           <MedicalMap />
         </div>
       </section>
+
+      {/* Navigation flottante (mobile uniquement) */}
+      <MobileViewNav
+        view={view}
+        onViewChange={setView}
+      />
     </div>
   );
 }

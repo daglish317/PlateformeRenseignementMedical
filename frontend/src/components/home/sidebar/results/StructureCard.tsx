@@ -47,7 +47,7 @@ export default function StructureCard({ result }: StructureCardProps) {
   const handleRoute = async (e: React.MouseEvent) => {
     e.stopPropagation();
     const position = await locateUser();
-    if (position) {
+    if (position && structure.latitude !== null && structure.longitude !== null) {
       calculateRoute({
         startLat: position.latitude,
         startLng: position.longitude,

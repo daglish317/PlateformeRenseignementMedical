@@ -25,6 +25,8 @@ export const MAP = {
 
   /**
    * Limites du zoom.
+   * maxZoom à 19 pour OpenStreetMap Standard (maximum officiel)
+   * Permet de voir les bâtiments individuels, commerces, entreprises (Point NB verification.md)
    */
   minZoom: 5,
   maxZoom: 19,

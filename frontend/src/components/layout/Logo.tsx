@@ -66,16 +66,16 @@ export default function Logo({
 
   const dimensions = {
     horizontal: {
-      width: width ?? 180,
-      height: height ?? 48,
+      width: width ?? 100,
+      height: height ?? 28,
     },
     vertical: {
       width: width ?? 150,
       height: height ?? 170,
     },
     icon: {
-      width: width ?? 42,
-      height: height ?? 42,
+      width: width ?? 28,
+      height: height ?? 28,
     },
   };
 
@@ -84,14 +84,14 @@ export default function Logo({
       <Link
         href="/"
         aria-label="Retour à l'accueil de SantéProx"
-        className={cn("inline-flex items-center", className)}
+        className={cn("inline-flex items-center shrink-0", className)}
       >
         {/* Desktop */}
         <Image
           src={horizontalLogo}
           alt="Logo SantéProx"
-          width={180}
-          height={48}
+          width={100}
+          height={28}
           priority={priority}
           className="hidden h-auto w-auto md:block"
         />
@@ -100,8 +100,8 @@ export default function Logo({
         <Image
           src={iconLogo}
           alt="Logo SantéProx"
-          width={42}
-          height={42}
+          width={28}
+          height={28}
           priority={priority}
           className="block h-auto w-auto md:hidden"
         />

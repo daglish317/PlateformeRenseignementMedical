@@ -12,10 +12,12 @@ export default function HeaderMenu({
   return (
     <div
       className="
-        flex
+        hidden
         w-full
         items-center
-        gap-6
+        gap-3
+
+        lg:flex
       "
     >
       <HeaderLogo />

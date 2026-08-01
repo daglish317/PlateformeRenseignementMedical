@@ -19,12 +19,14 @@ export default function MapControls({
     <div
       className="
         absolute
-        bottom-6
-        right-6
+        bottom-24
+        right-4
         z-[1000]
         flex
         flex-col
         gap-3
+        md:bottom-6
+        md:right-6
       "
     >
       <CurrentLocationButton

@@ -1,7 +1,7 @@
 "use client";
 
 import SearchItem from "./SearchItem";
-import { Suggestion } from "@/hooks/useSuggestions";
+import { Suggestion } from "@/types/search";
 
 type SearchSuggestionsProps = {
   suggestions: Suggestion[];
@@ -26,12 +26,12 @@ export default function SearchSuggestions({
         Suggestions
       </div>
 
-      {suggestions.map((item) => (
+      {suggestions.map((item, index) => (
         <SearchItem
-          key={item.id}
-          nom={item.nom}
+          key={`${item.text}-${index}`}
+          nom={item.text}
           type={item.type}
-          onClick={() => onSelect(item.nom)}
+          onClick={() => onSelect(item.text)}
         />
       ))}
     </div>

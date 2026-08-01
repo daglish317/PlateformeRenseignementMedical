@@ -3,16 +3,14 @@
 import { useQuery } from "@tanstack/react-query";
 import axios from "@/lib/axios";
 import { useDebounce } from "./useDebounce";
+import type { Suggestion } from "@/types/search";
 
-const SUGGESTIONS_ENDPOINT = "/api/search/suggestions/";
+// Nouveau endpoint du moteur de recherche intelligent
+const LIVE_SEARCH_ENDPOINT = "/api/search/live/";
 
-export type Suggestion = {
-  id: string;
-  nom: string;
-  type: string;
-};
+type LiveSearchResponse = Suggestion[];
 
-type SuggestionsResponse = Suggestion[];
+export type { Suggestion };
 
 export function useSuggestions(query: string) {
   const debouncedQuery = useDebounce(query, 300);
@@ -21,8 +19,9 @@ export function useSuggestions(query: string) {
     queryKey: ["search-suggestions", debouncedQuery],
 
     queryFn: async () => {
-      const { data } = await axios.get<SuggestionsResponse>(
-        SUGGESTIONS_ENDPOINT,
+      // Utiliser le nouveau endpoint live search
+      const { data } = await axios.get<LiveSearchResponse>(
+        LIVE_SEARCH_ENDPOINT,
         {
           params: {
             q: debouncedQuery,

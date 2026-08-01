@@ -19,8 +19,8 @@ const userIcon = L.divIcon({
     <div
       style="
         position: relative;
-        width: 42px;
-        height: 42px;
+        width: 44px;
+        height: 44px;
         display:flex;
         align-items:center;
         justify-content:center;
@@ -30,11 +30,11 @@ const userIcon = L.divIcon({
       <div
         style="
           position:absolute;
-          width:42px;
-          height:42px;
+          width:44px;
+          height:44px;
           border-radius:9999px;
-          background:rgba(37,99,235,0.20);
-          animation:pulse 2s infinite;
+          background:rgba(22,163,74,0.28);
+          animation:user-marker-pulse 2.4s ease-out infinite;
         "
       ></div>
 
@@ -44,7 +44,7 @@ const userIcon = L.divIcon({
           width:22px;
           height:22px;
           border-radius:9999px;
-          background:#2563eb;
+          background:#16a34a;
           border:4px solid white;
           box-shadow:
             0 4px 12px rgba(0,0,0,0.35);
@@ -54,8 +54,8 @@ const userIcon = L.divIcon({
 
     </div>
   `,
-  iconSize: [42,42],
-  iconAnchor: [21,21],
+  iconSize: [44,44],
+  iconAnchor: [22,22],
 });
 
 
@@ -73,7 +73,7 @@ export default function UserMarker({
     >
 
       <Popup>
-        Votre position actuelle
+        Vous êtes ici
       </Popup>
 
     </Marker>

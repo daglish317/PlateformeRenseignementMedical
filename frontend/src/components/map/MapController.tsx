@@ -37,7 +37,7 @@ export default function MapController({
   }, [location, map]);
 
   useEffect(() => {
-    if (selectedStructure) {
+    if (selectedStructure && selectedStructure.latitude !== null && selectedStructure.longitude !== null) {
       map.flyTo(
         [
           selectedStructure.latitude,
@@ -52,4 +52,4 @@ export default function MapController({
   }, [selectedStructure, map]);
 
   return null;
-}
+}

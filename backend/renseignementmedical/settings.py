@@ -166,10 +166,14 @@ if DATABASE_URL:
     }
 else:
     DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": BASE_DIR / "db.sqlite3",
-        }
+        'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'santeprox_db',
+        'USER': 'santeprox_user',
+        'PASSWORD': 'medor',
+        'HOST': 'localhost',
+        'PORT': '5432',
+    }
     }
 
 # ---------------------------------------------------------------------------

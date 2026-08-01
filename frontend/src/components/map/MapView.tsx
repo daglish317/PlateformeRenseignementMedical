@@ -3,7 +3,6 @@
 
 import { ReactNode, useSyncExternalStore } from "react";
 import { MapContainer, TileLayer } from "react-leaflet";
-import { useTheme } from "next-themes";
 
 import { MAP } from "@/constants/map";
 import MapController from "./MapController";
@@ -14,11 +13,16 @@ type MapViewProps = {
   location?: UserLocation | null;
 };
 
-// Voyager = même fournisseur (CARTO) que l'ancien "light_all", mais avec les
-// routes, parcs et plans d'eau en couleur — c'est ce qui donne le rendu
-// "Google Maps" au lieu du fond gris/blanc plat.
-const LIGHT_TILES = "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png";
-const DARK_TILES = "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
+// OpenStreetMap Standard - Affiche TOUT:
+// - Bâtiments
+// - Routes et chemins
+// - Parcs et espaces verts
+// - Commerces et entreprises
+// - Points d'intérêt (restaurants, hôpitaux, écoles, etc.)
+// - Transports en commun
+// - Limites administratives
+// Comme Google Maps avec tous les détails
+const TILES_URL = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
 
 // Remplace le pattern useState+useEffect(setMounted(true)) : on ne "set" jamais
 // d'état dans un effet, on synchronise avec un store externe qui n'a qu'une
@@ -38,11 +42,7 @@ export default function MapView({
   children,
   location,
 }: MapViewProps) {
-  const { resolvedTheme } = useTheme();
   const mounted = useMounted();
-
-  const isDark = mounted && resolvedTheme === "dark";
-  const tileUrl = isDark ? DARK_TILES : LIGHT_TILES;
 
   return (
     <MapContainer
@@ -58,9 +58,9 @@ export default function MapView({
       className="h-full w-full"
     >
       <TileLayer
-        key={isDark ? "dark" : "voyager"}
-        url={tileUrl}
-        attribution="© OpenStreetMap contributors © CARTO"
+        key="osm-standard"
+        url={TILES_URL}
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
       />
 
       <MapController

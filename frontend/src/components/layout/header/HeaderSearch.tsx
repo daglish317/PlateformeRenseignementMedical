@@ -14,8 +14,10 @@ export default function HeaderSearch({
   return (
     <div
       className="
+        relative
+        z-[10000]
         flex-1
-        max-w-3xl
+        max-w-5xl
       "
     >
       <SearchBar />

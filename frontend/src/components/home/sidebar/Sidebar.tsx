@@ -4,7 +4,6 @@ import dynamic from "next/dynamic";
 
 import { useSearchStore } from "@/store/search-store";
 
-import SidebarHeader from "./SidebarHeader";
 import EmergencyGrid from "@/features/emergency/components/EmergencyGrid";
 import EmergencyBanner from "@/features/emergency/components/EmergencyBanner";
 
@@ -114,7 +113,10 @@ export default function Sidebar() {
             flex-1
             overflow-y-auto
             px-4
-            py-3
+            pt-3
+            pb-20
+
+            md:pb-3
           "
         >
 

@@ -3,6 +3,8 @@
 import { Polyline } from "react-leaflet";
 import { useRoutingStore } from "@/features/routing/store/routing-store";
 
+const ROUTE_COLOR = "#16a34a";
+
 export default function RouteLayer() {
   const currentRoute = useRoutingStore((state) => state.currentRoute);
 
@@ -13,7 +15,13 @@ export default function RouteLayer() {
   return (
     <Polyline
       positions={currentRoute.coordinates}
-      pathOptions={{ color: "#3b82f6", weight: 4, opacity: 0.8 }}
+      pathOptions={{
+        color: ROUTE_COLOR,
+        weight: 7,
+        opacity: 0.9,
+        lineCap: "round",
+        lineJoin: "round",
+      }}
     />
   );
 }

@@ -13,7 +13,7 @@ export default function Header({
       className="
         sticky
         top-0
-        z-40
+        z-[10000]
         w-full
         border-b
         border-border
@@ -30,9 +30,10 @@ export default function Header({
           w-full
           max-w-7xl
           items-center
-          px-4
-          sm:px-6
-          lg:px-8
+          gap-2
+          px-3
+          sm:px-4
+          lg:px-6
         "
       >
         <HeaderMenu
