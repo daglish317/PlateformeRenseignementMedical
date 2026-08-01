@@ -66,16 +66,16 @@ export default function Logo({
 
   const dimensions = {
     horizontal: {
-      width: width ?? 100,
-      height: height ?? 28,
+      width: width ?? 95,
+      height: height ?? 30,
     },
     vertical: {
-      width: width ?? 150,
-      height: height ?? 170,
+      width: width ?? 155,
+      height: height ?? 175,
     },
     icon: {
-      width: width ?? 28,
-      height: height ?? 28,
+      width: width ?? 37,
+      height: height ?? 37,
     },
   };
 
@@ -86,24 +86,24 @@ export default function Logo({
         aria-label="Retour à l'accueil de SantéProx"
         className={cn("inline-flex items-center shrink-0", className)}
       >
-        {/* Desktop */}
+        {/* Desktop - Visible et élégant */}
         <Image
           src={horizontalLogo}
           alt="Logo SantéProx"
           width={100}
-          height={28}
+          height={35}
           priority={priority}
-          className="hidden h-auto w-auto md:block"
+          className="hidden max-w-[190px] max-h-[130px] h-auto w-auto md:block"
         />
 
-        {/* Mobile */}
+        {/* Mobile - Visible sans être imposant */}
         <Image
           src={iconLogo}
           alt="Logo SantéProx"
-          width={28}
-          height={28}
+          width={40}
+          height={40}
           priority={priority}
-          className="block h-auto w-auto md:hidden"
+          className="block max-w-[50px] max-h-[50px] h-auto w-auto md:hidden"
         />
       </Link>
     );
@@ -113,7 +113,7 @@ export default function Logo({
     <Link
       href="/"
       aria-label="Retour à l'accueil de SantéProx"
-      className={cn("inline-flex items-center", className)}
+      className={cn("inline-flex items-center shrink-0", className)}
     >
       <Image
         src={logo}
@@ -122,7 +122,11 @@ export default function Logo({
         height={dimensions[variant].height}
         priority={priority}
         loading={priority ? "eager" : "lazy"}
-        className="h-auto w-auto"
+        className="h-auto w-auto object-contain"
+        style={{
+          maxWidth: `${dimensions[variant].width}px`,
+          maxHeight: `${dimensions[variant].height}px`,
+        }}
       />
     </Link>
   );

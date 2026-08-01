@@ -11,20 +11,22 @@ export default function HeaderMenu({
 }: HeaderMenuProps) {
   return (
     <div
-      className="
+      className={`
         hidden
         w-full
         items-center
-        gap-3
 
         lg:flex
-      "
+        ${showSearch ? 'gap-1.5' : 'justify-between'}
+      `}
     >
       <HeaderLogo />
 
-      <HeaderSearch
-        visible={showSearch}
-      />
+      {showSearch && (
+        <HeaderSearch
+          visible={showSearch}
+        />
+      )}
 
       <HeaderActions />
     </div>

@@ -26,7 +26,7 @@ export default function Header({
         className="
           mx-auto
           flex
-          h-16
+          h-14
           w-full
           max-w-7xl
           items-center

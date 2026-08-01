@@ -17,7 +17,7 @@ export default function HeaderSearch({
         relative
         z-[10000]
         flex-1
-        max-w-5xl
+        max-w-6xl
       "
     >
       <SearchBar />

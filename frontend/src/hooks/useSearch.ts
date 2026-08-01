@@ -69,7 +69,7 @@ export function useSearch({
     queryFn: async () => {
       // Utiliser le nouveau moteur de recherche intelligent
       const { data } = await axios.get<UnifiedSearchResponse>(
-        "/api/search/unified/",
+        "/search/unified/",
         {
           params: {
             q: query,

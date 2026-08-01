@@ -53,14 +53,24 @@ export default function MobileMenu({ showSearch = true }: MobileMenuProps) {
   }
 
   return (
-    <div className="flex w-full items-center gap-2 sm:gap-3 lg:hidden">
-      {/* Logo */}
+    <div className={`flex w-full items-center lg:hidden ${showSearch ? 'gap-1 sm:gap-1.5' : 'justify-between'}`}>
+      {/* Logo ultra-minimal */}
       <HeaderLogo />
 
       {/* Barre de recherche - MAXIMALE */}
-      <div className="relative z-[10000] flex-1">
-        {showSearch && <SearchBar />}
-      </div>
+      {showSearch && (
+        <div className="relative z-[10000] flex-1 min-w-0">
+          <SearchBar />
+        </div>
+      )}
+
+      {/* Actions rapides pour pages sans recherche */}
+      {!showSearch && (
+        <div className="flex items-center gap-2 shrink-0">
+          <LanguageSwitcher />
+          <ThemeToggle />
+        </div>
+      )}
 
       {/* Menu */}
       <Sheet

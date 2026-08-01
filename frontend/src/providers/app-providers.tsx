@@ -9,8 +9,6 @@ import QueryProvider from "./query.provider";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { Toaster } from "sonner";
 
-const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
-
 type AppProvidersProps = {
   children: React.ReactNode;
   locale: string;
@@ -22,6 +20,8 @@ export default function AppProviders({
   locale,
   messages,
 }: AppProvidersProps) {
+  const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+
   const providers = (
     <QueryProvider>
       <AuthProvider>
@@ -43,14 +43,14 @@ export default function AppProviders({
   return (
     <LocaleProvider locale={locale} messages={messages}>
       <ThemeProvider>
-        {googleClientId ? (
-          <GoogleOAuthProvider clientId={googleClientId}>
-            {providers}
-          </GoogleOAuthProvider>
-        ) : (
-          providers
-        )}
+        <GoogleOAuthProvider clientId={googleClientId ?? ""}>
+          {providers}
+        </GoogleOAuthProvider>
       </ThemeProvider>
     </LocaleProvider>
   );
 }
+console.log(
+  "NEXT_PUBLIC_GOOGLE_CLIENT_ID =",
+  process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID
+);

@@ -24,19 +24,13 @@ export default function Footer() {
           flex-col
           gap-4
           px-6
-          py-5
+          py-4
 
           md:flex-row
           md:items-center
           md:justify-between
         "
       >
-        {/* Logo */}
-        <Logo
-          variant="horizontal"
-          width={155}
-        />
-
         {/* Navigation */}
         <nav
           aria-label="Navigation du pied de page"
@@ -48,6 +42,8 @@ export default function Footer() {
             gap-6
             text-sm
             text-muted-foreground
+
+            md:justify-start
           "
         >
           <Link
@@ -82,7 +78,7 @@ export default function Footer() {
             md:text-right
           "
         >
-          © {year} SantéProx
+          © {year} SantéProx. Tous droits réservés.
         </p>
       </div>
     </footer>

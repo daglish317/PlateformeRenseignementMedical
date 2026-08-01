@@ -19,5 +19,10 @@ class GoogleAuthService:
                 "nom": idinfo.get("name", ""),
                 "email_verified": idinfo.get("email_verified", False),
             }
-        except Exception:
-            return None
+        except Exception as e:
+            print("ERREUR GOOGLE :", repr(e))
+            raise
+
+from django.conf import settings
+
+print("GOOGLE_CLIENT_ID =", settings.GOOGLE_CLIENT_ID)

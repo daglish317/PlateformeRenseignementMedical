@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useCallback, useState } from "react";
+import { useEffect, useState } from "react";
+import { GoogleLogin } from "@react-oauth/google";
 import { useGoogleLogin } from "@/features/auth/hooks/useGoogleLogin";
 import { toast } from "sonner";
 
@@ -9,13 +10,11 @@ interface GoogleButtonProps {
   onError?: (error: unknown) => void;
 }
 
-let googleInitialized = false;
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const getGoogleAccountsId = (): any => {
+const isGoogleReady = (): boolean => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const w = window as any;
-  return w?.google?.accounts?.id;
+  return Boolean(w?.google?.accounts?.id);
 };
 
 export function GoogleButton({
@@ -24,81 +23,29 @@ export function GoogleButton({
 }: GoogleButtonProps) {
   const { mutate: authenticate, isPending } = useGoogleLogin();
   const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
-  const containerRef = useRef<HTMLDivElement>(null);
-  const callbackRef = useRef<{ onSuccess?: () => void; onError?: (error: unknown) => void }>({
-    onSuccess,
-    onError,
-  });
   const [scriptReady, setScriptReady] = useState(false);
-
-  callbackRef.current = { onSuccess, onError };
-
-  const handleCredentialResponse = useCallback(
-    (response: { credential?: string }) => {
-      const token = response.credential;
-
-      if (!token) {
-        toast.error("Impossible de récupérer le jeton Google");
-        return;
-      }
-
-      authenticate(
-        { id_token: token },
-        {
-          onSuccess: () => {
-            toast.success("Connexion Google réussie");
-            callbackRef.current.onSuccess?.();
-          },
-          onError: (error) => {
-            console.error("Erreur Google:", error);
-            toast.error("Erreur lors de la connexion Google");
-            callbackRef.current.onError?.(error);
-          },
-        }
-      );
-    },
-    [authenticate]
-  );
+  const [scriptFailed, setScriptFailed] = useState(false);
 
   useEffect(() => {
-    if (getGoogleAccountsId()) {
+    if (isGoogleReady()) {
       setScriptReady(true);
       return;
     }
 
-    const onScriptLoad = () => setScriptReady(true);
+    const timeout = window.setTimeout(() => setScriptFailed(true), 10000);
+    const interval = window.setInterval(() => {
+      if (isGoogleReady()) {
+        setScriptReady(true);
+        window.clearInterval(interval);
+        window.clearTimeout(timeout);
+      }
+    }, 250);
 
-    const existing = document.querySelector(
-      'script[src="https://accounts.google.com/gsi/client"]'
-    );
-    if (existing) {
-      existing.addEventListener("load", onScriptLoad, { once: true });
-      return () => existing.removeEventListener("load", onScriptLoad);
-    }
+    return () => {
+      window.clearInterval(interval);
+      window.clearTimeout(timeout);
+    };
   }, []);
-
-  useEffect(() => {
-    if (!scriptReady || googleInitialized || !googleClientId || !containerRef.current) {
-      return;
-    }
-
-    const idApi = getGoogleAccountsId();
-    if (!idApi) return;
-
-    googleInitialized = true;
-
-    idApi.initialize({
-      client_id: googleClientId,
-      callback: handleCredentialResponse,
-    });
-
-    idApi.renderButton(containerRef.current, {
-      text: "continue_with",
-      theme: "outline",
-      size: "large",
-      width: containerRef.current.offsetWidth || 300,
-    });
-  }, [scriptReady, googleClientId, handleCredentialResponse]);
 
   if (!googleClientId) {
     return (
@@ -112,9 +59,53 @@ export function GoogleButton({
     );
   }
 
+  if (!scriptReady) {
+    return (
+      <div className="flex w-full items-center justify-center gap-2 rounded-md border border-border bg-muted px-4 py-3 text-sm text-muted-foreground">
+        {scriptFailed
+          ? "Impossible de charger le bouton Google. Réessayez après actualisation."
+          : "Chargement de Google..."}
+      </div>
+    );
+  }
+
+  const handleCredential = (credential?: string) => {
+    if (!credential) {
+      toast.error("Impossible de récupérer le jeton Google");
+      return;
+    }
+
+    authenticate(
+      { id_token: credential },
+      {
+        onSuccess: () => {
+          toast.success("Connexion Google réussie");
+          onSuccess?.();
+        },
+        onError: (error) => {
+          console.error("Erreur Google:", error);
+          toast.error("Erreur lors de la connexion Google");
+          onError?.(error);
+        },
+      }
+    );
+  };
+
   return (
     <div className="w-full space-y-2">
-      <div ref={containerRef} className="w-full" />
+      <div className="flex w-full justify-center">
+        <GoogleLogin
+          shape="rectangular"
+          size="large"
+          theme="outline"
+          text="continue_with"
+          onSuccess={(response) => handleCredential(response.credential)}
+          onError={() => {
+            console.error("Erreur Google: la fenêtre de connexion a échoué");
+            toast.error("Erreur lors de la connexion Google");
+          }}
+        />
+      </div>
 
       {isPending && (
         <p className="text-center text-sm text-muted-foreground">

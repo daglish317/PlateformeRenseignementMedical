@@ -6,7 +6,7 @@ import { useDebounce } from "./useDebounce";
 import type { Suggestion } from "@/types/search";
 
 // Nouveau endpoint du moteur de recherche intelligent
-const LIVE_SEARCH_ENDPOINT = "/api/search/live/";
+const LIVE_SEARCH_ENDPOINT = "/search/live/";
 
 type LiveSearchResponse = Suggestion[];
 

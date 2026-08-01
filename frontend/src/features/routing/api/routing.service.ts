@@ -7,7 +7,7 @@ export const getRoute = async (
   endLat: number,
   endLng: number
 ): Promise<Route> => {
-  const { data } = await axios.get<RouteResponse>("/api/routing/", {
+  const { data } = await axios.get<RouteResponse>("/routing/", {
     params: {
       start_lat: startLat,
       start_lng: startLng,

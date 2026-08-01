@@ -7,6 +7,18 @@ interface AxiosRequestConfigWithRetry extends InternalAxiosRequestConfig {
   _retry?: boolean;
 }
 
+// Endpoints d'authentification publics : un 401 ne doit jamais déclencher
+// de refresh de token (pas de session, l'erreur réelle doit remonter telle quelle).
+const PUBLIC_AUTH_ENDPOINTS = [
+  "/utilisateurs/google/",
+  "/utilisateurs/login/",
+  "/utilisateurs/register/",
+  "/utilisateurs/token/refresh/",
+];
+
+const isPublicAuthEndpoint = (url?: string) =>
+  PUBLIC_AUTH_ENDPOINTS.some((endpoint) => url?.includes(endpoint));
+
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
   headers: {
@@ -48,7 +60,11 @@ api.interceptors.response.use(
   async (error: AxiosError) => {
     const originalRequest = error.config as AxiosRequestConfigWithRetry;
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    if (
+      error.response?.status === 401 &&
+      !originalRequest._retry &&
+      !isPublicAuthEndpoint(originalRequest.url)
+    ) {
       if (isRefreshing) {
         return new Promise((resolve) => {
           subscribeTokenRefresh((token: string) => {
