@@ -26,7 +26,18 @@ export default function QueryProvider({
       new QueryClient({
         defaultOptions: {
           queries: {
-            staleTime: 60 * 1000,
+            // Augmenter drastiquement le staleTime
+            staleTime: 5 * 60 * 1000, // 5 minutes
+            // Cache plus long
+            gcTime: 10 * 60 * 1000, // 10 minutes (anciennement cacheTime)
+            // Réduire les retries
+            retry: 1,
+            // Refetch moins agressif
+            refetchOnWindowFocus: false,
+            refetchOnMount: false,
+            refetchOnReconnect: true,
+          },
+          mutations: {
             retry: 1,
           },
         },
@@ -38,9 +49,11 @@ export default function QueryProvider({
     <QueryClientProvider client={queryClient}>
       {children}
 
-      <ReactQueryDevtools
-        initialIsOpen={false}
-      />
+      {process.env.NODE_ENV === 'development' && (
+        <ReactQueryDevtools
+          initialIsOpen={false}
+        />
+      )}
 
     </QueryClientProvider>
   );

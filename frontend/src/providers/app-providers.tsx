@@ -1,13 +1,16 @@
 "use client";
 
+import { Suspense, lazy } from "react";
 import AuthProvider from "./auth.provider";
 import NotificationProvider from "./notification.provider";
-import WebSocketProvider from "./websocket.provider";
 import LocaleProvider from "./locale.provider";
 import ThemeProvider from "./theme.provider";
 import QueryProvider from "./query.provider";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { Toaster } from "sonner";
+
+// Lazy load WebSocket provider (seulement pour utilisateurs authentifiés)
+const WebSocketProvider = lazy(() => import("./websocket.provider"));
 
 type AppProvidersProps = {
   children: React.ReactNode;
@@ -25,17 +28,19 @@ export default function AppProviders({
   const providers = (
     <QueryProvider>
       <AuthProvider>
-        <WebSocketProvider>
-          <NotificationProvider>
-            {children}
-            <Toaster
-              position="top-right"
-              richColors
-              closeButton
-              duration={3000}
-            />
-          </NotificationProvider>
-        </WebSocketProvider>
+        <Suspense fallback={null}>
+          <WebSocketProvider>
+            <NotificationProvider>
+              {children}
+              <Toaster
+                position="top-right"
+                richColors
+                closeButton
+                duration={3000}
+              />
+            </NotificationProvider>
+          </WebSocketProvider>
+        </Suspense>
       </AuthProvider>
     </QueryProvider>
   );
@@ -50,7 +55,3 @@ export default function AppProviders({
     </LocaleProvider>
   );
 }
-console.log(
-  "NEXT_PUBLIC_GOOGLE_CLIENT_ID =",
-  process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID
-);

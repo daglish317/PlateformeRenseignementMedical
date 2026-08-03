@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useTheme } from "next-themes";
 import {
   Menu,
@@ -12,6 +12,7 @@ import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
+import { useMounted } from "@/hooks/useMounted";
 import { useDashboardSidebar } from "../hooks/useDashboardSidebar";
 import { useDashboardNavigation } from "../hooks/useDashboardNavigation";
 import { DASHBOARD_SIDEBAR, DASHBOARD_LAYOUT } from "../constants/layout";
@@ -27,11 +28,7 @@ export function DashboardSidebar({ type, className }: DashboardSidebarProps) {
     useDashboardSidebar();
   const { navigation } = useDashboardNavigation(type);
   const { resolvedTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const mounted = useMounted();
 
   const isDark = mounted && resolvedTheme === "dark";
 

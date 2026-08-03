@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import Image from "next/image";
 import { useTheme } from "next-themes";
 import { Link, usePathname } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
+import { useMounted } from "@/hooks/useMounted";
 import { useNotifications } from "@/providers/notification.provider";
 import { adminNavigation, isActiveRoute } from "../navigation/navigation";
 import { useSidebar } from "../hooks/useSidebar";
@@ -88,11 +89,7 @@ function SidebarContent({ collapsed, isDark }: { collapsed: boolean; isDark: boo
 export function AdminSidebar() {
   const { open, collapsed, isMobile, setOpen, setCollapsed, setIsMobile } = useSidebar();
   const { resolvedTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const mounted = useMounted();
 
   const isDark = mounted && resolvedTheme === "dark";
 

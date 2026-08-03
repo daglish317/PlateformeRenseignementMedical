@@ -34,6 +34,8 @@ export function useSuggestions(query: string) {
 
     enabled: debouncedQuery.trim().length > 0,
 
-    staleTime: 1000 * 60 * 5,
+    // Cache agressif pour suggestions
+    staleTime: 10 * 60 * 1000, // 10 minutes
+    gcTime: 15 * 60 * 1000, // 15 minutes
   });
 }

@@ -19,20 +19,20 @@ interface DashboardRouteProps {
 export function DashboardRoute({ children, type }: DashboardRouteProps) {
   const { user, authenticated, hydrated } = useAuthStore();
   const router = useRouter();
-  const [allowed, setAllowed] = useState<boolean | null>(null);
+  const [structureStatus, setStructureStatus] = useState<
+    "pending" | "ok" | "no"
+  >("pending");
 
   useEffect(() => {
     if (!hydrated) return;
 
     if (!authenticated) {
       router.push("/connexion");
-      setAllowed(false);
       return;
     }
 
     if (user && !hasGestionnairePermission(user.role)) {
       router.push("/");
-      setAllowed(false);
       return;
     }
 
@@ -40,23 +40,24 @@ export function DashboardRoute({ children, type }: DashboardRouteProps) {
       .get("/structures/me/")
       .then(({ data }) => {
         const structureType = (data.type as string).toUpperCase();
-        const backendType = type === "HOPITAL" ? "HOPITAL" : "PHARMACIE";
 
-        if (structureType === backendType && data.statut === "ACTIVE") {
-          setAllowed(true);
+        if (structureType === type && data.statut === "ACTIVE") {
+          setStructureStatus("ok");
         } else {
           const route = TYPE_TO_ROUTE[structureType] || "hospital";
           router.replace(`/${route}`);
-          setAllowed(false);
+          setStructureStatus("no");
         }
       })
       .catch(() => {
         router.replace("/gestionnaire/setup");
-        setAllowed(false);
+        setStructureStatus("no");
       });
   }, [authenticated, hydrated, user, router, type]);
 
-  if (!hydrated || allowed === null) {
+  const blocked = !authenticated || !user || !hasGestionnairePermission(user.role);
+
+  if (!hydrated || structureStatus === "pending") {
     return (
       <div className="flex h-screen items-center justify-center">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
@@ -64,7 +65,7 @@ export function DashboardRoute({ children, type }: DashboardRouteProps) {
     );
   }
 
-  if (!allowed || !authenticated || !user || !hasGestionnairePermission(user.role)) {
+  if (blocked || structureStatus !== "ok") {
     return null;
   }
 

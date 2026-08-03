@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,13 +33,16 @@ export function EditCatalogueDialog({
   const [description, setDescription] = useState("");
   const updateCatalogue = useUpdateCatalogue();
 
-  useEffect(() => {
+  const [prevCatalogue, setPrevCatalogue] = useState(catalogue);
+
+  if (catalogue !== prevCatalogue) {
+    setPrevCatalogue(catalogue);
     if (catalogue) {
       setNom(catalogue.nom);
       setType(catalogue.type);
       setDescription(catalogue.description);
     }
-  }, [catalogue]);
+  }
 
   const canSubmit = nom.trim() && type && !updateCatalogue.isPending;
 

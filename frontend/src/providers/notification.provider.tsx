@@ -28,55 +28,51 @@ export function useNotifications() {
 }
 
 export default function NotificationProvider({ children }: { children: React.ReactNode }) {
-  const { lastMessage } = useWebSocket();
+  const { subscribe } = useWebSocket();
   const queryClient = useQueryClient();
   const authenticated = useAuthStore((s) => s.authenticated);
   const hydrated = useAuthStore((s) => s.hydrated);
   const [notifications, setNotifications] = useState<NotificationMessage[]>([]);
   const [unreadByNavItem, setUnreadByNavItem] = useState<Record<string, number>>({});
 
-  const fetchUnreadCounts = useCallback(async () => {
+  useEffect(() => {
     if (!hydrated || !authenticated) return;
-    try {
-      const counts = await notificationsService.unreadCounts();
-      setUnreadByNavItem(counts);
-    } catch {
-      // silently fail
-    }
+    notificationsService
+      .unreadCounts()
+      .then(setUnreadByNavItem)
+      .catch(() => {
+        // silently fail
+      });
   }, [hydrated, authenticated]);
 
   useEffect(() => {
-    fetchUnreadCounts();
-  }, [fetchUnreadCounts]);
+    return subscribe((message) => {
+      setNotifications((prev) => [message, ...prev].slice(0, 50));
 
-  useEffect(() => {
-    if (!lastMessage) return;
+      if (message.nav_item) {
+        setUnreadByNavItem((prev) => ({
+          ...prev,
+          [message.nav_item!]: (prev[message.nav_item!] || 0) + 1,
+          total: (prev.total || 0) + 1,
+        }));
+      } else {
+        setUnreadByNavItem((prev) => ({
+          ...prev,
+          total: (prev.total || 0) + 1,
+        }));
+      }
 
-    setNotifications((prev) => [lastMessage, ...prev].slice(0, 50));
+      toast.info(message.titre, {
+        description: message.message,
+        duration: 5000,
+      });
 
-    if (lastMessage.nav_item) {
-      setUnreadByNavItem((prev) => ({
-        ...prev,
-        [lastMessage.nav_item!]: (prev[lastMessage.nav_item!] || 0) + 1,
-        total: (prev.total || 0) + 1,
-      }));
-    } else {
-      setUnreadByNavItem((prev) => ({
-        ...prev,
-        total: (prev.total || 0) + 1,
-      }));
-    }
-
-    toast.info(lastMessage.titre, {
-      description: lastMessage.message,
-      duration: 5000,
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+      queryClient.invalidateQueries({ queryKey: ["unread-counts"] });
+      queryClient.invalidateQueries({ queryKey: ["admin", "dashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["admin", "structures"] });
     });
-
-    queryClient.invalidateQueries({ queryKey: ["notifications"] });
-    queryClient.invalidateQueries({ queryKey: ["unread-counts"] });
-    queryClient.invalidateQueries({ queryKey: ["admin", "dashboard"] });
-    queryClient.invalidateQueries({ queryKey: ["admin", "structures"] });
-  }, [lastMessage, queryClient]);
+  }, [subscribe, queryClient]);
 
   const markAllRead = useCallback(async () => {
     try {

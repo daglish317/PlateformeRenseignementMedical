@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,13 +33,16 @@ export function EditServiceDialog({
   const [description, setDescription] = useState("");
   const updateService = useUpdateService();
 
-  useEffect(() => {
+  const [prevService, setPrevService] = useState(service);
+
+  if (service !== prevService) {
+    setPrevService(service);
     if (service) {
       setNom(service.nom);
       setType(service.type);
       setDescription(service.description);
     }
-  }, [service]);
+  }
 
   const canSubmit = nom.trim() && type && !updateService.isPending;
 

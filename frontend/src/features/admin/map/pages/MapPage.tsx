@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AdminPageTitle } from "../../shared/components/AdminPageTitle";
 import { AdminLoading } from "../../shared/components/AdminLoading";
 import { AdminError } from "../../shared/components/AdminError";
@@ -10,6 +10,8 @@ import { useStructuresMap } from "../hooks/useStructuresMap";
 import { useMapStore } from "../store/map-store";
 import { MapFilters } from "../components/MapFilters";
 import { MapLegend } from "../components/MapLegend";
+import { getCurrentLocation } from "@/services/map/geolocalisation";
+import type { UserLocation } from "@/services/map/geolocalisation";
 
 const MapInner = dynamic(() => import("../components/MapInner"), {
   ssr: false,
@@ -21,12 +23,21 @@ const MapInner = dynamic(() => import("../components/MapInner"), {
 });
 
 export function MapPage() {
-  const { data, isLoading, isError, refetch } = useStructuresMap();
+  const { data: structures, isLoading, isError, refetch } = useStructuresMap();
   const filters = useMapStore((s) => s.filters);
+  const [location, setLocation] = useState<UserLocation | null>(null);
 
-  const structures = useMemo(() => {
-    if (!data?.results) return [];
-    return data.results.filter((s) => {
+  useEffect(() => {
+    getCurrentLocation()
+      .then(setLocation)
+      .catch(() => {
+        // Position de l'admin indisponible : la carte reste utilisable.
+      });
+  }, []);
+
+  const filteredStructures = useMemo(() => {
+    if (!structures) return [];
+    return structures.filter((s) => {
       if (filters.type && s.type !== filters.type) return false;
       if (filters.statut && s.statut !== filters.statut) return false;
       if (filters.search) {
@@ -37,7 +48,7 @@ export function MapPage() {
       }
       return true;
     });
-  }, [data?.results, filters]);
+  }, [structures, filters]);
 
   if (isLoading) {
     return <AdminLoading label="Chargement de la carte..." />;
@@ -61,7 +72,7 @@ export function MapPage() {
 
       <MapFilters />
 
-      {structures.length === 0 ? (
+      {filteredStructures.length === 0 ? (
         <AdminEmptyState
           title="Aucune structure"
           description="Aucune structure ne correspond aux filtres sélectionnés."
@@ -70,12 +81,12 @@ export function MapPage() {
         <>
           <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
             <div className="h-[500px]">
-              <MapInner structures={structures} />
+              <MapInner structures={filteredStructures} location={location} />
             </div>
           </div>
           <MapLegend />
           <p className="text-sm text-muted-foreground">
-            {structures.length} structure{structures.length > 1 ? "s" : ""} affichée{structures.length > 1 ? "s" : ""}
+            {filteredStructures.length} structure{filteredStructures.length > 1 ? "s" : ""} affichée{filteredStructures.length > 1 ? "s" : ""}
           </p>
         </>
       )}

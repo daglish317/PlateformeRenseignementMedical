@@ -116,6 +116,9 @@ MIDDLEWARE = [
 if IS_PRODUCTION:
     MIDDLEWARE.append("whitenoise.middleware.WhiteNoiseMiddleware")
 
+# GZIP Compression pour réduire la bande passante de 70-90%
+MIDDLEWARE.append("django.middleware.gzip.GZipMiddleware")
+
 MIDDLEWARE += [
     "corsheaders.middleware.CorsMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -160,20 +163,25 @@ if DATABASE_URL:
     DATABASES = {
         "default": dj_database_url.parse(
             DATABASE_URL,
-            conn_max_age=600,
+            conn_max_age=600,  # Connection pooling: 10 minutes
             ssl_require=IS_PRODUCTION,
         )
     }
 else:
     DATABASES = {
         'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'santeprox_db',
-        'USER': 'santeprox_user',
-        'PASSWORD': 'medor',
-        'HOST': 'localhost',
-        'PORT': '5432',
-    }
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': 'santeprox_db',
+            'USER': 'santeprox_user',
+            'PASSWORD': 'medor',
+            'HOST': 'localhost',
+            'PORT': '5432',
+            'CONN_MAX_AGE': 600,  # Connection pooling: 10 minutes
+            'OPTIONS': {
+                'connect_timeout': 10,
+                'options': '-c statement_timeout=30000'  # 30s timeout
+            },
+        }
     }
 
 # ---------------------------------------------------------------------------

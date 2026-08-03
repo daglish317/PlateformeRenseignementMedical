@@ -10,7 +10,6 @@ interface GoogleButtonProps {
   onError?: (error: unknown) => void;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const isGoogleReady = (): boolean => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const w = window as any;
@@ -23,14 +22,13 @@ export function GoogleButton({
 }: GoogleButtonProps) {
   const { mutate: authenticate, isPending } = useGoogleLogin();
   const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
-  const [scriptReady, setScriptReady] = useState(false);
+  const [scriptReady, setScriptReady] = useState(
+    () => typeof window !== "undefined" && isGoogleReady()
+  );
   const [scriptFailed, setScriptFailed] = useState(false);
 
   useEffect(() => {
-    if (isGoogleReady()) {
-      setScriptReady(true);
-      return;
-    }
+    if (scriptReady) return;
 
     const timeout = window.setTimeout(() => setScriptFailed(true), 10000);
     const interval = window.setInterval(() => {
@@ -45,7 +43,7 @@ export function GoogleButton({
       window.clearInterval(interval);
       window.clearTimeout(timeout);
     };
-  }, []);
+  }, [scriptReady]);
 
   if (!googleClientId) {
     return (

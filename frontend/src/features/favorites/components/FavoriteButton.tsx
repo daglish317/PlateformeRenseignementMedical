@@ -2,6 +2,8 @@
 
 import { Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { usePathname, useRouter } from "@/i18n/navigation";
+import { useAuthStore } from "@/features/auth/store/auth-store";
 import { useCheckFavorite } from "../hooks/useCheckFavorite";
 import { useAddFavorite } from "../hooks/useAddFavorite";
 import { useRemoveFavorite } from "../hooks/useRemoveFavorite";
@@ -14,6 +16,9 @@ export default function FavoriteButton({ structureId }: FavoriteButtonProps) {
   const { data, isLoading } = useCheckFavorite(structureId);
   const { mutate: addFavorite, isPending: adding } = useAddFavorite();
   const { mutate: removeFavorite, isPending: removing } = useRemoveFavorite();
+  const authenticated = useAuthStore((state) => state.authenticated);
+  const router = useRouter();
+  const pathname = usePathname();
 
   const isFavorite = data?.is_favori ?? false;
   const loading = isLoading || adding || removing;
@@ -21,6 +26,10 @@ export default function FavoriteButton({ structureId }: FavoriteButtonProps) {
   const handleToggle = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    if (!authenticated) {
+      router.push(`/connexion?returnTo=${pathname}`);
+      return;
+    }
     if (isFavorite) {
       removeFavorite(structureId);
     } else {

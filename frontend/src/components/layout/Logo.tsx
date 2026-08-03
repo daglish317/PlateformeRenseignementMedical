@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useTheme } from "next-themes";
 
+import { useMounted } from "@/hooks/useMounted";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 
@@ -26,11 +26,7 @@ export default function Logo({
 }: LogoProps) {
   const { resolvedTheme } = useTheme();
 
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const mounted = useMounted();
 
   const isDark = mounted && resolvedTheme === "dark";
 

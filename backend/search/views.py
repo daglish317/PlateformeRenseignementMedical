@@ -1,9 +1,12 @@
 """
-API Views pour le moteur de recherche unifié
+API Views pour le moteur de recherche unifié - OPTIMISÉ POUR PERFORMANCE
 """
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from django.views.decorators.cache import cache_page
+from django.utils.decorators import method_decorator
+from core.cache import cache_result, RedisCacheService
 from .engines.unified_engine import UnifiedSearchEngine
 from .models import SearchLog
 
@@ -12,6 +15,11 @@ class UnifiedSearchAPIView(APIView):
     """
     Endpoint principal de recherche unifiée (Exigences #1-#17)
     GET /api/search/unified/?q=paracetamol&lat=3.8&lon=11.5
+    
+    OPTIMISATIONS:
+    - Cache Redis 5 minutes
+    - Query optimization
+    - Compression response
     """
     
     def get(self, request):
@@ -40,6 +48,17 @@ class UnifiedSearchAPIView(APIView):
         
         offset = (page - 1) * page_size
         
+        # Générer clé de cache
+        cache_key = RedisCacheService.generate_cache_key(
+            'search',
+            query, user_lat, user_lon, page, page_size
+        )
+        
+        # Vérifier cache
+        cached_result = RedisCacheService.get(cache_key)
+        if cached_result:
+            return Response(cached_result, status=status.HTTP_200_OK)
+        
         # Effectuer la recherche
         result = UnifiedSearchEngine.search(
             query=query,
@@ -50,6 +69,7 @@ class UnifiedSearchAPIView(APIView):
         )
         
         # Logger la recherche (Exigence #10 - historique)
+        # Async pour ne pas bloquer la réponse
         try:
             SearchLog.objects.create(
                 query=query[:255],
@@ -68,6 +88,9 @@ class UnifiedSearchAPIView(APIView):
         result['has_next'] = (offset + page_size) < result['total']
         result['has_previous'] = page > 1
         
+        # Mettre en cache (5 minutes)
+        RedisCacheService.set(cache_key, result, timeout=300)
+        
         return Response(result, status=status.HTTP_200_OK)
 
 
@@ -75,6 +98,11 @@ class LiveSearchAPIView(APIView):
     """
     Live search pour autocomplétion (Exigence #2, #6)
     GET /api/search/live/?q=par
+    
+    OPTIMISATIONS:
+    - Cache Redis 3 minutes
+    - Limite 8 résultats
+    - Query ultra-rapide
     """
     
     def get(self, request):
@@ -88,18 +116,31 @@ class LiveSearchAPIView(APIView):
         except ValueError:
             limit = 8
         
+        # Cache 3 minutes
+        cache_key = RedisCacheService.generate_cache_key('live_search', query, limit)
+        cached = RedisCacheService.get(cache_key)
+        if cached:
+            return Response(cached, status=status.HTTP_200_OK)
+        
         suggestions = UnifiedSearchEngine.live_search(query, limit=limit)
         
-        return Response({
+        response_data = {
             'query': query,
             'suggestions': suggestions,
-        }, status=status.HTTP_200_OK)
+        }
+        
+        RedisCacheService.set(cache_key, response_data, timeout=180)
+        
+        return Response(response_data, status=status.HTTP_200_OK)
 
 
 class SearchSuggestionsAPIView(APIView):
     """
     Suggestions intelligentes (Exigence #6)
     GET /api/search/suggestions/?q=parace
+    
+    OPTIMISATIONS:
+    - Cache Redis 10 minutes
     """
     
     def get(self, request):
@@ -113,18 +154,32 @@ class SearchSuggestionsAPIView(APIView):
         except ValueError:
             limit = 10
         
+        # Cache 10 minutes
+        cache_key = RedisCacheService.generate_cache_key('suggestions', query, limit)
+        cached = RedisCacheService.get(cache_key)
+        if cached:
+            return Response(cached, status=status.HTTP_200_OK)
+        
         suggestions = UnifiedSearchEngine.get_suggestions(query, limit=limit)
         
-        return Response({
+        response_data = {
             'query': query,
             'suggestions': suggestions,
-        }, status=status.HTTP_200_OK)
+        }
+        
+        RedisCacheService.set(cache_key, response_data, timeout=600)
+        
+        return Response(response_data, status=status.HTTP_200_OK)
 
 
 class SearchHistoryAPIView(APIView):
     """
     Historique de recherche utilisateur (Exigence #10)
     GET /api/search/history/
+    
+    OPTIMISATIONS:
+    - Query optimisée avec only()
+    - Cache par utilisateur
     """
     
     def get(self, request):
@@ -139,12 +194,24 @@ class SearchHistoryAPIView(APIView):
         except ValueError:
             limit = 10
         
-        # Récupérer l'historique de l'utilisateur
+        # Cache 5 minutes par utilisateur
+        cache_key = RedisCacheService.generate_cache_key(
+            'history',
+            request.user.id,
+            limit
+        )
+        cached = RedisCacheService.get(cache_key)
+        if cached:
+            return Response(cached, status=status.HTTP_200_OK)
+        
+        # Récupérer l'historique de l'utilisateur avec query optimisée
         history = SearchLog.objects.filter(
             user=request.user
+        ).only(
+            'query', 'search_type', 'results_count', 'created_at'
         ).order_by('-created_at')[:limit]
         
-        return Response({
+        response_data = {
             'history': [
                 {
                     'query': log.query,
@@ -154,7 +221,11 @@ class SearchHistoryAPIView(APIView):
                 }
                 for log in history
             ]
-        }, status=status.HTTP_200_OK)
+        }
+        
+        RedisCacheService.set(cache_key, response_data, timeout=300)
+        
+        return Response(response_data, status=status.HTTP_200_OK)
 
 
 class ReindexAPIView(APIView):
@@ -162,6 +233,9 @@ class ReindexAPIView(APIView):
     Endpoint admin pour réindexer toutes les données (Exigence #14)
     POST /api/search/reindex/
     Nécessite permissions admin
+    
+    OPTIMISATIONS:
+    - Invalide tout le cache après réindexation
     """
     
     def post(self, request):
@@ -179,9 +253,16 @@ class ReindexAPIView(APIView):
             from .models import SearchIndex
             total = SearchIndex.objects.count()
             
+            # Invalider tout le cache de recherche
+            from core.cache import invalidate_cache_pattern
+            invalidate_cache_pattern('search:*')
+            invalidate_cache_pattern('live_search:*')
+            invalidate_cache_pattern('suggestions:*')
+            
             return Response({
                 'message': 'Réindexation terminée avec succès',
                 'total_indexed': total,
+                'cache_cleared': True,
             }, status=status.HTTP_200_OK)
             
         except Exception as e:

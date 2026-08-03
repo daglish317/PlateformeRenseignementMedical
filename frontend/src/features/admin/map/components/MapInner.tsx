@@ -3,8 +3,10 @@
 import { Marker, Popup } from "react-leaflet";
 import L from "leaflet";
 import MapView from "@/components/map/MapView";
+import UserMarker from "@/components/map/UserMarker";
 import { Badge } from "@/components/ui/badge";
 import type { AdminMapStructure } from "../types/map";
+import type { UserLocation } from "@/services/map/geolocalisation";
 
 const hopitalIcon = L.divIcon({
   className: "custom-marker",
@@ -32,38 +34,42 @@ const statutLabel: Record<string, string> = {
 
 interface MapInnerProps {
   structures: AdminMapStructure[];
+  location?: UserLocation | null;
 }
 
-export default function MapInner({ structures }: MapInnerProps) {
+export default function MapInner({ structures, location }: MapInnerProps) {
   return (
-    <MapView>
-      {structures.map((structure) => {
-        const icon = structure.type === "HOPITAL" ? hopitalIcon : pharmacieIcon;
+    <MapView location={location}>
+      {location && <UserMarker location={location} />}
+      {structures
+        .filter((s) => s.latitude !== null && s.longitude !== null)
+        .map((structure) => {
+          const icon = structure.type === "HOPITAL" ? hopitalIcon : pharmacieIcon;
 
-        return (
-          <Marker
-            key={structure.id}
-            position={[structure.latitude, structure.longitude]}
-            icon={icon}
-          >
-            <Popup>
-              <div className="space-y-2 min-w-[180px]">
-                <h3 className="font-semibold">{structure.nom}</h3>
-                <p className="text-sm text-muted-foreground">
-                  {structure.type === "HOPITAL" ? "Hôpital" : "Pharmacie"}
-                </p>
-                <p className="text-sm">{structure.adresse}</p>
-                {structure.telephone && (
-                  <p className="text-xs text-muted-foreground">{structure.telephone}</p>
-                )}
-                <Badge variant={statutBadgeVariant[structure.statut] ?? "secondary"}>
-                  {statutLabel[structure.statut] ?? structure.statut}
-                </Badge>
-              </div>
-            </Popup>
-          </Marker>
-        );
-      })}
+          return (
+            <Marker
+              key={structure.id}
+              position={[structure.latitude, structure.longitude]}
+              icon={icon}
+            >
+              <Popup>
+                <div className="space-y-2 min-w-[180px]">
+                  <h3 className="font-semibold">{structure.nom}</h3>
+                  <p className="text-sm text-muted-foreground">
+                    {structure.type === "HOPITAL" ? "Hôpital" : "Pharmacie"}
+                  </p>
+                  <p className="text-sm">{structure.adresse}</p>
+                  {structure.telephone && (
+                    <p className="text-xs text-muted-foreground">{structure.telephone}</p>
+                  )}
+                  <Badge variant={statutBadgeVariant[structure.statut] ?? "secondary"}>
+                    {statutLabel[structure.statut] ?? structure.statut}
+                  </Badge>
+                </div>
+              </Popup>
+            </Marker>
+          );
+        })}
     </MapView>
   );
 }

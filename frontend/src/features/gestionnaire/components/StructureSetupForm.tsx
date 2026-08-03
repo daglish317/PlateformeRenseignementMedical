@@ -29,6 +29,7 @@ const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
 export function StructureSetupForm() {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const retryLocationRef = useRef<() => void>(() => {});
 
   const [loading, setLoading] = useState(false);
   const [geoLoading, setGeoLoading] = useState(true);
@@ -44,11 +45,69 @@ export function StructureSetupForm() {
   const [photoError, setPhotoError] = useState<string | null>(null);
 
   useEffect(() => {
-    getCurrentLocation()
-      .then(setCoords)
-      .catch(() => setGeoError("La géolocalisation est requise. Veuillez autoriser l'accès à votre position."))
-      .finally(() => setGeoLoading(false));
+    let cancelled = false;
+    let retryTimer: ReturnType<typeof setTimeout> | null = null;
+    let permissionStatus: PermissionStatus | null = null;
+
+    const attempt = () => {
+      if (retryTimer) {
+        clearTimeout(retryTimer);
+        retryTimer = null;
+      }
+
+      getCurrentLocation()
+        .then((position) => {
+          if (cancelled) return;
+          setCoords(position);
+          setGeoError(null);
+          setGeoLoading(false);
+        })
+        .catch(() => {
+          if (cancelled) return;
+          setGeoLoading(false);
+          retryTimer = setTimeout(attempt, 3000);
+        });
+    };
+
+    const handlePermissionChange = () => {
+      if (cancelled) return;
+      if (permissionStatus?.state === "granted") attempt();
+    };
+
+    const watchPermission = async () => {
+      if (!navigator.permissions?.query) return;
+
+      try {
+        const status = await navigator.permissions.query({ name: "geolocation" });
+        if (cancelled) return;
+        permissionStatus = status;
+        status.addEventListener("change", handlePermissionChange);
+      } catch {
+        // permissions API indisponible : le retry automatique prend le relais
+      }
+    };
+
+    retryLocationRef.current = () => {
+      setGeoLoading(true);
+      setGeoError(null);
+      attempt();
+    };
+
+    attempt();
+    watchPermission();
+
+    return () => {
+      cancelled = true;
+      if (retryTimer) clearTimeout(retryTimer);
+      if (permissionStatus) {
+        permissionStatus.removeEventListener("change", handlePermissionChange);
+      }
+    };
   }, []);
+
+  function handleRetryLocation() {
+    retryLocationRef.current();
+  }
 
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -117,12 +176,23 @@ export function StructureSetupForm() {
       )}
 
       {geoError && (
-        <div className="flex items-start gap-2 rounded-lg border border-destructive/50 bg-destructive/5 p-4 text-sm text-destructive">
-          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
-          <div>
-            <p className="font-medium">Géolocalisation requise</p>
-            <p>{geoError}</p>
+        <div className="space-y-3">
+          <div className="flex items-start gap-2 rounded-lg border border-destructive/50 bg-destructive/5 p-4 text-sm text-destructive">
+            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+            <div>
+              <p className="font-medium">Géolocalisation requise</p>
+              <p>{geoError}</p>
+              <p className="mt-1 text-muted-foreground">
+                Le système reste à l&apos;écoute de votre position : dès que la
+                localisation est activée, le formulaire se réactive
+                automatiquement, sans rechargement.
+              </p>
+            </div>
           </div>
+          <Button type="button" variant="outline" size="sm" onClick={handleRetryLocation}>
+            <MapPin className="mr-1.5 h-4 w-4" />
+            Réessayer
+          </Button>
         </div>
       )}
 

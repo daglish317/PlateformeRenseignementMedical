@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Loader2, UserPlus, Copy, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,15 +30,14 @@ export function CreateManagerDialog() {
 
   const canSubmit = nom.trim() && email.trim() && !createManager.isPending;
 
-  useEffect(() => {
-    if (!createdEmail || !open) return;
+  function loadOtp(emailToLoad: string) {
     setOtpLoading(true);
     api
-      .get(`/core/dev/otp/?email=${encodeURIComponent(createdEmail)}`)
+      .get(`/core/dev/otp/?email=${encodeURIComponent(emailToLoad)}`)
       .then(({ data }) => setOtpCode(data.code))
       .catch(() => setOtpCode(null))
       .finally(() => setOtpLoading(false));
-  }, [createdEmail, open]);
+  }
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -51,6 +50,7 @@ export function CreateManagerDialog() {
           setCreatedEmail(email.trim());
           setNom("");
           setEmail("");
+          loadOtp(email.trim());
         },
       }
     );

@@ -30,9 +30,12 @@ export default function SearchBar() {
 
   useSearch({ query, page });
 
-  useEffect(() => {
+  const [prevQuery, setPrevQuery] = useState(query);
+
+  if (prevQuery !== query) {
+    setPrevQuery(query);
     setInputValue(query);
-  }, [query]);
+  }
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {

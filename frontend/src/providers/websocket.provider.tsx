@@ -7,7 +7,7 @@ import { tokenService } from "@/features/auth/api/token.service";
 
 interface WebSocketContextValue {
   connected: boolean;
-  lastMessage: NotificationMessage | null;
+  subscribe: (listener: (message: NotificationMessage) => void) => () => void;
 }
 
 export interface NotificationMessage {
@@ -20,7 +20,7 @@ export interface NotificationMessage {
 
 const WebSocketContext = createContext<WebSocketContextValue>({
   connected: false,
-  lastMessage: null,
+  subscribe: () => () => {},
 });
 
 export function useWebSocket() {
@@ -29,13 +29,21 @@ export function useWebSocket() {
 
 export default function WebSocketProvider({ children }: { children: React.ReactNode }) {
   const [connected, setConnected] = useState(false);
-  const [lastMessage, setLastMessage] = useState<NotificationMessage | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<ReturnType<typeof setTimeout>>(null);
   const mountedRef = useRef(true);
   const intentionalCloseRef = useRef(false);
+  const listenersRef = useRef(new Set<(message: NotificationMessage) => void>());
+  const connectRef = useRef<() => Promise<void>>(async () => {});
   const authenticated = useAuthStore((s) => s.authenticated);
   const hydrated = useAuthStore((s) => s.hydrated);
+
+  const subscribe = useCallback((listener: (message: NotificationMessage) => void) => {
+    listenersRef.current.add(listener);
+    return () => {
+      listenersRef.current.delete(listener);
+    };
+  }, []);
 
   const connect = useCallback(async () => {
     if (!authenticated || !hydrated || !mountedRef.current) return;
@@ -76,18 +84,18 @@ export default function WebSocketProvider({ children }: { children: React.ReactN
     ws.onmessage = (event) => {
       try {
         const data: NotificationMessage = JSON.parse(event.data);
-        if (mountedRef.current) setLastMessage(data);
+        listenersRef.current.forEach((listener) => listener(data));
       } catch {
         // ignore malformed messages
       }
     };
 
     ws.onclose = () => {
-      if (intentionalCloseRef.current || !mountedRef.current) return;
       setConnected(false);
+      if (intentionalCloseRef.current || !mountedRef.current) return;
       if (authenticated && mountedRef.current) {
         reconnectTimeoutRef.current = setTimeout(() => {
-          if (mountedRef.current) connect();
+          if (mountedRef.current) connectRef.current();
         }, 5000);
       }
     };
@@ -98,6 +106,10 @@ export default function WebSocketProvider({ children }: { children: React.ReactN
       }
     };
   }, [authenticated, hydrated]);
+
+  useEffect(() => {
+    connectRef.current = connect;
+  }, [connect]);
 
   const safeClose = useCallback(() => {
     intentionalCloseRef.current = true;
@@ -117,7 +129,6 @@ export default function WebSocketProvider({ children }: { children: React.ReactN
       connect();
     } else {
       safeClose();
-      setConnected(false);
     }
 
     return () => {
@@ -126,12 +137,11 @@ export default function WebSocketProvider({ children }: { children: React.ReactN
         clearTimeout(reconnectTimeoutRef.current);
       }
       safeClose();
-      setConnected(false);
     };
   }, [authenticated, connect, safeClose]);
 
   return (
-    <WebSocketContext.Provider value={{ connected, lastMessage }}>
+    <WebSocketContext.Provider value={{ connected, subscribe }}>
       {children}
     </WebSocketContext.Provider>
   );

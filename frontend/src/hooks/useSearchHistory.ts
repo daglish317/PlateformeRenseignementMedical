@@ -1,24 +1,22 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 
 const STORAGE_KEY = "search-history";
 const MAX_HISTORY = 10;
 
 export function useSearchHistory() {
-  const [history, setHistory] = useState<string[]>([]);
+  const [history, setHistory] = useState<string[]>(() => {
+    if (typeof window === "undefined") return [];
 
-  useEffect(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
 
-      if (!stored) return;
-
-      setHistory(JSON.parse(stored));
+      return stored ? (JSON.parse(stored) as string[]) : [];
     } catch {
-      setHistory([]);
+      return [];
     }
-  }, []);
+  });
 
   const saveHistory = useCallback((items: string[]) => {
     setHistory(items);
