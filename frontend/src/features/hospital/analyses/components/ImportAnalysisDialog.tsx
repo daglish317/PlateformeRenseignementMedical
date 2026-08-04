@@ -1,4 +1,5 @@
 "use client";
+
 import { useState, useRef } from "react";
 import { Loader2, Upload, FileSpreadsheet } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -45,7 +46,7 @@ export function ImportAnalysisDialog({ structureId }: ImportAnalysisDialogProps)
         <DialogHeader>
           <DialogTitle>Importer des analyses</DialogTitle>
           <DialogDescription>
-            Fichier Excel (.xlsx) ou CSV avec une colonne <strong>Nom de l'analyse</strong>.
+            Fichier Excel (.xlsx) ou CSV avec une colonne <strong>Nom de l&apos;analyse</strong>.
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4">

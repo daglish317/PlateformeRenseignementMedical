@@ -1,6 +1,5 @@
 "use client";
 
-import Logo from "@/components/layout/Logo";
 import { Link } from "@/i18n/navigation";
 
 export default function Footer() {

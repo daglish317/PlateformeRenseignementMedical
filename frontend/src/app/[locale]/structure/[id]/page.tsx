@@ -29,8 +29,8 @@ export default function StructurePage({ params }: StructurePageProps) {
   if (loading) {
     return (
       <PublicLayout showSearch={false} showFooter={true}>
-        <div className="flex items-center justify-center min-h-[50vh]">
-          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        <div className="flex min-h-[50vh] items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
       </PublicLayout>
     );
@@ -40,9 +40,10 @@ export default function StructurePage({ params }: StructurePageProps) {
     return (
       <PublicLayout showSearch={false} showFooter={true}>
         <div className="container mx-auto px-4 py-16 text-center">
-          <h1 className="text-2xl font-bold mb-4">Structure introuvable</h1>
+          <h1 className="mb-4 text-2xl font-bold">Structure introuvable</h1>
           <p className="text-muted-foreground">
-            La structure médicale que vous recherchez n'existe pas ou une erreur est survenue.
+            La structure médicale que vous recherchez n&apos;existe pas ou une erreur est
+            survenue.
           </p>
         </div>
       </PublicLayout>
@@ -51,17 +52,17 @@ export default function StructurePage({ params }: StructurePageProps) {
 
   return (
     <PublicLayout showSearch={false} showFooter={true}>
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
+      <div className="container mx-auto max-w-7xl px-4 py-8">
         <StructureHeader structure={structure} />
 
-        <div className="mt-4 mb-2">
+        <div className="mb-2 mt-4">
           <StructureBreadcrumb name={structure.nom} />
         </div>
 
         <StructureNavMobile />
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
-          <div className="lg:col-span-2 space-y-8">
+        <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-3">
+          <div className="space-y-8 lg:col-span-2">
             <div id="infos" className="scroll-mt-20">
               <StructureInfo structure={structure} />
             </div>
@@ -82,9 +83,9 @@ export default function StructurePage({ params }: StructurePageProps) {
             </div>
           </div>
 
-          <div className="lg:col-span-1 space-y-6">
+          <div className="space-y-6 lg:col-span-1">
             <StructureActions structure={structure} />
-            <div className="hidden lg:block sticky top-8">
+            <div className="sticky top-8 hidden lg:block">
               <StructureNavDesktop />
             </div>
           </div>

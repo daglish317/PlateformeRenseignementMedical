@@ -1,14 +1,22 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { AdminPageTitle } from "../../shared/components/AdminPageTitle";
 import { AdminLoading } from "../../shared/components/AdminLoading";
 import { AdminError } from "../../shared/components/AdminError";
 import { useStatistics } from "../hooks/useStatistics";
 import { StatisticsPeriod } from "../components/StatisticsPeriod";
 import { StatisticsCardsGrid } from "../components/StatisticsCards";
-import { StatisticsCharts } from "../components/StatisticsCharts";
 import { TopSearches } from "../components/TopSearches";
 import { PopularStructures } from "../components/PopularStructures";
+
+const StatisticsCharts = dynamic(
+  () => import("../components/StatisticsCharts").then((mod) => mod.StatisticsCharts),
+  {
+    ssr: false,
+    loading: () => <div className="h-[220px] rounded-xl bg-muted/30" />,
+  }
+);
 
 export function StatisticsPage() {
   const { data, isLoading, isError, refetch } = useStatistics();

@@ -1,6 +1,6 @@
 "use client";
 
-import { Loader2, RefreshCw } from "lucide-react";
+import { RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PageContainer } from "../../dashboard/components/PageContainer";
@@ -87,7 +87,7 @@ export function DashboardHomePage({ type }: DashboardHomePageProps) {
             <StatusCard structure={data.structure} />
           </div>
 
-          <RecentActivity activities={[]} />
+          <RecentActivity activities={data.recent_activity} />
         </div>
       ) : null}
     </PageContainer>

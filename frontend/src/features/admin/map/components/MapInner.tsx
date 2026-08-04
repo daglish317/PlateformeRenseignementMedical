@@ -35,11 +35,12 @@ const statutLabel: Record<string, string> = {
 interface MapInnerProps {
   structures: AdminMapStructure[];
   location?: UserLocation | null;
+  zoomControl?: boolean;
 }
 
-export default function MapInner({ structures, location }: MapInnerProps) {
+export default function MapInner({ structures, location, zoomControl = false }: MapInnerProps) {
   return (
-    <MapView location={location}>
+    <MapView location={location} zoomControl={zoomControl}>
       {location && <UserMarker location={location} />}
       {structures
         .filter((s) => s.latitude !== null && s.longitude !== null)

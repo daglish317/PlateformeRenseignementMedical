@@ -1,15 +1,8 @@
 "use client";
 
-import { useEffect } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { useTheme } from "next-themes";
-import {
-  Menu,
-  PanelLeftClose,
-  PanelLeft,
-} from "lucide-react";
 import Image from "next/image";
-import { Link } from "@/i18n/navigation";
-import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import { useMounted } from "@/hooks/useMounted";
@@ -24,33 +17,43 @@ interface DashboardSidebarProps {
 }
 
 export function DashboardSidebar({ type, className }: DashboardSidebarProps) {
-  const { open, collapsed, isMobile, setOpen, setCollapsed, setIsMobile } =
-    useDashboardSidebar();
+  const { open, collapsed, isMobile, setOpen, setIsMobile } = useDashboardSidebar();
   const { navigation } = useDashboardNavigation(type);
   const { resolvedTheme } = useTheme();
   const mounted = useMounted();
 
   const isDark = mounted && resolvedTheme === "dark";
+  const closeMobileMenu = useCallback(() => {
+    if (isMobile) {
+      setOpen(false);
+    }
+  }, [isMobile, setOpen]);
 
   useEffect(() => {
-    function handleResize() {
-      const mobile = window.innerWidth < DASHBOARD_LAYOUT.mobileBreakpoint;
+    const mediaQuery = window.matchMedia(
+      `(max-width: ${DASHBOARD_LAYOUT.mobileBreakpoint - 1}px)`
+    );
+
+    const syncResponsiveState = () => {
+      const mobile = mediaQuery.matches;
       setIsMobile(mobile);
-      if (mobile) {
-        setOpen(false);
-      } else {
-        setOpen(true);
-      }
+      setOpen(!mobile);
+    };
+
+    syncResponsiveState();
+
+    if (mediaQuery.addEventListener) {
+      mediaQuery.addEventListener("change", syncResponsiveState);
+      return () => mediaQuery.removeEventListener("change", syncResponsiveState);
     }
 
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    mediaQuery.addListener(syncResponsiveState);
+    return () => mediaQuery.removeListener(syncResponsiveState);
   }, [setIsMobile, setOpen]);
 
   const subtitle = type === "HOPITAL" ? "Hôpital" : "Pharmacie";
 
-  const sidebarContent = (
+  const sidebarContent = useMemo(() => (
     <div className="flex h-full flex-col">
       <div className="flex h-20 items-center justify-center border-b px-4">
         {collapsed ? (
@@ -73,11 +76,15 @@ export function DashboardSidebar({ type, className }: DashboardSidebarProps) {
       </div>
 
       <div className="flex-1 overflow-y-auto px-3 py-4">
-        <SidebarMenu items={navigation} collapsed={collapsed} />
+        <SidebarMenu
+          items={navigation}
+          collapsed={collapsed}
+          onNavigate={closeMobileMenu}
+        />
       </div>
 
     </div>
-  );
+  ), [closeMobileMenu, collapsed, isDark, navigation]);
 
   if (isMobile) {
     return (

@@ -3,9 +3,11 @@
 import { Marker, Popup } from "react-leaflet";
 import L from "leaflet";
 import MapView from "@/components/map/MapView";
+import UserMarker from "@/components/map/UserMarker";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import type { DashboardMapStructure } from "../types/dashboard";
+import type { UserLocation } from "@/services/map/geolocalisation";
 
 const hopitalIcon = L.divIcon({
   className: "custom-marker",
@@ -21,11 +23,13 @@ const pharmacieIcon = L.divIcon({
 
 interface PlatformMapInnerProps {
   structures: DashboardMapStructure[];
+  location?: UserLocation | null;
 }
 
-export default function PlatformMapInner({ structures }: PlatformMapInnerProps) {
+export default function PlatformMapInner({ structures, location }: PlatformMapInnerProps) {
   return (
-    <MapView>
+    <MapView location={location} zoomControl>
+      {location && <UserMarker location={location} />}
       {structures.map((structure) => {
         const icon = structure.type === "HOPITAL" ? hopitalIcon : pharmacieIcon;
 

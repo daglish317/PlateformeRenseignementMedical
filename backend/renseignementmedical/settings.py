@@ -76,7 +76,6 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "rest_framework.authtoken",
-    "rest_framework_simplejwt.token_blacklist",
     "allauth",
     "allauth.account",
     "allauth.socialaccount",
@@ -105,6 +104,10 @@ INSTALLED_APPS = [
 ASGI_APPLICATION = 'core.asgi.application'
 if IS_PRODUCTION:
     INSTALLED_APPS.insert(6, "whitenoise.runserver_nostatic")
+
+ENABLE_JWT_BLACKLIST = os.getenv("ENABLE_JWT_BLACKLIST", "false").lower() == "true"
+if ENABLE_JWT_BLACKLIST:
+    INSTALLED_APPS.append("rest_framework_simplejwt.token_blacklist")
 
 # ---------------------------------------------------------------------------
 # Middleware

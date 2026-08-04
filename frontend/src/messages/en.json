@@ -9,87 +9,119 @@
     "delete": "Delete",
     "edit": "Edit"
   },
-
   "navigation": {
     "home": "Home",
     "search": "Search",
     "login": "Login"
   },
-
   "header": {
     "ariaLabel": "Main navigation",
-    "logoAlt": "SantéProx logo",
+    "logoAlt": "Sant\u00e9Prox logo",
     "login": "Login",
     "dashboard": "My space"
   },
-
   "footer": {
-  "about": "À propos",
-  "contact": "Me contacter",
-  "feedback": "Laisser un avis",
-  "copyright": "Tous droits réservés."
- },
-
+    "about": "About",
+    "contact": "Contact me",
+    "feedback": "Leave feedback",
+    "copyright": "All rights reserved."
+  },
   "language": {
     "label": "Language",
     "change": "Change language",
     "fr": "French",
     "en": "English"
   },
-
   "theme": {
     "label": "Theme",
     "system": "System",
     "toggle": "Change theme",
     "light": "Light mode",
     "dark": "Dark mode"
-    
   },
-
   "home": {},
-
   "auth": {
     "login": "Login",
     "register": "Create an account",
-    "dashboard": "My space"
+    "dashboard": "My space",
+    "loginTitle": "Login",
+    "registerTitle": "Sign up",
+    "activationTitle": "Account activation",
+    "name": "Name",
+    "namePlaceholder": "Your name",
+    "email": "Email",
+    "emailPlaceholder": "email@example.com",
+    "password": "Password",
+    "confirmPassword": "Confirm password",
+    "passwordPlaceholder": "\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022",
+    "signIn": "Sign in",
+    "signingIn": "Signing in...",
+    "signUp": "Sign up",
+    "signingUp": "Signing up...",
+    "loginSuccess": "Signed in successfully",
+    "registerSuccess": "Account created successfully",
+    "noAccount": "Don't have an account yet?",
+    "hasAccount": "Already have an account?",
+    "managerAccount": "Are you a manager? Activate your account",
+    "noManagerAccount": "No manager account?",
+    "normalRegister": "Sign up normally",
+    "googleNotConfigured": "Google is not configured",
+    "googleLoading": "Loading Google...",
+    "googleLoadFailed": "Unable to load the Google button. Click to retry.",
+    "googleMissingToken": "Unable to retrieve the Google token",
+    "googleSuccess": "Google sign-in successful",
+    "googleError": "Google sign-in failed",
+    "googlePopupError": "The Google sign-in window failed",
+    "googlePending": "Signing in...",
+    "genericError": "Something went wrong",
+    "validation": {
+      "email": "Invalid email",
+      "passwordRequired": "Password is required",
+      "nameRequired": "Name is required",
+      "passwordMin": "Password must contain at least 8 characters",
+      "confirmPasswordRequired": "Password confirmation is required",
+      "passwordMismatch": "Passwords do not match"
+    },
+    "manager": {
+      "pendingNotFound": "No pending manager account was found with this email.",
+      "otpInvalid": "Invalid or expired OTP code.",
+      "passwordMismatch": "Passwords do not match.",
+      "passwordMin": "Password must contain at least 8 characters.",
+      "activated": "Account activated successfully",
+      "emailHelp": "Enter the email used when your manager account was created.",
+      "checking": "Checking...",
+      "checkEmail": "Check my email",
+      "backToRegister": "Back to sign up",
+      "otpHelp": "Enter the 4-digit code sent to",
+      "verifyCode": "Verify code",
+      "passwordHelp": "Code verified. Set your password for",
+      "passwordMinPlaceholder": "Minimum 8 characters",
+      "confirmPasswordPlaceholder": "Retype the password",
+      "activating": "Activating...",
+      "activate": "Activate my account"
+    }
   },
-
   "search": {
     "placeholder": "Search for a hospital, pharmacy, service...",
     "history": "Recent searches",
     "suggestions": "Suggestions"
   },
-
   "map": {},
-
   "structure": {},
-
   "catalogue": {},
-
   "stock": {},
-
   "servicesMedicaux": {},
-
   "plateauTechnique": {},
-
   "priseEnCharge": {},
-
   "dashboard": {
     "admin": {},
     "gestionnaire": {}
   },
-
   "notifications": {},
-
   "messagerie": {},
-
   "feedback": {},
-
   "profile": {},
-
   "settings": {},
-
   "validation": {},
-
   "errors": {}
 }

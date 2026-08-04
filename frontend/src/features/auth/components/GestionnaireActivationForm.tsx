@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
+import { ArrowLeft, Loader2 } from "lucide-react";
+import { toast } from "sonner";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, ArrowLeft } from "lucide-react";
-import { toast } from "sonner";
 import { authService } from "@/features/auth/api/auth.service";
 import { useAuthStore } from "@/features/auth/store/auth-store";
 import { getAuthErrorMessage } from "@/features/auth/utils/auth-errors";
@@ -15,14 +17,17 @@ interface GestionnaireActivationFormProps {
   onBackToRegister?: () => void;
 }
 
-export function GestionnaireActivationForm({ onSuccess, onBackToRegister }: GestionnaireActivationFormProps) {
+export function GestionnaireActivationForm({
+  onSuccess,
+  onBackToRegister,
+}: GestionnaireActivationFormProps) {
+  const t = useTranslations("auth");
   const setAuth = useAuthStore((s) => s.setAuth);
 
   const [email, setEmail] = useState("");
   const [otpDigits, setOtpDigits] = useState<string[]>(["", "", "", ""]);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-
   const [step, setStep] = useState<"email" | "otp" | "password">("email");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -31,30 +36,33 @@ export function GestionnaireActivationForm({ onSuccess, onBackToRegister }: Gest
     e.preventDefault();
     setLoading(true);
     setError(null);
+
     try {
       const result = await authService.checkGestionnaire(email);
       if (result.is_gestionnaire) {
         setStep("otp");
       } else {
-        setError("Aucun compte gestionnaire en attente trouvé avec cet email.");
+        setError(t("manager.pendingNotFound"));
       }
     } catch {
-      setError("Aucun compte gestionnaire en attente trouvé avec cet email.");
+      setError(t("manager.pendingNotFound"));
     } finally {
       setLoading(false);
     }
   };
 
-  const handleVerifyOtp = async () => {
-    const code = otpDigits.join("");
+  const handleVerifyOtp = async (nextCode?: string) => {
+    const code = nextCode ?? otpDigits.join("");
     if (code.length !== 4) return;
+
     setLoading(true);
     setError(null);
+
     try {
       await authService.validateGestionnaireOtp(email, code);
       setStep("password");
     } catch {
-      setError("Code OTP invalide ou expiré.");
+      setError(t("manager.otpInvalid"));
     } finally {
       setLoading(false);
     }
@@ -62,55 +70,64 @@ export function GestionnaireActivationForm({ onSuccess, onBackToRegister }: Gest
 
   const handleOtpChange = (index: number, value: string) => {
     if (!/^\d*$/.test(value)) return;
+
     const newDigits = [...otpDigits];
     newDigits[index] = value.slice(-1);
     setOtpDigits(newDigits);
     setError(null);
-    if (newDigits.every((d) => d !== "")) {
-      handleVerifyOtp();
+
+    if (newDigits.every((digit) => digit !== "")) {
+      handleVerifyOtp(newDigits.join(""));
     }
   };
 
   const handleOtpKeyDown = (index: number, e: React.KeyboardEvent) => {
     if (e.key === "Backspace" && !otpDigits[index] && index > 0) {
-      const prev = document.getElementById(`otp-${index - 1}`);
-      prev?.focus();
+      document.getElementById(`otp-${index - 1}`)?.focus();
     }
   };
 
   const handleOtpPaste = (e: React.ClipboardEvent) => {
     e.preventDefault();
+
     const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 4);
     if (!pasted) return;
+
     const newDigits = [...otpDigits];
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < 4; i += 1) {
       newDigits[i] = pasted[i] ?? "";
     }
+
     setOtpDigits(newDigits);
-    if (newDigits.every((d) => d !== "")) {
-      handleVerifyOtp();
+
+    if (newDigits.every((digit) => digit !== "")) {
+      handleVerifyOtp(newDigits.join(""));
     }
   };
 
   const handleSetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
+
     if (password !== confirmPassword) {
-      setError("Les mots de passe ne correspondent pas.");
+      setError(t("manager.passwordMismatch"));
       return;
     }
+
     if (password.length < 8) {
-      setError("Le mot de passe doit contenir au moins 8 caractères.");
+      setError(t("manager.passwordMin"));
       return;
     }
+
     setLoading(true);
     setError(null);
+
     try {
       const auth = await authService.activateGestionnaire(email, password);
-      toast.success("Compte activé avec succès");
+      toast.success(t("manager.activated"));
       setAuth(auth);
       onSuccess?.();
     } catch (err) {
-      setError(getAuthErrorMessage(err));
+      setError(getAuthErrorMessage(err, t("genericError")));
     } finally {
       setLoading(false);
     }
@@ -121,16 +138,19 @@ export function GestionnaireActivationForm({ onSuccess, onBackToRegister }: Gest
       {step === "email" && (
         <form onSubmit={handleCheckEmail} className="space-y-4">
           <p className="text-sm text-muted-foreground">
-            Entrez l&apos;email utilisé lors de la création de votre compte gestionnaire.
+            {t("manager.emailHelp")}
           </p>
           <div className="space-y-2">
-            <Label htmlFor="gest-email">Email</Label>
+            <Label htmlFor="gest-email">{t("email")}</Label>
             <Input
               id="gest-email"
               type="email"
-              placeholder="email@exemple.com"
+              placeholder={t("emailPlaceholder")}
               value={email}
-              onChange={(e) => { setEmail(e.target.value); setError(null); }}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                setError(null);
+              }}
               disabled={loading}
             />
           </div>
@@ -139,20 +159,20 @@ export function GestionnaireActivationForm({ onSuccess, onBackToRegister }: Gest
             {loading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Vérification...
+                {t("manager.checking")}
               </>
             ) : (
-              "Vérifier mon email"
+              t("manager.checkEmail")
             )}
           </Button>
           {onBackToRegister && (
             <button
               type="button"
               onClick={onBackToRegister}
-              className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mx-auto"
+              className="mx-auto flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
             >
               <ArrowLeft className="h-4 w-4" />
-              Retour à l&apos;inscription
+              {t("manager.backToRegister")}
             </button>
           )}
         </form>
@@ -160,40 +180,41 @@ export function GestionnaireActivationForm({ onSuccess, onBackToRegister }: Gest
 
       {step === "otp" && (
         <div className="space-y-4">
-          <p className="text-sm text-muted-foreground text-center">
-            Entrez le code à 4 chiffres envoyé à <span className="font-medium text-foreground">{email}</span>
+          <p className="text-center text-sm text-muted-foreground">
+            {t("manager.otpHelp")}{" "}
+            <span className="font-medium text-foreground">{email}</span>
           </p>
           <div className="flex justify-center gap-3">
-            {otpDigits.map((digit, i) => (
+            {otpDigits.map((digit, index) => (
               <Input
-                key={i}
-                id={`otp-${i}`}
+                key={index}
+                id={`otp-${index}`}
                 type="text"
                 inputMode="numeric"
                 maxLength={1}
                 value={digit}
-                onChange={(e) => handleOtpChange(i, e.target.value)}
-                onKeyDown={(e) => handleOtpKeyDown(i, e)}
-                onPaste={i === 0 ? handleOtpPaste : undefined}
+                onChange={(e) => handleOtpChange(index, e.target.value)}
+                onKeyDown={(e) => handleOtpKeyDown(index, e)}
+                onPaste={index === 0 ? handleOtpPaste : undefined}
                 className="h-14 w-14 text-center text-lg font-semibold"
                 disabled={loading}
-                autoFocus={i === 0}
+                autoFocus={index === 0}
               />
             ))}
           </div>
-          {error && <p className="text-sm text-destructive text-center">{error}</p>}
+          {error && <p className="text-center text-sm text-destructive">{error}</p>}
           <Button
             className="w-full"
-            disabled={otpDigits.some((d) => d === "") || loading}
-            onClick={handleVerifyOtp}
+            disabled={otpDigits.some((digit) => digit === "") || loading}
+            onClick={() => handleVerifyOtp()}
           >
             {loading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Vérification...
+                {t("manager.checking")}
               </>
             ) : (
-              "Vérifier le code"
+              t("manager.verifyCode")
             )}
           </Button>
         </div>
@@ -201,40 +222,51 @@ export function GestionnaireActivationForm({ onSuccess, onBackToRegister }: Gest
 
       {step === "password" && (
         <form onSubmit={handleSetPassword} className="space-y-4">
-          <p className="text-sm text-muted-foreground text-center">
-            Code vérifié. Définissez votre mot de passe pour <span className="font-medium text-foreground">{email}</span>
+          <p className="text-center text-sm text-muted-foreground">
+            {t("manager.passwordHelp")}{" "}
+            <span className="font-medium text-foreground">{email}</span>
           </p>
           <div className="space-y-2">
-            <Label htmlFor="gest-password">Mot de passe</Label>
+            <Label htmlFor="gest-password">{t("password")}</Label>
             <Input
               id="gest-password"
               type="password"
-              placeholder="Minimum 8 caractères"
+              placeholder={t("manager.passwordMinPlaceholder")}
               value={password}
-              onChange={(e) => { setPassword(e.target.value); setError(null); }}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                setError(null);
+              }}
               disabled={loading}
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="gest-confirm">Confirmer le mot de passe</Label>
+            <Label htmlFor="gest-confirm">{t("confirmPassword")}</Label>
             <Input
               id="gest-confirm"
               type="password"
-              placeholder="Retapez le mot de passe"
+              placeholder={t("manager.confirmPasswordPlaceholder")}
               value={confirmPassword}
-              onChange={(e) => { setConfirmPassword(e.target.value); setError(null); }}
+              onChange={(e) => {
+                setConfirmPassword(e.target.value);
+                setError(null);
+              }}
               disabled={loading}
             />
           </div>
           {error && <p className="text-sm text-destructive">{error}</p>}
-          <Button type="submit" className="w-full" disabled={loading || !password || !confirmPassword}>
+          <Button
+            type="submit"
+            className="w-full"
+            disabled={loading || !password || !confirmPassword}
+          >
             {loading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Activation...
+                {t("manager.activating")}
               </>
             ) : (
-              "Activer mon compte"
+              t("manager.activate")
             )}
           </Button>
         </form>

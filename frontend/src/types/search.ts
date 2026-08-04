@@ -29,7 +29,7 @@ export type UnifiedSearchResult = {
   distance_km: number | null;
   is_available: boolean;
   quantity: number;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
   relevance_score: number;
 };
 

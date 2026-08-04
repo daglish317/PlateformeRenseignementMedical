@@ -2,8 +2,9 @@
 
 import { useEffect } from "react";
 import { useRouter } from "@/i18n/navigation";
+
 import { useAuthStore } from "@/features/auth/store/auth-store";
-import api from "@/lib/axios";
+import { useMyStructure } from "@/features/shared/structure-profile/hooks/useMyStructure";
 
 const TYPE_TO_ROUTE: Record<string, string> = {
   HOPITAL: "hospital",
@@ -12,32 +13,36 @@ const TYPE_TO_ROUTE: Record<string, string> = {
 
 export default function GestionnaireRootPage() {
   const router = useRouter();
-  const authenticated = useAuthStore((s) => s.authenticated);
+  const authenticated = useAuthStore((state) => state.authenticated);
+  const hydrated = useAuthStore((state) => state.hydrated);
+  const { data: structure, isError } = useMyStructure(hydrated && authenticated);
 
   useEffect(() => {
+    if (!hydrated) return;
+
     if (!authenticated) {
       router.replace("/connexion");
       return;
     }
 
-    api
-      .get("/structures/me/")
-      .then(({ data }) => {
-        const statut = data.statut as string;
-        const route = TYPE_TO_ROUTE[(data.type as string).toUpperCase()] || "hospital";
+    if (isError) {
+      router.replace("/gestionnaire/setup");
+      return;
+    }
 
-        if (statut === "ACTIVE") {
-          router.replace(`/${route}`);
-        } else if (statut === "EN_ATTENTE") {
-          router.replace("/gestionnaire/success");
-        } else {
-          router.replace("/gestionnaire/setup");
-        }
-      })
-      .catch(() => {
-        router.replace("/gestionnaire/setup");
-      });
-  }, [authenticated, router]);
+    if (!structure) return;
+
+    const statut = structure.statut;
+    const route = TYPE_TO_ROUTE[structure.type.toUpperCase()] || "hospital";
+
+    if (statut === "ACTIVE") {
+      router.replace(`/${route}`);
+    } else if (statut === "EN_ATTENTE") {
+      router.replace("/gestionnaire/success");
+    } else {
+      router.replace("/gestionnaire/setup");
+    }
+  }, [authenticated, hydrated, isError, router, structure]);
 
   return null;
 }

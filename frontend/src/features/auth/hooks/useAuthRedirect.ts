@@ -10,10 +10,6 @@ export const useAuthRedirect = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const user = useAuthStore(
-    (state) => state.user
-  );
-
   const redirectAfterAuth = () => {
     const returnTo = searchParams.get("returnTo");
 
@@ -21,6 +17,8 @@ export const useAuthRedirect = () => {
       router.push(returnTo);
       return;
     }
+
+    const user = useAuthStore.getState().user;
 
     if (!user) {
       return;

@@ -2,8 +2,9 @@
 
 import { useEffect } from "react";
 import { useRouter } from "@/i18n/navigation";
+
 import { useAuthStore } from "@/features/auth/store/auth-store";
-import { authService } from "@/features/auth/api/auth.service";
+import { useCurrentUser } from "@/features/auth/hooks/useCurrentUser";
 import { hasAdminPermission } from "../navigation/permissions";
 import { AdminLoading } from "./AdminLoading";
 
@@ -14,41 +15,29 @@ interface AdminRouteProps {
 export function AdminRoute({ children }: AdminRouteProps) {
   const router = useRouter();
   const authenticated = useAuthStore((state) => state.authenticated);
-  const user = useAuthStore((state) => state.user);
-  const setUser = useAuthStore((state) => state.setUser);
+  const hydrated = useAuthStore((state) => state.hydrated);
+  const storedUser = useAuthStore((state) => state.user);
+  const { data: currentUser, isLoading, isError } = useCurrentUser();
+  const user = storedUser ?? currentUser;
 
   useEffect(() => {
-    if (!authenticated) {
+    if (!hydrated) return;
+
+    if (!authenticated || isError) {
       router.replace("/connexion");
       return;
     }
 
-    if (!user) {
-      authService.getMe().then((userData) => {
-        setUser(userData);
-        if (!hasAdminPermission(userData.role)) {
-          router.replace("/");
-        }
-      }).catch(() => {
-        router.replace("/connexion");
-      });
-      return;
-    }
-
-    if (!hasAdminPermission(user.role)) {
+    if (user && !hasAdminPermission(user.role)) {
       router.replace("/");
     }
-  }, [authenticated, user, router, setUser]);
+  }, [authenticated, hydrated, isError, router, user]);
 
-  if (!authenticated) {
-    return null;
+  if (!hydrated || isLoading) {
+    return <AdminLoading label="Verification des acces..." />;
   }
 
-  if (!user) {
-    return <AdminLoading label="Vérification des accès..." />;
-  }
-
-  if (!hasAdminPermission(user.role)) {
+  if (!authenticated || !user || !hasAdminPermission(user.role)) {
     return null;
   }
 

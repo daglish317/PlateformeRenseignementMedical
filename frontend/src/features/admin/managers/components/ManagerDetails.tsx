@@ -49,7 +49,7 @@ export function ManagerDetails({ manager, open, onOpenChange }: ManagerDetailsPr
             </div>
 
             <div className="border-t pt-4">
-              <p className="text-xs font-medium text-muted-foreground mb-3">Structure</p>
+              <p className="mb-3 text-xs font-medium text-muted-foreground">Structure</p>
               {manager.structure ? (
                 <div className="space-y-2">
                   <div>
@@ -73,10 +73,10 @@ export function ManagerDetails({ manager, open, onOpenChange }: ManagerDetailsPr
             </div>
 
             <div className="border-t pt-4">
-              <p className="text-xs font-medium text-muted-foreground mb-3">Activité</p>
+              <p className="mb-3 text-xs font-medium text-muted-foreground">Activité</p>
               <div className="space-y-2">
                 <div>
-                  <p className="text-xs text-muted-foreground">Date d'inscription</p>
+                  <p className="text-xs text-muted-foreground">Date d&apos;inscription</p>
                   <p className="text-sm">
                     {format(new Date(manager.date_joined), "dd MMMM yyyy", { locale: fr })}
                   </p>
@@ -85,7 +85,9 @@ export function ManagerDetails({ manager, open, onOpenChange }: ManagerDetailsPr
                   <p className="text-xs text-muted-foreground">Dernière connexion</p>
                   <p className="text-sm">
                     {manager.last_login
-                      ? format(new Date(manager.last_login), "dd MMMM yyyy 'à' HH:mm", { locale: fr })
+                      ? format(new Date(manager.last_login), "dd MMMM yyyy 'à' HH:mm", {
+                          locale: fr,
+                        })
                       : "Jamais"}
                   </p>
                 </div>

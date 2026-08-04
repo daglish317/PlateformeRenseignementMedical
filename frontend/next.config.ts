@@ -21,6 +21,42 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
+        source: '/fr/connexion',
+        headers: [
+          {
+            key: 'Cross-Origin-Opener-Policy',
+            value: 'same-origin-allow-popups',
+          },
+        ],
+      },
+      {
+        source: '/en/connexion',
+        headers: [
+          {
+            key: 'Cross-Origin-Opener-Policy',
+            value: 'same-origin-allow-popups',
+          },
+        ],
+      },
+      {
+        source: '/fr/inscription',
+        headers: [
+          {
+            key: 'Cross-Origin-Opener-Policy',
+            value: 'same-origin-allow-popups',
+          },
+        ],
+      },
+      {
+        source: '/en/inscription',
+        headers: [
+          {
+            key: 'Cross-Origin-Opener-Policy',
+            value: 'same-origin-allow-popups',
+          },
+        ],
+      },
+      {
         source: '/api/:path*',
         headers: [
           {
@@ -42,17 +78,24 @@ const nextConfig: NextConfig = {
   },
 
   async rewrites() {
-    return [
-      {
-        source: "/fr/administrateur/:path*",
-        destination: "/fr/admin/:path*",
-      },
-      {
-        source: "/fr/administrateur",
-        destination: "/fr/admin",
-      },
-    ];
-  },
+  return [
+    // Proxy vers Django
+    {
+      source: "/api/:path*",
+      destination: "http://localhost:8000/api/:path*",
+    },
+
+    // Réécriture des routes administrateur
+    {
+      source: "/fr/administrateur/:path*",
+      destination: "/fr/admin/:path*",
+    },
+    {
+      source: "/fr/administrateur",
+      destination: "/fr/admin",
+    },
+  ];
+},
 
   // Optimisations expérimentales
   experimental: {

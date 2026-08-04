@@ -1,7 +1,10 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -13,9 +16,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { PasswordInput } from "@/features/auth/components/PasswordInput";
-import { loginSchema } from "@/features/auth/validation/login.schema";
+import { createLoginSchema } from "@/features/auth/validation/login.schema";
 import { useLogin } from "@/features/auth/hooks/useLogin";
-import { toast } from "sonner";
 import { getAuthErrorMessage } from "@/features/auth/utils/auth-errors";
 import { LoginCredentials } from "@/features/auth/types/auth";
 
@@ -24,10 +26,11 @@ interface LoginFormProps {
 }
 
 export function LoginForm({ onSuccess }: LoginFormProps) {
+  const t = useTranslations("auth");
   const { mutate: login, isPending } = useLogin();
 
   const form = useForm<LoginCredentials>({
-    resolver: zodResolver(loginSchema),
+    resolver: zodResolver(createLoginSchema(t)),
     defaultValues: {
       email: "",
       password: "",
@@ -37,11 +40,11 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
   const onSubmit = (data: LoginCredentials) => {
     login(data, {
       onSuccess: () => {
-        toast.success("Connexion réussie");
+        toast.success(t("loginSuccess"));
         onSuccess?.();
       },
       onError: (error) => {
-        toast.error(getAuthErrorMessage(error));
+        toast.error(getAuthErrorMessage(error, t("genericError")));
       },
     });
   };
@@ -54,9 +57,9 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email</FormLabel>
+              <FormLabel>{t("email")}</FormLabel>
               <FormControl>
-                <Input type="email" placeholder="email@exemple.com" {...field} />
+                <Input type="email" placeholder={t("emailPlaceholder")} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -68,9 +71,9 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
           name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Mot de passe</FormLabel>
+              <FormLabel>{t("password")}</FormLabel>
               <FormControl>
-                <PasswordInput placeholder="••••••••" {...field} />
+                <PasswordInput placeholder={t("passwordPlaceholder")} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -78,7 +81,7 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
         />
 
         <Button type="submit" className="w-full" disabled={isPending}>
-          {isPending ? "Connexion..." : "Se connecter"}
+          {isPending ? t("signingIn") : t("signIn")}
         </Button>
       </form>
     </Form>

@@ -1,14 +1,29 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { AdminPageTitle } from "../../shared/components/AdminPageTitle";
 import { AdminLoading } from "../../shared/components/AdminLoading";
 import { AdminError } from "../../shared/components/AdminError";
 import { useDashboard } from "../hooks/useDashboard";
 import { StatsCards } from "../components/StatsCards";
-import { PlatformMap } from "../components/PlatformMap";
-import { DashboardCharts } from "../components/DashboardCharts";
 import { PendingStructures } from "../components/PendingStructures";
 import { RecentActivity } from "../components/RecentActivity";
+
+const PlatformMap = dynamic(
+  () => import("../components/PlatformMap").then((mod) => mod.PlatformMap),
+  {
+    ssr: false,
+    loading: () => <div className="h-[360px] rounded-xl bg-muted/30" />,
+  }
+);
+
+const DashboardCharts = dynamic(
+  () => import("../components/DashboardCharts").then((mod) => mod.DashboardCharts),
+  {
+    ssr: false,
+    loading: () => <div className="h-[260px] rounded-xl bg-muted/30" />,
+  }
+);
 
 export function DashboardPage() {
   const { data, isLoading, isError, refetch } = useDashboard();

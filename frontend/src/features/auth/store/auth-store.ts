@@ -93,7 +93,8 @@ export const useAuthStore = create<AuthState>((set) => ({
     if (typeof window !== "undefined" && wasAuthenticated) {
       const pathname = window.location.pathname;
       if (!pathname.includes("/connexion") && !pathname.includes("/inscription")) {
-        window.location.href = "/fr/connexion";
+        const locale = pathname.split("/")[1] === "en" ? "en" : "fr";
+        window.location.href = `/${locale}/connexion`;
       }
     }
   },

@@ -9,9 +9,7 @@ type StructureMedicamentsProps = {
 
 export default function StructureMedicaments({ structure }: StructureMedicamentsProps) {
   if (structure.type !== "PHARMACIE") return null;
-  // If there's an actual 'medicaments' field in the real data we would map over it
-  // For now we assume the structure type handles the schema
-  const medicaments = (structure as any).medicaments || [];
+  const medicaments = structure.medicaments ?? [];
 
   return (
     <section className="bg-card rounded-3xl p-8 shadow-sm border border-border mt-8">

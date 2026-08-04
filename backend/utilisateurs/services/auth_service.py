@@ -1,4 +1,3 @@
-from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from utilisateurs.models import Utilisateur, RoleUtilisateur, TypeAuthentification
@@ -41,10 +40,16 @@ class AuthService:
     # =========================
     @staticmethod
     def login_email(email: str, password: str):
-
-        user = authenticate(email=email, password=password)
+        normalized_email = email.lower().strip()
+        user = Utilisateur.objects.filter(email=normalized_email).first()
 
         if not user:
+            return None
+
+        if not user.is_active:
+            return None
+
+        if not user.check_password(password):
             return None
 
         return user
@@ -60,7 +65,7 @@ class AuthService:
         if not data:
             return None
 
-        email = data["email"]
+        email = data["email"].lower().strip()
 
         user = Utilisateur.objects.filter(email=email).first()
 
@@ -76,8 +81,17 @@ class AuthService:
             )
         else:
             # update verification
-            user.email_verifie = True
-            user.type_authentification = TypeAuthentification.GOOGLE
-            user.save()
+            update_fields = []
+
+            if not user.email_verifie:
+                user.email_verifie = True
+                update_fields.append("email_verifie")
+
+            if user.type_authentification != TypeAuthentification.GOOGLE:
+                user.type_authentification = TypeAuthentification.GOOGLE
+                update_fields.append("type_authentification")
+
+            if update_fields:
+                user.save(update_fields=update_fields)
 
         return user

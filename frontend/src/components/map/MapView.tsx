@@ -1,7 +1,7 @@
 
 "use client";
 
-import { ReactNode, useSyncExternalStore } from "react";
+import { ReactNode } from "react";
 import { MapContainer, TileLayer } from "react-leaflet";
 
 import { MAP } from "@/constants/map";
@@ -11,6 +11,7 @@ import type { UserLocation } from "@/services/map/geolocalisation";
 type MapViewProps = {
   children?: ReactNode;
   location?: UserLocation | null;
+  zoomControl?: boolean;
 };
 
 // OpenStreetMap Standard - Affiche TOUT:
@@ -24,26 +25,11 @@ type MapViewProps = {
 // Comme Google Maps avec tous les détails
 const TILES_URL = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
 
-// Remplace le pattern useState+useEffect(setMounted(true)) : on ne "set" jamais
-// d'état dans un effet, on synchronise avec un store externe qui n'a qu'une
-// seule valeur possible côté client, et une autre côté serveur.
-function noopSubscribe() {
-  return () => {};
-}
-function useMounted() {
-  return useSyncExternalStore(
-    noopSubscribe,
-    () => true,   // snapshot côté client
-    () => false   // snapshot côté serveur (SSR)
-  );
-}
-
 export default function MapView({
   children,
   location,
+  zoomControl = false,
 }: MapViewProps) {
-  const mounted = useMounted();
-
   return (
     <MapContainer
       center={[
@@ -53,7 +39,7 @@ export default function MapView({
       zoom={MAP.defaultZoom}
       minZoom={MAP.minZoom}
       maxZoom={MAP.maxZoom}
-      zoomControl={false}
+      zoomControl={zoomControl}
       attributionControl={false}
       className="h-full w-full"
     >

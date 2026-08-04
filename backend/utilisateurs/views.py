@@ -23,6 +23,7 @@ from .serializers import (
     LogoutSerializer,
 )
 from .services.auth_service import AuthService
+from .services.google_service import GoogleAuthError
 from core.verification.session import VerificationSession
 from .views_admin import (
     RegisterAdminView,
@@ -93,9 +94,16 @@ class GoogleAuthView(APIView):
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        user = AuthService.login_google(
-            google_token=serializer.validated_data["id_token"],
-        )
+        try:
+            user = AuthService.login_google(
+                google_token=serializer.validated_data["id_token"],
+            )
+        except GoogleAuthError as exc:
+            return Response(
+                {"detail": str(exc)},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+
         if not user:
             return Response(
                 {"detail": "Token Google invalide"},
@@ -111,12 +119,9 @@ class LogoutView(APIView):
         serializer = LogoutSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         try:
-            token = RefreshToken(serializer.validated_data["refresh"])
-            token.blacklist()
+            RefreshToken(serializer.validated_data["refresh"])
         except TokenError:
             return Response({"detail": "Token invalide"}, status=400)
-        except Exception:
-            pass
         return Response({"message": "Déconnexion réussie"})
 
 

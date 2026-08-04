@@ -6,7 +6,6 @@ import NotificationProvider from "./notification.provider";
 import LocaleProvider from "./locale.provider";
 import ThemeProvider from "./theme.provider";
 import QueryProvider from "./query.provider";
-import { GoogleOAuthProvider } from "@react-oauth/google";
 import { Toaster } from "sonner";
 
 // Lazy load WebSocket provider (seulement pour utilisateurs authentifiés)
@@ -23,8 +22,6 @@ export default function AppProviders({
   locale,
   messages,
 }: AppProvidersProps) {
-  const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
-
   const providers = (
     <QueryProvider>
       <AuthProvider>
@@ -48,9 +45,7 @@ export default function AppProviders({
   return (
     <LocaleProvider locale={locale} messages={messages}>
       <ThemeProvider>
-        <GoogleOAuthProvider clientId={googleClientId ?? ""}>
-          {providers}
-        </GoogleOAuthProvider>
+        {providers}
       </ThemeProvider>
     </LocaleProvider>
   );

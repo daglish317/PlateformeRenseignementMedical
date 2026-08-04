@@ -67,10 +67,14 @@ export default function NotificationProvider({ children }: { children: React.Rea
         duration: 5000,
       });
 
-      queryClient.invalidateQueries({ queryKey: ["notifications"] });
-      queryClient.invalidateQueries({ queryKey: ["unread-counts"] });
-      queryClient.invalidateQueries({ queryKey: ["admin", "dashboard"] });
-      queryClient.invalidateQueries({ queryKey: ["admin", "structures"] });
+      queryClient.invalidateQueries({
+        queryKey: ["notifications"],
+        refetchType: "inactive",
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["unread-counts"],
+        refetchType: "inactive",
+      });
     });
   }, [subscribe, queryClient]);
 
@@ -81,8 +85,14 @@ export default function NotificationProvider({ children }: { children: React.Rea
       // silently fail
     }
     setUnreadByNavItem({});
-    queryClient.invalidateQueries({ queryKey: ["notifications"] });
-    queryClient.invalidateQueries({ queryKey: ["unread-counts"] });
+    queryClient.invalidateQueries({
+      queryKey: ["notifications"],
+      refetchType: "inactive",
+    });
+    queryClient.invalidateQueries({
+      queryKey: ["unread-counts"],
+      refetchType: "inactive",
+    });
   }, [queryClient]);
 
   const unreadCount = unreadByNavItem.total || 0;

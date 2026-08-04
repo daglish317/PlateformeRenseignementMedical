@@ -34,7 +34,7 @@ export default function MapController({
         }
       );
     }
-  }, [location, map]);
+  }, [location, map, selectedStructure]);
 
   useEffect(() => {
     if (selectedStructure && selectedStructure.latitude !== null && selectedStructure.longitude !== null) {

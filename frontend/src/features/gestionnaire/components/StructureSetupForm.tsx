@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "@/i18n/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -10,6 +11,7 @@ import { Loader2, MapPin, AlertTriangle, Camera, Upload, X } from "lucide-react"
 import { toast } from "sonner";
 import { getCurrentLocation } from "@/services/map/geolocalisation";
 import { gestionnaireService } from "../api/gestionnaire.service";
+import { MY_STRUCTURE_QUERY_KEY } from "@/features/shared/structure-profile/hooks/useMyStructure";
 
 type AxiosError = { response?: { data?: Record<string, unknown> | string } };
 
@@ -28,6 +30,7 @@ const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
 
 export function StructureSetupForm() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const retryLocationRef = useRef<() => void>(() => {});
 
@@ -153,6 +156,7 @@ export function StructureSetupForm() {
         longitude: coords.longitude,
         photo,
       });
+      queryClient.invalidateQueries({ queryKey: MY_STRUCTURE_QUERY_KEY });
       toast.success("Structure soumise avec succès !");
       router.push("/gestionnaire/success");
     } catch (err) {

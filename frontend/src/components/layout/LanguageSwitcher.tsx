@@ -10,44 +10,28 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-import {
-  usePathname,
-  useRouter,
-} from "@/i18n/navigation";
-
+import { usePathname, useRouter } from "@/i18n/navigation";
 
 type Locale = "fr" | "en";
 
-
 export default function LanguageSwitcher() {
-
   const locale = useLocale() as Locale;
-
   const t = useTranslations("language");
-
   const router = useRouter();
-
   const pathname = usePathname();
 
-
   function changeLocale(nextLocale: Locale) {
-
     if (nextLocale === locale) {
       return;
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    router.replace(pathname as any, {
+    router.replace(pathname, {
       locale: nextLocale,
     });
-
   }
 
-
   return (
-
     <DropdownMenu>
-
       <DropdownMenuTrigger
         className="
           inline-flex
@@ -63,41 +47,25 @@ export default function LanguageSwitcher() {
         "
         aria-label={t("change")}
       >
-
         <Globe className="size-4" />
-
-        <span className="uppercase">
-          {locale}
-        </span>
-
+        <span className="uppercase">{locale}</span>
       </DropdownMenuTrigger>
 
-
-      <DropdownMenuContent
-        align="end"
-        className="min-w-40"
-      >
-
+      <DropdownMenuContent align="end" className="min-w-40">
         <DropdownMenuItem
           onClick={() => changeLocale("fr")}
           disabled={locale === "fr"}
         >
-          Français
+          {t("fr")}
         </DropdownMenuItem>
-
 
         <DropdownMenuItem
           onClick={() => changeLocale("en")}
           disabled={locale === "en"}
         >
-          English
+          {t("en")}
         </DropdownMenuItem>
-
-
       </DropdownMenuContent>
-
-
     </DropdownMenu>
-
   );
 }

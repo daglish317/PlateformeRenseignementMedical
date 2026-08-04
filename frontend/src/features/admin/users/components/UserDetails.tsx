@@ -20,7 +20,15 @@ interface UserDetailsProps {
   onOpenChange: (open: boolean) => void;
 }
 
-function InfoRow({ icon: Icon, label, value }: { icon: React.ElementType; label: string; value?: string | null }) {
+function InfoRow({
+  icon: Icon,
+  label,
+  value,
+}: {
+  icon: React.ElementType;
+  label: string;
+  value?: string | null;
+}) {
   if (!value) return null;
   return (
     <div className="flex items-start gap-3">
@@ -40,7 +48,7 @@ export function UserDetails({ user, open, onOpenChange }: UserDetailsProps) {
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="overflow-y-auto sm:max-w-md">
         <SheetHeader>
-          <SheetTitle>Détails de l'utilisateur</SheetTitle>
+          <SheetTitle>Détails de l&apos;utilisateur</SheetTitle>
         </SheetHeader>
 
         <div className="mt-6 flex flex-col gap-6">
@@ -60,7 +68,7 @@ export function UserDetails({ user, open, onOpenChange }: UserDetailsProps) {
             <InfoRow icon={Mail} label="Email" value={user.email} />
             <InfoRow
               icon={Calendar}
-              label="Date d'inscription"
+              label="Date d&apos;inscription"
               value={format(new Date(user.date_joined), "dd MMMM yyyy", { locale: fr })}
             />
             <InfoRow

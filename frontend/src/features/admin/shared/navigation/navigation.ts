@@ -47,11 +47,11 @@ export const localizedPathnames: Record<string, Record<string, string>> = {
   "/admin/settings": { fr: "/administrateur/parametres", en: "/admin/settings" },
 };
 
-export function getLocalizedHref(href: string, _locale: string): string {
+export function getLocalizedHref(href: string): string {
   return href;
 }
 
-export function isActiveRoute(pathname: string, href: string, _locale: string): boolean {
+export function isActiveRoute(pathname: string, href: string): boolean {
   if (href === "/admin") {
     return pathname === "/admin" || pathname === "/";
   }

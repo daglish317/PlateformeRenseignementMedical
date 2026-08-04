@@ -5,8 +5,6 @@ import L from "leaflet";
 import { Phone, MapPin, Navigation, Info } from "lucide-react";
 
 import { useStructureSelectionStore } from "@/features/structure-selection/store/structure-selection-store";
-import { useRoutingStore } from "@/features/routing/store/routing-store";
-
 import type { MapStructure } from "./MedicalMap";
 
 type StructureMarkerProps = {
@@ -83,8 +81,6 @@ export default function StructureMarker({
 }: StructureMarkerProps) {
   const setSelectedStructure = useStructureSelectionStore((state) => state.setSelectedStructure);
   const selectedStructure = useStructureSelectionStore((state) => state.selectedStructure);
-  const setCurrentRoute = useRoutingStore((state) => state.setCurrentRoute);
-
   // Ne pas afficher le marqueur si pas de coordonnées
   if (structure.latitude === null || structure.longitude === null) {
     return null;

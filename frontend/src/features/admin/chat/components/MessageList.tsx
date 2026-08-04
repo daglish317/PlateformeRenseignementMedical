@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Skeleton } from "@/components/ui/skeleton";
+import type { MessagesResponse } from "../api/chat.service";
 import { MessageBubble } from "./MessageBubble";
 import { useMessages } from "../hooks/useMessages";
 import type { ChatMessage } from "../types/chat";
@@ -41,7 +42,7 @@ function groupByDate(
 export function MessageList() {
   const { data, isLoading } = useMessages();
   const bottomRef = useRef<HTMLDivElement>(null);
-  const messages = (data as any)?.messages ?? data?.results ?? [];
+  const messages = (data as MessagesResponse | undefined)?.results ?? [];
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });

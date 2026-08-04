@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import type { LucideIcon } from "lucide-react";
 import { usePathname } from "@/i18n/navigation";
 import { SidebarMenuItem } from "./SidebarMenuItem";
@@ -7,6 +8,7 @@ import { SidebarMenuItem } from "./SidebarMenuItem";
 interface SidebarMenuProps {
   items: Array<{ label: string; href: string; icon: LucideIcon; badge?: number }>;
   collapsed: boolean;
+  onNavigate?: () => void;
 }
 
 function isActiveRoute(pathname: string, href: string): boolean {
@@ -16,7 +18,7 @@ function isActiveRoute(pathname: string, href: string): boolean {
   return pathname === href || pathname.startsWith(href + "/");
 }
 
-export function SidebarMenu({ items, collapsed }: SidebarMenuProps) {
+function SidebarMenuComponent({ items, collapsed, onNavigate }: SidebarMenuProps) {
   const pathname = usePathname();
 
   return (
@@ -27,8 +29,11 @@ export function SidebarMenu({ items, collapsed }: SidebarMenuProps) {
           item={item}
           active={isActiveRoute(pathname, item.href)}
           collapsed={collapsed}
+          onNavigate={onNavigate}
         />
       ))}
     </nav>
   );
 }
+
+export const SidebarMenu = memo(SidebarMenuComponent);

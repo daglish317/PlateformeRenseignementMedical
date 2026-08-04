@@ -1,6 +1,4 @@
 "use client";
-
-import { useState } from "react";
 import { Eye, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { StructureAdmin } from "../types/structure";

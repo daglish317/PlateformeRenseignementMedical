@@ -32,6 +32,15 @@ class RegisterSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True)
 
+    def validate_email(self, value):
+        email = value.lower().strip()
+        if Utilisateur.objects.filter(email=email).exists():
+            raise serializers.ValidationError("Cette adresse email est d\u00e9j\u00e0 utilis\u00e9e.")
+        return email
+
+    def validate_nom(self, value):
+        return value.strip()
+
     def create(self, validated_data):
         return AuthService.register_patient(
             nom=validated_data["nom"],

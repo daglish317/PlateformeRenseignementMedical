@@ -3,6 +3,11 @@ export type Service = {
   nom: string;
 };
 
+export type StructureSchedule = {
+  jour: string;
+  heures: string;
+};
+
 export type StructureDetail = {
   id: string;
   nom: string;
@@ -16,4 +21,8 @@ export type StructureDetail = {
   services: Service[];
   description?: string;
   ouverture?: string;
+  website?: string;
+  plateauTechnique?: string[];
+  horaires?: StructureSchedule[];
+  medicaments?: string[];
 };

@@ -1,7 +1,11 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
+import { z } from "zod";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -13,23 +17,22 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { PasswordInput } from "@/features/auth/components/PasswordInput";
-import { registerSchema } from "@/features/auth/validation/register.schema";
+import { createRegisterSchema } from "@/features/auth/validation/register.schema";
 import { useRegister } from "@/features/auth/hooks/useRegister";
-import { toast } from "sonner";
 import { getAuthErrorMessage } from "@/features/auth/utils/auth-errors";
-import { z } from "zod";
 
-type RegisterFormData = z.infer<typeof registerSchema>;
+type RegisterFormData = z.infer<ReturnType<typeof createRegisterSchema>>;
 
 interface RegisterFormProps {
   onSuccess?: () => void;
 }
 
 export function RegisterForm({ onSuccess }: RegisterFormProps) {
+  const t = useTranslations("auth");
   const { mutate: register, isPending } = useRegister();
 
   const form = useForm<RegisterFormData>({
-    resolver: zodResolver(registerSchema),
+    resolver: zodResolver(createRegisterSchema(t)),
     defaultValues: {
       nom: "",
       email: "",
@@ -41,13 +44,14 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
   const onSubmit = (data: RegisterFormData) => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { confirmPassword: _, ...credentials } = data;
+
     register(credentials, {
       onSuccess: () => {
-        toast.success("Inscription réussie");
+        toast.success(t("registerSuccess"));
         onSuccess?.();
       },
       onError: (error) => {
-        toast.error(getAuthErrorMessage(error));
+        toast.error(getAuthErrorMessage(error, t("genericError")));
       },
     });
   };
@@ -60,9 +64,9 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
           name="nom"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Nom</FormLabel>
+              <FormLabel>{t("name")}</FormLabel>
               <FormControl>
-                <Input placeholder="Votre nom" {...field} />
+                <Input placeholder={t("namePlaceholder")} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -74,9 +78,9 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email</FormLabel>
+              <FormLabel>{t("email")}</FormLabel>
               <FormControl>
-                <Input type="email" placeholder="email@exemple.com" {...field} />
+                <Input type="email" placeholder={t("emailPlaceholder")} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -88,9 +92,9 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
           name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Mot de passe</FormLabel>
+              <FormLabel>{t("password")}</FormLabel>
               <FormControl>
-                <PasswordInput placeholder="••••••••" {...field} />
+                <PasswordInput placeholder={t("passwordPlaceholder")} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -102,9 +106,9 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
           name="confirmPassword"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Confirmer le mot de passe</FormLabel>
+              <FormLabel>{t("confirmPassword")}</FormLabel>
               <FormControl>
-                <PasswordInput placeholder="••••••••" {...field} />
+                <PasswordInput placeholder={t("passwordPlaceholder")} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -112,7 +116,7 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
         />
 
         <Button type="submit" className="w-full" disabled={isPending}>
-          {isPending ? "Inscription..." : "S'inscrire"}
+          {isPending ? t("signingUp") : t("signUp")}
         </Button>
       </form>
     </Form>

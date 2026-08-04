@@ -1,7 +1,7 @@
 import api from "@/lib/axios";
 import type { ChatConversation, ChatMessage } from "../types/chat";
 
-interface MessagesResponse {
+export interface MessagesResponse {
   results: ChatMessage[];
   page: number;
   page_size: number;
@@ -9,9 +9,7 @@ interface MessagesResponse {
 }
 
 export const chatService = {
-  getConversations: async (
-    _params: Record<string, string | number> = {}
-  ): Promise<ChatConversation[]> => {
+  getConversations: async (): Promise<ChatConversation[]> => {
     const response = await api.get("/messagerie/conversations/");
     return response.data;
   },

@@ -32,11 +32,11 @@ export function ReactivateUserDialog({ user, open, onOpenChange }: ReactivateUse
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Réactiver l'utilisateur</DialogTitle>
+          <DialogTitle>Réactiver l&apos;utilisateur</DialogTitle>
           <DialogDescription>
-            Êtes-vous sûr de vouloir réactiver l'utilisateur{" "}
-            <span className="font-medium text-foreground">{user?.nom}</span> ?
-            Il pourra à nouveau accéder à la plateforme.
+            Êtes-vous sûr de vouloir réactiver l&apos;utilisateur{" "}
+            <span className="font-medium text-foreground">{user?.nom}</span> ? Il pourra à
+            nouveau accéder à la plateforme.
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
@@ -47,10 +47,7 @@ export function ReactivateUserDialog({ user, open, onOpenChange }: ReactivateUse
           >
             Annuler
           </Button>
-          <Button
-            onClick={handleConfirm}
-            disabled={reactivateMutation.isPending}
-          >
+          <Button onClick={handleConfirm} disabled={reactivateMutation.isPending}>
             {reactivateMutation.isPending ? "Réactivation..." : "Réactiver"}
           </Button>
         </DialogFooter>

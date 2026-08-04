@@ -18,9 +18,21 @@ export const useSidebarStore = create<SidebarState>((set, get) => ({
   collapsed: false,
   isMobile: false,
   toggle: () => set({ open: !get().open }),
-  setOpen: (open) => set({ open }),
-  setCollapsed: (collapsed) => set({ collapsed }),
-  setIsMobile: (isMobile) => set({ isMobile, open: !isMobile }),
+  setOpen: (open) => {
+    if (get().open !== open) {
+      set({ open });
+    }
+  },
+  setCollapsed: (collapsed) => {
+    if (get().collapsed !== collapsed) {
+      set({ collapsed });
+    }
+  },
+  setIsMobile: (isMobile) => {
+    if (get().isMobile !== isMobile) {
+      set({ isMobile, open: !isMobile });
+    }
+  },
 }));
 
 export function useSidebar() {

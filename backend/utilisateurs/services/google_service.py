@@ -1,28 +1,39 @@
 from django.conf import settings
-from google.oauth2 import id_token
 from google.auth.transport import requests
+from google.oauth2 import id_token
+
+
+class GoogleAuthError(Exception):
+    pass
 
 
 class GoogleAuthService:
 
     @staticmethod
     def verify_google_token(token: str):
+        client_id = getattr(settings, "GOOGLE_CLIENT_ID", "")
+
+        if not client_id:
+            raise GoogleAuthError("Google OAuth n'est pas configur\u00e9.")
+
         try:
-            client_id = getattr(settings, "GOOGLE_CLIENT_ID", None)
             idinfo = id_token.verify_oauth2_token(
                 token,
                 requests.Request(),
                 audience=client_id,
             )
-            return {
-                "email": idinfo["email"],
-                "nom": idinfo.get("name", ""),
-                "email_verified": idinfo.get("email_verified", False),
-            }
-        except Exception as e:
-            print("ERREUR GOOGLE :", repr(e))
-            raise
+        except Exception as exc:
+            raise GoogleAuthError("Token Google invalide.") from exc
 
-from django.conf import settings
+        email = idinfo.get("email", "").lower().strip()
+        email_verified = bool(idinfo.get("email_verified", False))
 
-print("GOOGLE_CLIENT_ID =", settings.GOOGLE_CLIENT_ID)
+        if not email or not email_verified:
+            raise GoogleAuthError("Adresse email Google non v\u00e9rifi\u00e9e.")
+
+        return {
+            "email": email,
+            "nom": idinfo.get("name") or email.split("@")[0],
+            "email_verified": email_verified,
+            "google_id": idinfo.get("sub", ""),
+        }

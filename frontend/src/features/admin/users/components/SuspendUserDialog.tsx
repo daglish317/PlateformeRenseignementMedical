@@ -32,11 +32,11 @@ export function SuspendUserDialog({ user, open, onOpenChange }: SuspendUserDialo
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Suspendre l'utilisateur</DialogTitle>
+          <DialogTitle>Suspendre l&apos;utilisateur</DialogTitle>
           <DialogDescription>
-            Êtes-vous sûr de vouloir suspendre l'utilisateur{" "}
-            <span className="font-medium text-foreground">{user?.nom}</span> ?
-            Il ne pourra plus accéder à la plateforme.
+            Êtes-vous sûr de vouloir suspendre l&apos;utilisateur{" "}
+            <span className="font-medium text-foreground">{user?.nom}</span> ? Il ne pourra
+            plus accéder à la plateforme.
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>

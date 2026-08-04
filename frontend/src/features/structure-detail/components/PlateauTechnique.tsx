@@ -9,8 +9,8 @@ type PlateauTechniqueProps = {
 
 export default function PlateauTechnique({ structure }: PlateauTechniqueProps) {
   if (structure.type !== "HOPITAL") return null;
-  
-  const plateauTechnique = (structure as any).plateauTechnique || [];
+
+  const plateauTechnique = structure.plateauTechnique ?? [];
 
   if (plateauTechnique.length === 0) return null;
 

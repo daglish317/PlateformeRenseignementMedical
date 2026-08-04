@@ -10,12 +10,24 @@ interface DashboardSidebarState {
   setIsMobile: (isMobile: boolean) => void;
 }
 
-export const useDashboardSidebar = create<DashboardSidebarState>((set) => ({
+export const useDashboardSidebar = create<DashboardSidebarState>((set, get) => ({
   open: true,
   collapsed: false,
   isMobile: false,
   toggle: () => set((state) => ({ open: !state.open })),
-  setOpen: (open) => set({ open }),
-  setCollapsed: (collapsed) => set({ collapsed }),
-  setIsMobile: (isMobile) => set({ isMobile }),
+  setOpen: (open) => {
+    if (get().open !== open) {
+      set({ open });
+    }
+  },
+  setCollapsed: (collapsed) => {
+    if (get().collapsed !== collapsed) {
+      set({ collapsed });
+    }
+  },
+  setIsMobile: (isMobile) => {
+    if (get().isMobile !== isMobile) {
+      set({ isMobile });
+    }
+  },
 }));

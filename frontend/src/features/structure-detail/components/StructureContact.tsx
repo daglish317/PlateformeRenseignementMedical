@@ -35,21 +35,21 @@ export default function StructureContact({ structure }: StructureContactProps) {
         )}
         
         {/* Placeholder for future email/website fields if they get added to StructureDetail */}
-        {((structure as any).email) && (
+        {structure.email && (
           <a 
-            href={`mailto:${(structure as any).email}`}
+            href={`mailto:${structure.email}`}
             className="flex items-center gap-4 p-4 rounded-xl bg-muted/50 hover:bg-muted transition-colors group"
           >
             <div className="p-2 bg-background rounded-lg shadow-sm group-hover:scale-105 transition-transform">
               <Mail className="h-5 w-5 text-primary" />
             </div>
-            <span className="font-medium">{(structure as any).email}</span>
+            <span className="font-medium">{structure.email}</span>
           </a>
         )}
         
-        {((structure as any).website) && (
+        {structure.website && (
           <a 
-            href={(structure as any).website}
+            href={structure.website}
             target="_blank"
             rel="noreferrer"
             className="flex items-center gap-4 p-4 rounded-xl bg-muted/50 hover:bg-muted transition-colors group"

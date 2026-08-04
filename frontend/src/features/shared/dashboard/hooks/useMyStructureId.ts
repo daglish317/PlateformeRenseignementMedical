@@ -1,15 +1,23 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import api from "@/lib/axios";
+import {
+  MY_STRUCTURE_QUERY_KEY,
+  useMyStructure,
+} from "@/features/shared/structure-profile/hooks/useMyStructure";
 
 export function useMyStructureId() {
+  const myStructure = useMyStructure();
+
   return useQuery({
     queryKey: ["my-structure-id"],
-    queryFn: async () => {
-      const { data } = await api.get("/structures/me/");
-      return data.id as string;
+    queryFn: () => Promise.resolve(myStructure.data?.id as string),
+    enabled: Boolean(myStructure.data?.id),
+    initialData: myStructure.data?.id,
+    staleTime: 10 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+    meta: {
+      sourceQueryKey: MY_STRUCTURE_QUERY_KEY,
     },
-    staleTime: 5 * 60 * 1000,
   });
 }

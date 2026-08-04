@@ -32,11 +32,11 @@ export function DeleteUserDialog({ user, open, onOpenChange }: DeleteUserDialogP
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Supprimer l'utilisateur</DialogTitle>
+          <DialogTitle>Supprimer l&apos;utilisateur</DialogTitle>
           <DialogDescription>
-            Êtes-vous sûr de vouloir supprimer définitivement l'utilisateur{" "}
-            <span className="font-medium text-foreground">{user?.nom}</span> ?
-            Cette action est irréversible et toutes ses données seront perdues.
+            Êtes-vous sûr de vouloir supprimer définitivement l&apos;utilisateur{" "}
+            <span className="font-medium text-foreground">{user?.nom}</span> ? Cette action
+            est irréversible et toutes ses données seront perdues.
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
