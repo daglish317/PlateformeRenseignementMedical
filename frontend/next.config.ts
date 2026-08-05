@@ -18,59 +18,60 @@ const nextConfig: NextConfig = {
   compress: true,
   
   // Headers pour cache et sécurité
+  
   async headers() {
     return [
       {
-        source: '/fr/connexion',
+        source: "/fr/connexion",
         headers: [
           {
-            key: 'Cross-Origin-Opener-Policy',
-            value: 'same-origin-allow-popups',
+            key: "Cross-Origin-Opener-Policy",
+            value: "same-origin-allow-popups",
           },
         ],
       },
       {
-        source: '/en/connexion',
+        source: "/en/connexion",
         headers: [
           {
-            key: 'Cross-Origin-Opener-Policy',
-            value: 'same-origin-allow-popups',
+            key: "Cross-Origin-Opener-Policy",
+            value: "same-origin-allow-popups",
           },
         ],
       },
       {
-        source: '/fr/inscription',
+        source: "/fr/inscription",
         headers: [
           {
-            key: 'Cross-Origin-Opener-Policy',
-            value: 'same-origin-allow-popups',
+            key: "Cross-Origin-Opener-Policy",
+            value: "same-origin-allow-popups",
           },
         ],
       },
       {
-        source: '/en/inscription',
+        source: "/en/inscription",
         headers: [
           {
-            key: 'Cross-Origin-Opener-Policy',
-            value: 'same-origin-allow-popups',
+            key: "Cross-Origin-Opener-Policy",
+            value: "same-origin-allow-popups",
           },
         ],
       },
       {
-        source: '/api/:path*',
+        source: "/api/:path*",
         headers: [
           {
-            key: 'Cache-Control',
-            value: 'public, s-maxage=60, stale-while-revalidate=300',
+            key: "Cache-Control",
+            value: "public, s-maxage=60, stale-while-revalidate=300",
           },
         ],
       },
       {
-        source: '/:all*(svg|jpg|jpeg|png|gif|webp|avif|ico|woff|woff2)',
+        source: "/:all*(svg|jpg|jpeg|png|gif|webp|avif|ico|woff|woff2)",
         headers: [
           {
-            key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable',
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
           },
         ],
       },

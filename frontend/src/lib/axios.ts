@@ -31,7 +31,7 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     const token = authStorage.getAccessToken();
-    if (token && config.headers) {
+    if (token && config.headers && !isPublicAuthEndpoint(config.url)) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     if (config.data instanceof FormData) {
