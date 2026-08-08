@@ -6,6 +6,7 @@ import {
   ClipboardList,
   History,
   LayoutDashboard,
+  Settings,
 } from "lucide-react";
 import type { DashboardNavItem } from "../types";
 
@@ -15,6 +16,13 @@ export const ownerNavigation: DashboardNavItem[] = [
     href: "/owner",
     icon: LayoutDashboard,
     permission: "PROPRIETAIRE",
+  },
+  {
+    label: "Profil",
+    href: "/owner/profile",
+    icon: Building2,
+    permission: "PROPRIETAIRE",
+    navItem: "profil",
   },
   {
     label: "Structures & Équipe",
@@ -50,6 +58,12 @@ export const ownerNavigation: DashboardNavItem[] = [
     label: "Caisse",
     href: "/owner/caisse",
     icon: Banknote,
+    permission: "PROPRIETAIRE",
+  },
+  {
+    label: "Paramètres",
+    href: "/owner/settings",
+    icon: Settings,
     permission: "PROPRIETAIRE",
   },
 ];
