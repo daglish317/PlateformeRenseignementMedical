@@ -1,6 +1,7 @@
 import api from "@/lib/axios";
 import {
   AuthResponse,
+  CheckGestionnaireResponse,
   LoginCredentials,
   RegisterCredentials,
 } from "@/features/auth/types/auth";
@@ -26,8 +27,8 @@ export const authService = {
     return response.data;
   },
 
-  checkGestionnaire: async (email: string): Promise<{ is_gestionnaire: boolean }> => {
-    const response = await api.post("/utilisateurs/gestionnaire/check/", { email });
+  checkGestionnaire: async (email: string): Promise<CheckGestionnaireResponse> => {
+    const response = await api.post<CheckGestionnaireResponse>("/utilisateurs/gestionnaire/check/", { email });
     return response.data;
   },
 
@@ -38,11 +39,13 @@ export const authService = {
 
   activateGestionnaire: async (
     email: string,
-    password: string
+    password: string,
+    nom?: string
   ): Promise<AuthResponse> => {
     const response = await api.post<AuthResponse>("/utilisateurs/gestionnaire/activate/", {
       email,
       password,
+      nom,
     });
     return response.data;
   },

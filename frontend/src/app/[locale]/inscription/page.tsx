@@ -10,28 +10,23 @@ import { RegisterForm } from "@/features/auth/components/RegisterForm";
 import { GestionnaireActivationForm } from "@/features/auth/components/GestionnaireActivationForm";
 import { Divider } from "@/features/auth/components/Divider";
 import { GoogleButton } from "@/features/auth/components/GoogleButton";
-import { Link, useRouter } from "@/i18n/navigation";
+import { Link } from "@/i18n/navigation";
 import { useAuthRedirect } from "@/features/auth/hooks/useAuthRedirect";
 
 export default function RegisterPage() {
   const t = useTranslations("auth");
   const { redirectAfterAuth } = useAuthRedirect();
-  const router = useRouter();
-  const [isGestionnaire, setIsGestionnaire] = useState(false);
-
-  const handleGestionnaireSuccess = () => {
-    router.push("/gestionnaire/setup");
-  };
+  const [isOwnerActivation, setIsOwnerActivation] = useState(false);
 
   return (
     <PublicLayout showSearch={false} showFooter={true}>
       <AuthLayout>
-        <AuthCard title={isGestionnaire ? t("activationTitle") : t("registerTitle")}>
+        <AuthCard title={isOwnerActivation ? t("activationTitle") : t("registerTitle")}>
           <div className="space-y-6">
-            {isGestionnaire ? (
+            {isOwnerActivation ? (
               <GestionnaireActivationForm
-                onSuccess={handleGestionnaireSuccess}
-                onBackToRegister={() => setIsGestionnaire(false)}
+                onSuccess={redirectAfterAuth}
+                onBackToRegister={() => setIsOwnerActivation(false)}
               />
             ) : (
               <>
@@ -44,7 +39,7 @@ export default function RegisterPage() {
                 <div className="text-center">
                   <button
                     type="button"
-                    onClick={() => setIsGestionnaire(true)}
+                    onClick={() => setIsOwnerActivation(true)}
                     className="text-sm text-primary hover:underline"
                   >
                     {t("managerAccount")}
@@ -54,12 +49,12 @@ export default function RegisterPage() {
             )}
 
             <p className="text-center text-sm text-muted-foreground">
-              {isGestionnaire ? (
+              {isOwnerActivation ? (
                 <>
                   {t("noManagerAccount")}{" "}
                   <button
                     type="button"
-                    onClick={() => setIsGestionnaire(false)}
+                    onClick={() => setIsOwnerActivation(false)}
                     className="text-primary hover:underline"
                   >
                     {t("normalRegister")}

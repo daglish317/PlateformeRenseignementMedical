@@ -94,6 +94,11 @@ INSTALLED_APPS = [
     "core.apps.CoreConfig",
     "search.apps.SearchConfig",
     "stock",
+    "ventes",
+    "inventaires",
+    "historique",
+    "alertes",
+    "statistiques",
     # "avis" — désactivé : non utilisé pour le moment (aucune URL, aucun lien search)
     "feedback",
     "service_medical",
@@ -125,6 +130,10 @@ MIDDLEWARE.append("django.middleware.gzip.GZipMiddleware")
 MIDDLEWARE += [
     "corsheaders.middleware.CorsMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    # Applique le slash final en interne (sans redirection) pour les URLs
+    # /api sans slash transmises par le proxy Next.js (évite la boucle
+    # de redirections avec APPEND_SLASH).
+    "renseignementmedical.middleware.AppendSlashNoRedirectMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -209,6 +218,10 @@ REST_AUTH = {
     "USE_JWT": True,
     "TOKEN_MODEL": None,
 }
+
+# Durée maximale d'une vente en attente de paiement (module Vente).
+# Au-delà, la vente est automatiquement annulée et les réservations libérées.
+VENTE_DELAI_PAIEMENT_MINUTES = int(os.getenv("VENTE_DELAI_PAIEMENT_MINUTES", "15"))
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (

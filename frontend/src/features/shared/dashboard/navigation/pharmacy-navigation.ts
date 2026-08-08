@@ -2,11 +2,14 @@ import {
   LayoutDashboard,
   Building2,
   Package,
+  Truck,
   Clock,
   MessagesSquare,
   Bell,
-  BarChart3,
   Settings,
+  ShoppingCart,
+  ClipboardList,
+  History,
   type LucideIcon,
 } from "lucide-react";
 
@@ -40,6 +43,38 @@ export const pharmacyNavigation: PharmacyNavItem[] = [
     navItem: "stock",
   },
   {
+    label: "Vente",
+    href: "/pharmacy/sale",
+    icon: ShoppingCart,
+    permission: "GESTIONNAIRE",
+    navItem: "vente",
+  },
+  {
+    label: "Approvisionnement",
+    href: "/pharmacy/supply",
+    icon: Truck,
+    permission: "GESTIONNAIRE",
+    navItem: "stock",
+  },
+  {
+    label: "Inventaire",
+    href: "/pharmacy/inventory",
+    icon: ClipboardList,
+    permission: "GESTIONNAIRE",
+  },
+  {
+    label: "Historique",
+    href: "/pharmacy/history",
+    icon: History,
+    permission: "GESTIONNAIRE",
+  },
+  {
+    label: "Alertes",
+    href: "/pharmacy/alertes",
+    icon: Bell,
+    permission: "GESTIONNAIRE",
+  },
+  {
     label: "Horaires",
     href: "/pharmacy/schedules",
     icon: Clock,
@@ -59,12 +94,6 @@ export const pharmacyNavigation: PharmacyNavItem[] = [
     icon: Bell,
     permission: "GESTIONNAIRE",
     navItem: "notifications",
-  },
-  {
-    label: "Statistiques",
-    href: "/pharmacy/statistics",
-    icon: BarChart3,
-    permission: "GESTIONNAIRE",
   },
   {
     label: "Paramètres",

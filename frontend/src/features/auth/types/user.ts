@@ -1,4 +1,9 @@
-export type RoleUtilisateur = "ADMINISTRATEUR" | "GESTIONNAIRE" | "PATIENT";
+export type RoleUtilisateur =
+  | "ADMINISTRATEUR"
+  | "PROPRIETAIRE"
+  | "GESTIONNAIRE"
+  | "CAISSIER"
+  | "PATIENT";
 
 export type TypeAuthentification = "EMAIL" | "GOOGLE";
 

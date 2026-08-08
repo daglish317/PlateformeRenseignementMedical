@@ -28,7 +28,10 @@ export function CreateManagerDialog() {
   const [copied, setCopied] = useState(false);
   const createManager = useCreateManager();
 
-  const canSubmit = nom.trim() && email.trim() && !createManager.isPending;
+  const canSubmit =
+    nom.trim() &&
+    email.trim() &&
+    !createManager.isPending;
 
   function loadOtp(emailToLoad: string) {
     setOtpLoading(true);
@@ -44,7 +47,10 @@ export function CreateManagerDialog() {
     if (!canSubmit) return;
 
     createManager.mutate(
-      { nom: nom.trim(), email: email.trim() },
+      {
+        nom: nom.trim(),
+        email: email.trim(),
+      },
       {
         onSuccess: () => {
           setCreatedEmail(email.trim());
@@ -86,16 +92,16 @@ export function CreateManagerDialog() {
       <DialogTrigger asChild>
         <Button>
           <UserPlus className="size-4" />
-          Créer un gestionnaire
+          Inviter un proprietaire
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Nouveau gestionnaire</DialogTitle>
+          <DialogTitle>Nouveau proprietaire</DialogTitle>
           <DialogDescription>
             {showOtpResult
-              ? "Le gestionnaire a été créé. Voici les informations de connexion :"
-              : "Créez un compte gestionnaire. Un email d'activation sera envoyé."}
+              ? "Le proprietaire a ete cree. Voici les informations de connexion :"
+              : "Creez le compte proprietaire. Il creera ses structures apres activation."}
           </DialogDescription>
         </DialogHeader>
 
@@ -130,7 +136,7 @@ export function CreateManagerDialog() {
               </div>
             </div>
             <p className="text-xs text-muted-foreground">
-              Partagez ces informations avec le gestionnaire. Il devra aller sur la page d&apos;inscription, entrer son email, valider le code OTP, définir son mot de passe, puis remplir les informations de sa structure avec sa géolocalisation activée.
+              Partagez ces informations avec le proprietaire. Il devra aller sur la page d&apos;inscription, entrer son email, valider le code OTP, puis definir son nom et son mot de passe.
             </p>
             <DialogFooter>
               <Button onClick={() => handleClose(false)}>Fermer</Button>

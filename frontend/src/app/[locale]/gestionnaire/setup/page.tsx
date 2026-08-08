@@ -36,8 +36,6 @@ export default function GestionnaireSetupPage() {
 
     if (statut === "ACTIVE") {
       router.replace(`/${route}`);
-    } else if (statut === "EN_ATTENTE") {
-      router.replace("/gestionnaire/success");
     }
   }, [authenticated, hydrated, router, structure]);
 

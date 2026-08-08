@@ -15,6 +15,18 @@ class StatutStructure(models.TextChoices):
     REFUSEE = "REFUSEE", "Refusée"
 
 
+class RoleEquipeStructure(models.TextChoices):
+    PROPRIETAIRE = "PROPRIETAIRE", "Proprietaire"
+    GESTIONNAIRE = "GESTIONNAIRE", "Gestionnaire"
+    CAISSIER = "CAISSIER", "Caissier"
+
+
+class StatutEquipeStructure(models.TextChoices):
+    INVITE = "INVITE", "Invite"
+    ACTIF = "ACTIF", "Actif"
+    SUSPENDU = "SUSPENDU", "Suspendu"
+
+
 class Structure(models.Model):
     id = models.UUIDField(
         primary_key=True,
@@ -41,11 +53,15 @@ class Structure(models.Model):
 
     adresse = models.CharField(
         max_length=255,
+        blank=True,
+        default="",
     )
 
     telephone = models.CharField(
         max_length=30,
         db_index=True,
+        blank=True,
+        default="",
     )
 
     latitude = models.DecimalField(
@@ -71,6 +87,8 @@ class Structure(models.Model):
 
     gestionnaire = models.OneToOneField(
         "utilisateurs.Utilisateur",
+        null=True,
+        blank=True,
         on_delete=models.CASCADE,
         related_name="structure",
     )
@@ -120,6 +138,61 @@ class Structure(models.Model):
         self.save(update_fields=["statut", "date_validation"])
     def __str__(self):
         return f"{self.nom} ({self.get_type_display()})"
+
+
+class EquipeStructure(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+
+    structure = models.ForeignKey(
+        Structure,
+        on_delete=models.CASCADE,
+        related_name="equipe",
+    )
+
+    utilisateur = models.ForeignKey(
+        "utilisateurs.Utilisateur",
+        on_delete=models.CASCADE,
+        related_name="structures_membres",
+    )
+
+    role = models.CharField(
+        max_length=20,
+        choices=RoleEquipeStructure.choices,
+        db_index=True,
+    )
+
+    statut = models.CharField(
+        max_length=20,
+        choices=StatutEquipeStructure.choices,
+        default=StatutEquipeStructure.INVITE,
+        db_index=True,
+    )
+
+    date_invitation = models.DateTimeField(auto_now_add=True)
+    date_activation = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        verbose_name = "Membre de structure"
+        verbose_name_plural = "Equipe des structures"
+        ordering = ["structure__nom", "role", "utilisateur__nom"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["structure", "utilisateur"],
+                name="unique_equipe_structure_utilisateur",
+            )
+        ]
+        indexes = [
+            models.Index(fields=["structure", "role"]),
+            models.Index(fields=["utilisateur", "statut"]),
+        ]
+
+    def activer(self):
+        self.statut = StatutEquipeStructure.ACTIF
+        self.date_activation = timezone.now()
+        self.save(update_fields=["statut", "date_activation"])
+
+    def __str__(self):
+        return f"{self.utilisateur} - {self.structure} ({self.role})"
 
 
 class TypeService(models.TextChoices):

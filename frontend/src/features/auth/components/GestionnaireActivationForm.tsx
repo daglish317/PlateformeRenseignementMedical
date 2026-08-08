@@ -25,10 +25,12 @@ export function GestionnaireActivationForm({
   const setAuth = useAuthStore((s) => s.setAuth);
 
   const [email, setEmail] = useState("");
+  const [nom, setNom] = useState("");
   const [otpDigits, setOtpDigits] = useState<string[]>(["", "", "", ""]);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [step, setStep] = useState<"email" | "otp" | "password">("email");
+  const [viaOtp, setViaOtp] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -39,8 +41,14 @@ export function GestionnaireActivationForm({
 
     try {
       const result = await authService.checkGestionnaire(email);
-      if (result.is_gestionnaire) {
+      if (result.is_invited && result.requires_otp) {
+        // Propriétaire (invité par l'admin) : flux email + OTP conservé.
+        setViaOtp(true);
         setStep("otp");
+      } else if (result.is_invited) {
+        // Gestionnaire / caissier : création de compte directe, sans OTP.
+        setViaOtp(false);
+        setStep("password");
       } else {
         setError(t("manager.pendingNotFound"));
       }
@@ -118,11 +126,16 @@ export function GestionnaireActivationForm({
       return;
     }
 
+    if (nom.trim().length < 3) {
+      setError("Le nom complet est requis.");
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
     try {
-      const auth = await authService.activateGestionnaire(email, password);
+      const auth = await authService.activateGestionnaire(email, password, nom.trim());
       toast.success(t("manager.activated"));
       setAuth(auth);
       onSuccess?.();
@@ -223,9 +236,23 @@ export function GestionnaireActivationForm({
       {step === "password" && (
         <form onSubmit={handleSetPassword} className="space-y-4">
           <p className="text-center text-sm text-muted-foreground">
-            {t("manager.passwordHelp")}{" "}
+            {viaOtp ? t("manager.passwordHelp") : t("manager.passwordHelpDirect")}{" "}
             <span className="font-medium text-foreground">{email}</span>
           </p>
+          <div className="space-y-2">
+            <Label htmlFor="gest-name">Nom complet</Label>
+            <Input
+              id="gest-name"
+              type="text"
+              placeholder="Jean Dupont"
+              value={nom}
+              onChange={(e) => {
+                setNom(e.target.value);
+                setError(null);
+              }}
+              disabled={loading}
+            />
+          </div>
           <div className="space-y-2">
             <Label htmlFor="gest-password">{t("password")}</Label>
             <Input
@@ -258,7 +285,7 @@ export function GestionnaireActivationForm({
           <Button
             type="submit"
             className="w-full"
-            disabled={loading || !password || !confirmPassword}
+            disabled={loading || !nom || !password || !confirmPassword}
           >
             {loading ? (
               <>

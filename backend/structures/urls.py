@@ -14,12 +14,18 @@ from .views import (
     SetHorairesView,
     UpdateSingleHoraireView,
     MyStructureView,
+    MyStructureTeamView,
+    OwnerStructuresView,
+    StructureTeamMemberStatusView,
 )
 from .views import StructuresProchesView
 from .form import StructureFormSubmitView
 
 urlpatterns = [
     path("me/", MyStructureView.as_view(), name="structure-me"),
+    path("owner/", OwnerStructuresView.as_view(), name="structure-owner"),
+    path("team/", MyStructureTeamView.as_view(), name="structure-team"),
+    path("team/<uuid:member_id>/status/", StructureTeamMemberStatusView.as_view(), name="structure-team-status"),
     path("create/", CreateStructureView.as_view(), name="structure-create"),
 
     path("admin/list/", AdminListStructuresView.as_view(), name="structure-admin-list"),

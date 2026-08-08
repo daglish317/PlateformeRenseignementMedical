@@ -4,17 +4,34 @@ import { useEffect } from "react";
 import { useRouter } from "@/i18n/navigation";
 
 import { useAuthStore } from "@/features/auth/store/auth-store";
-import { hasGestionnairePermission } from "../permissions/permissions";
+import { getRedirectPath } from "@/features/auth/utils/redirect";
+import type { RoleUtilisateur } from "@/features/auth/types/user";
 import { useMyStructure } from "@/features/shared/structure-profile/hooks/useMyStructure";
+import type { DashboardType } from "../types";
 
 const TYPE_TO_ROUTE: Record<string, string> = {
   HOPITAL: "hospital",
   PHARMACIE: "pharmacy",
 };
 
+const STRUCTURE_TYPES: DashboardType[] = ["HOPITAL", "PHARMACIE"];
+
+function isAllowedRole(role: RoleUtilisateur, type: DashboardType): boolean {
+  switch (type) {
+    case "HOPITAL":
+      return role === "PROPRIETAIRE" || role === "GESTIONNAIRE";
+    case "PHARMACIE":
+      return role === "GESTIONNAIRE";
+    case "OWNER":
+      return role === "PROPRIETAIRE";
+    case "CAISSIER":
+      return role === "CAISSIER";
+  }
+}
+
 interface DashboardRouteProps {
   children: React.ReactNode;
-  type: "HOPITAL" | "PHARMACIE";
+  type: DashboardType;
 }
 
 export function DashboardRoute({ children, type }: DashboardRouteProps) {
@@ -22,18 +39,15 @@ export function DashboardRoute({ children, type }: DashboardRouteProps) {
   const hydrated = useAuthStore((state) => state.hydrated);
   const user = useAuthStore((state) => state.user);
   const router = useRouter();
+
+  const requiresStructure = STRUCTURE_TYPES.includes(type);
   const canCheckStructure =
     hydrated &&
     authenticated &&
     Boolean(user) &&
-    user !== null &&
-    hasGestionnairePermission(user.role);
+    requiresStructure;
 
-  const {
-    data: structure,
-    isLoading,
-    isError,
-  } = useMyStructure(canCheckStructure);
+  const { data: structure, isLoading, isError } = useMyStructure(canCheckStructure);
 
   useEffect(() => {
     if (!hydrated) return;
@@ -43,10 +57,12 @@ export function DashboardRoute({ children, type }: DashboardRouteProps) {
       return;
     }
 
-    if (user && !hasGestionnairePermission(user.role)) {
-      router.replace("/");
+    if (user && !isAllowedRole(user.role, type)) {
+      router.replace(getRedirectPath(user));
       return;
     }
+
+    if (!requiresStructure) return;
 
     if (isError) {
       router.replace("/gestionnaire/setup");
@@ -57,22 +73,22 @@ export function DashboardRoute({ children, type }: DashboardRouteProps) {
 
     const structureType = structure.type.toUpperCase();
 
-    if (structureType !== type || structure.statut !== "ACTIVE") {
+    if (structureType !== type) {
       const route = TYPE_TO_ROUTE[structureType] || "hospital";
       router.replace(`/${route}`);
     }
-  }, [authenticated, hydrated, isError, router, structure, type, user]);
+  }, [authenticated, hydrated, isError, router, structure, type, user, requiresStructure]);
 
   const blocked =
     !hydrated ||
     !authenticated ||
     !user ||
-    !hasGestionnairePermission(user.role) ||
-    isLoading ||
-    isError ||
-    !structure ||
-    structure.type.toUpperCase() !== type ||
-    structure.statut !== "ACTIVE";
+    !isAllowedRole(user.role, type) ||
+    (requiresStructure &&
+      (isLoading ||
+        isError ||
+        !structure ||
+        structure.type.toUpperCase() !== type));
 
   if (blocked) {
     return (

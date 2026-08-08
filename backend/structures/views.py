@@ -1,7 +1,8 @@
-from rest_framework.views import APIView
+﻿from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
+from django.utils import timezone
 from .serializers_public import StructureMapSerializer
 from .models import Structure, Favori, Horaire
 from .serializers import (
@@ -10,21 +11,41 @@ from .serializers import (
     StructureAdminListSerializer,
     StructureDetailSerializer,
     StructureValidationSerializer,
+    EquipeStructureSerializer,
     FavoriCreateSerializer,
     FavoriSerializer,
     HoraireSerializer,
     HoraireBulkCreateSerializer,
+    InviteStructureMemberSerializer,
+    ProprietaireStructureCreateSerializer,
     StructureMapSerializer,
+    UpdateStructureMemberStatusSerializer,
 )
 
 from .services import StructureService, StructureGeoService
-from utilisateurs.decorators import gestionnaire_required, admin_required
-from .permissions import assert_gestionnaire_owns_structure
+from utilisateurs.decorators import (
+    admin_required,
+    gestionnaire_required,
+    proprietaire_required,
+    responsable_structure_required,
+)
+from .permissions import (
+    assert_gestionnaire_owns_structure,
+    assert_proprietaire_owns_structure,
+    get_user_structure,
+)
+from .models import (
+    EquipeStructure,
+    RoleEquipeStructure,
+    StatutEquipeStructure,
+    StatutStructure,
+)
+from utilisateurs.services.invitation_service import InvitationService
 
 
 class CreateStructureView(APIView):
 
-    @gestionnaire_required
+    @responsable_structure_required
     def post(self, request):
 
         serializer = StructureCreateSerializer(data=request.data)
@@ -40,7 +61,7 @@ class CreateStructureView(APIView):
 
         return Response(
             {
-                "message": "Structure créée avec succès",
+                "message": "Structure crÃ©Ã©e avec succÃ¨s",
                 "data": StructureDetailSerializer(structure).data,
             },
             status=status.HTTP_201_CREATED,
@@ -53,7 +74,11 @@ class AdminListStructuresView(APIView):
     def get(self, request):
         from django.db.models import Q
 
-        structures = Structure.objects.filter(est_supprimee=False).select_related("gestionnaire")
+        structures = (
+            Structure.objects.filter(est_supprimee=False)
+            .select_related("gestionnaire")
+            .prefetch_related("equipe__utilisateur")
+        )
 
         search = request.query_params.get("search", "").strip()
         if search:
@@ -102,14 +127,11 @@ class StructureDetailView(APIView):
             StructureDetailSerializer(structure).data
         )
 
-    @gestionnaire_required
+    @responsable_structure_required
     def patch(self, request, pk):
         try:
-            structure = Structure.objects.get(
-                id=pk,
-                gestionnaire=request.user,
-                est_supprimee=False,
-            )
+            assert_gestionnaire_owns_structure(request.user, pk)
+            structure = Structure.objects.get(id=pk, est_supprimee=False)
         except Structure.DoesNotExist:
             return Response(
                 {"detail": "Structure introuvable."},
@@ -163,7 +185,7 @@ class ValidateStructureView(APIView):
                     administrateur=request.user,
                 )
 
-                message = "Structure validée avec succès."
+                message = "Structure validÃ©e avec succÃ¨s."
 
             else:
 
@@ -173,7 +195,7 @@ class ValidateStructureView(APIView):
                     motif=serializer.validated_data["motif"],
                 )
 
-                message = "Structure refusée avec succès."
+                message = "Structure refusÃ©e avec succÃ¨s."
 
         except ValueError as e:
 
@@ -253,12 +275,12 @@ class AddFavoriView(APIView):
 
         if not created:
             return Response(
-                {"detail": "Déjà dans vos favoris"},
+                {"detail": "DÃ©jÃ  dans vos favoris"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
         return Response(
-            {"message": "Ajouté aux favoris", "data": FavoriSerializer(favori).data},
+            {"message": "AjoutÃ© aux favoris", "data": FavoriSerializer(favori).data},
             status=status.HTTP_201_CREATED,
         )
 
@@ -282,7 +304,7 @@ class RemoveFavoriView(APIView):
 
         favori.delete()
         return Response(
-            {"message": "Retiré des favoris"},
+            {"message": "RetirÃ© des favoris"},
             status=status.HTTP_200_OK,
         )
 
@@ -338,7 +360,7 @@ class ListHorairesView(APIView):
 
 class SetHorairesView(APIView):
 
-    @gestionnaire_required
+    @responsable_structure_required
     def put(self, request, structure_id):
 
         assert_gestionnaire_owns_structure(request.user, structure_id)
@@ -368,7 +390,7 @@ class SetHorairesView(APIView):
 
         return Response(
             {
-                "message": "Horaires enregistrés",
+                "message": "Horaires enregistrÃ©s",
                 "data": HoraireSerializer(horaires_crees, many=True).data,
             },
             status=status.HTTP_200_OK,
@@ -377,7 +399,7 @@ class SetHorairesView(APIView):
 
 class UpdateSingleHoraireView(APIView):
 
-    @gestionnaire_required
+    @responsable_structure_required
     def patch(self, request, pk):
 
         try:
@@ -398,14 +420,14 @@ class UpdateSingleHoraireView(APIView):
             fermeture = serializer.validated_data.get("heure_fermeture", horaire.heure_fermeture)
             if ouverture and fermeture and ouverture >= fermeture:
                 return Response(
-                    {"detail": "L'heure d'ouverture doit être avant l'heure de fermeture."},
+                    {"detail": "L'heure d'ouverture doit Ãªtre avant l'heure de fermeture."},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
         serializer.save()
 
         return Response(
-            {"message": "Horaire mis à jour", "data": serializer.data},
+            {"message": "Horaire mis Ã  jour", "data": serializer.data},
             status=status.HTTP_200_OK,
         )
     
@@ -431,28 +453,22 @@ class StructureMapView(APIView):
 
 class MyStructureView(APIView):
 
-    @gestionnaire_required
+    @responsable_structure_required
     def get(self, request):
-        try:
-            structure = Structure.objects.get(
-                gestionnaire=request.user,
-                est_supprimee=False,
-            )
-        except Structure.DoesNotExist:
+        structure = get_user_structure(request.user)
+        if not structure:
             return Response(
-                {"detail": "Aucune structure associée à votre compte."},
+                {"detail": "Aucune structure associÃ©e Ã  votre compte."},
                 status=status.HTTP_404_NOT_FOUND,
             )
         return Response(StructureDetailSerializer(structure).data)
 
-    @gestionnaire_required
+    @responsable_structure_required
     def patch(self, request, pk=None):
         try:
-            structure = Structure.objects.get(
-                id=pk,
-                gestionnaire=request.user,
-                est_supprimee=False,
-            )
+            structure = get_user_structure(request.user)
+            if not structure or str(structure.id) != str(pk):
+                raise Structure.DoesNotExist
         except Structure.DoesNotExist:
             return Response(
                 {"detail": "Structure introuvable."},
@@ -467,3 +483,177 @@ class MyStructureView(APIView):
         serializer.save()
 
         return Response(StructureDetailSerializer(structure).data)
+
+
+class OwnerStructuresView(APIView):
+
+    @proprietaire_required
+    def get(self, request):
+        memberships = (
+            EquipeStructure.objects.filter(
+                utilisateur=request.user,
+                role=RoleEquipeStructure.PROPRIETAIRE,
+                statut=StatutEquipeStructure.ACTIF,
+                structure__est_supprimee=False,
+            )
+            .select_related("structure")
+            .order_by("structure__nom")
+        )
+        structures = [membership.structure for membership in memberships]
+        return Response({
+            "results": StructureDetailSerializer(structures, many=True).data,
+        })
+
+    @proprietaire_required
+    def post(self, request):
+        serializer = ProprietaireStructureCreateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        structure = Structure.objects.create(
+            nom=serializer.validated_data["nom"],
+            type=serializer.validated_data["type"],
+            adresse=serializer.validated_data.get("adresse", ""),
+            telephone=serializer.validated_data.get("telephone", ""),
+            statut=StatutStructure.EN_ATTENTE,
+        )
+
+        EquipeStructure.objects.create(
+            structure=structure,
+            utilisateur=request.user,
+            role=RoleEquipeStructure.PROPRIETAIRE,
+            statut=StatutEquipeStructure.ACTIF,
+            date_activation=timezone.now(),
+        )
+
+        return Response(
+            {
+                "message": "Structure creee",
+                "data": StructureDetailSerializer(structure).data,
+            },
+            status=status.HTTP_201_CREATED,
+        )
+
+
+class MyStructureTeamView(APIView):
+
+    @proprietaire_required
+    def get(self, request):
+        structure_id = request.query_params.get("structure_id")
+        if not structure_id:
+            return Response(
+                {"detail": "structure_id requis."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        assert_proprietaire_owns_structure(request.user, structure_id)
+        structure = Structure.objects.get(id=structure_id, est_supprimee=False)
+        if not structure:
+            return Response(
+                {"detail": "Aucune structure associÃ©e Ã  votre compte."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        membres = structure.equipe.select_related("utilisateur").order_by("role", "utilisateur__nom")
+        return Response({
+            "structure": StructureDetailSerializer(structure).data,
+            "results": EquipeStructureSerializer(membres, many=True).data,
+        })
+
+    @proprietaire_required
+    def post(self, request):
+        serializer = InviteStructureMemberSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        structure_id = serializer.validated_data["structure_id"]
+        assert_proprietaire_owns_structure(request.user, structure_id)
+        structure = Structure.objects.get(id=structure_id, est_supprimee=False)
+
+        try:
+            if serializer.validated_data["role"] == RoleEquipeStructure.GESTIONNAIRE:
+                membre = InvitationService.inviter_gestionnaire(
+                    nom=serializer.validated_data["nom"],
+                    email=serializer.validated_data["email"],
+                    structure=structure,
+                )
+            else:
+                membre = InvitationService.inviter_caissier(
+                    nom=serializer.validated_data["nom"],
+                    email=serializer.validated_data["email"],
+                    structure=structure,
+                )
+        except ValueError as e:
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response(
+            {
+                "message": "Collaborateur pre-enregistre. Il creera son compte sur la page d'inscription.",
+                "data": {
+                    "id": str(membre.id),
+                    "nom": membre.nom,
+                    "email": membre.email,
+                    "role": membre.role,
+                },
+            },
+            status=status.HTTP_201_CREATED,
+        )
+
+
+class StructureTeamMemberStatusView(APIView):
+
+    @proprietaire_required
+    def patch(self, request, member_id):
+        serializer = UpdateStructureMemberStatusSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        try:
+            membership = (
+                EquipeStructure.objects.select_related("structure", "utilisateur")
+                .get(id=member_id, structure__est_supprimee=False)
+            )
+        except EquipeStructure.DoesNotExist:
+            return Response(
+                {"detail": "Membre introuvable."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        assert_proprietaire_owns_structure(request.user, membership.structure_id)
+
+        if membership.role not in {
+            RoleEquipeStructure.GESTIONNAIRE,
+            RoleEquipeStructure.CAISSIER,
+        }:
+            return Response(
+                {"detail": "Seuls les gestionnaires et caissiers peuvent etre modifies."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        utilisateur = membership.utilisateur
+        action = serializer.validated_data["action"]
+
+        if action == "DEACTIVATE":
+            membership.statut = StatutEquipeStructure.SUSPENDU
+            membership.save(update_fields=["statut"])
+            utilisateur.is_active = False
+            utilisateur.save(update_fields=["is_active"])
+            message = "Collaborateur desactive."
+        else:
+            if utilisateur.has_usable_password() and utilisateur.email_verifie:
+                membership.statut = StatutEquipeStructure.ACTIF
+                if not membership.date_activation:
+                    membership.date_activation = timezone.now()
+                membership.save(update_fields=["statut", "date_activation"])
+                utilisateur.is_active = True
+                utilisateur.save(update_fields=["is_active"])
+                message = "Collaborateur active."
+            else:
+                membership.statut = StatutEquipeStructure.INVITE
+                membership.save(update_fields=["statut"])
+                utilisateur.is_active = False
+                utilisateur.save(update_fields=["is_active"])
+                message = "Pre-enregistrement reactive. Le collaborateur doit finaliser son inscription."
+
+        return Response(
+            {
+                "message": message,
+                "data": EquipeStructureSerializer(membership).data,
+            },
+            status=status.HTTP_200_OK,
+        )

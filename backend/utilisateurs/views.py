@@ -35,6 +35,7 @@ from .views_admin import (
     AdminStatisticsView,
 )
 from .services.invitation_service import InvitationService
+from structures.models import EquipeStructure, StatutEquipeStructure
 from .permissions import IsAdmin
 from .decorators import admin_required
 from core.verification.service import VerificationService
@@ -190,7 +191,7 @@ class InviteGestionnaireView(APIView):
         serializer = InviteGestionnaireSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         try:
-            gestionnaire = InvitationService.inviter_gestionnaire(
+            proprietaire = InvitationService.inviter_proprietaire(
                 nom=serializer.validated_data["nom"],
                 email=serializer.validated_data["email"],
             )
@@ -199,7 +200,7 @@ class InviteGestionnaireView(APIView):
         return Response(
             {
                 "message": "Invitation envoyée",
-                "data": UtilisateurSerializer(gestionnaire).data,
+                "data": UtilisateurSerializer(proprietaire).data,
             },
             status=201,
         )
@@ -244,11 +245,24 @@ class CheckGestionnaireView(APIView):
         user = Utilisateur.objects.filter(email=email).first()
         is_pending = (
             user is not None
-            and user.role == RoleUtilisateur.GESTIONNAIRE
+            and user.role in {
+                RoleUtilisateur.PROPRIETAIRE,
+                RoleUtilisateur.GESTIONNAIRE,
+                RoleUtilisateur.CAISSIER,
+            }
             and user.is_active is False
             and user.email_verifie is False
         )
-        return Response({"is_gestionnaire": is_pending})
+        # Le propriétaire (invité par l'admin) garde le flux email + OTP.
+        # Le gestionnaire/caissier crée son compte directement (pas d'OTP).
+        requires_otp = is_pending and user.role == RoleUtilisateur.PROPRIETAIRE
+        return Response({
+            "is_invited": is_pending,
+            "is_gestionnaire": is_pending,
+            "is_invited_structure_user": is_pending,
+            "requires_otp": requires_otp,
+            "role": user.role if is_pending else None,
+        })
 
 
 class ActivateGestionnaireView(APIView):
@@ -258,26 +272,44 @@ class ActivateGestionnaireView(APIView):
         serializer.is_valid(raise_exception=True)
         email = serializer.validated_data["email"].lower().strip()
         password = serializer.validated_data["password"]
+        nom = serializer.validated_data.get("nom", "").strip()
 
         user = Utilisateur.objects.filter(email=email).first()
-        if not user or user.role != RoleUtilisateur.GESTIONNAIRE:
+        if not user or user.role not in {
+            RoleUtilisateur.PROPRIETAIRE,
+            RoleUtilisateur.GESTIONNAIRE,
+            RoleUtilisateur.CAISSIER,
+        }:
             return Response({"detail": "Utilisateur introuvable."}, status=404)
 
         if user.is_active:
             return Response({"detail": "Ce compte est déjà activé."}, status=400)
 
-        session = VerificationSession.objects.filter(
-            email=email,
-            is_verified=True,
-            expires_at__gt=timezone.now(),
-        ).first()
+        # Seul le propriétaire (invité par l'admin) doit valider un code OTP
+        # avant l'activation. Le gestionnaire/caissier crée son compte avec
+        # son email seul (pas d'email envoyé par le propriétaire).
+        if user.role == RoleUtilisateur.PROPRIETAIRE:
+            session = VerificationSession.objects.filter(
+                email=email,
+                is_verified=True,
+                expires_at__gt=timezone.now(),
+            ).first()
 
-        if not session:
-            return Response({"detail": "Session expirée. Validez à nouveau votre code OTP."}, status=400)
+            if not session:
+                return Response({"detail": "Session expirée. Validez à nouveau votre code OTP."}, status=400)
 
         user.set_password(password)
+        if nom:
+            user.nom = nom
         user.is_active = True
         user.email_verifie = True
-        user.save(update_fields=["password", "is_active", "email_verifie"])
+        user.save(update_fields=["password", "nom", "is_active", "email_verifie"])
+        EquipeStructure.objects.filter(
+            utilisateur=user,
+            statut=StatutEquipeStructure.INVITE,
+        ).update(
+            statut=StatutEquipeStructure.ACTIF,
+            date_activation=timezone.now(),
+        )
 
         return Response(_user_response(user), status=200)

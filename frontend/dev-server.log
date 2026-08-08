@@ -1,0 +1,22 @@
+
+> frontend@0.1.0 dev
+> next dev
+
+▲ Next.js 16.3.0 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.56.1:3000
+- Environments: .env.local, .env
+✓ Ready in 2.5s
+✓ Running next.config.ts took 354ms
+- Experiments (use with caution):
+  · optimizePackageImports
+
+✓ Generated AGENTS.md and CLAUDE.md for AI agents. Set `agentRules: false` in next.config to disable.
+○ Compiling /[locale]/connexion ...
+ GET /fr/owner/team 200 in 19.3s (next.js: 7.5s, generate-params: 8.2s, application-code: 3.6s)
+ GET /fr/connexion 200 in 19.6s (next.js: 8.7s, generate-params: 9.6s, application-code: 1225ms)
+ GET /manifest.webmanifest 200 in 757ms (next.js: 561ms, application-code: 196ms)
+[browser] Image with src "/logos/logo-vertical-dark.svg" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
+ GET /fr/connexion 200 in 270ms (next.js: 18ms, generate-params: 42ms, application-code: 209ms)
+[?25h

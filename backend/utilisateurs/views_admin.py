@@ -1,4 +1,4 @@
-from datetime import timedelta
+﻿from datetime import timedelta
 from django.db.models import Q, Count
 from django.utils import timezone
 from rest_framework.views import APIView
@@ -40,7 +40,7 @@ class RegisterAdminView(APIView):
         if len(password) < 8:
             return Response({"detail": "Mot de passe trop court (min 8)."}, status=400)
         if Utilisateur.objects.filter(email=email).exists():
-            return Response({"detail": "Cette adresse email est déjà utilisée."}, status=400)
+            return Response({"detail": "Cette adresse email est dÃ©jÃ  utilisÃ©e."}, status=400)
 
         user = Utilisateur.objects.create_user(
             nom=nom,
@@ -222,12 +222,12 @@ class AdminUserDetailView(APIView):
         if action == "reactivate":
             u.is_active = True
             u.save(update_fields=["is_active"])
-            return Response({"message": "Utilisateur réactivé"})
+            return Response({"message": "Utilisateur rÃ©activÃ©"})
         if action == "delete":
             u.is_active = False
             u.email = f"deleted_{u.id}_{u.email}"
             u.save(update_fields=["is_active", "email"])
-            return Response({"message": "Utilisateur supprimé (logique)"})
+            return Response({"message": "Utilisateur supprimÃ© (logique)"})
 
         return Response({"detail": "Action invalide"}, status=400)
 
@@ -236,14 +236,17 @@ class AdminManagersListView(APIView):
 
     @admin_required
     def get(self, request):
-        qs = Utilisateur.objects.filter(role=RoleUtilisateur.GESTIONNAIRE).select_related("structure")
+        qs = (
+            Utilisateur.objects.filter(role=RoleUtilisateur.PROPRIETAIRE)
+            .prefetch_related("structures_membres__structure")
+        )
 
         search = request.query_params.get("search", "").strip()
         if search:
             qs = qs.filter(
                 Q(nom__icontains=search)
                 | Q(email__icontains=search)
-                | Q(structure__nom__icontains=search)
+                | Q(structures_membres__structure__nom__icontains=search)
             )
 
         statut = request.query_params.get("statut")
@@ -254,16 +257,17 @@ class AdminManagersListView(APIView):
 
         type_structure = request.query_params.get("type_structure")
         if type_structure == "HOPITAL":
-            qs = qs.filter(structure__type=TypeStructure.HOPITAL)
+            qs = qs.filter(structures_membres__structure__type=TypeStructure.HOPITAL)
         elif type_structure == "PHARMACIE":
-            qs = qs.filter(structure__type=TypeStructure.PHARMACIE)
+            qs = qs.filter(structures_membres__structure__type=TypeStructure.PHARMACIE)
 
-        qs = qs.order_by(request.query_params.get("ordering", "-date_joined"))
+        qs = qs.distinct().order_by(request.query_params.get("ordering", "-date_joined"))
         page_items, pagination = _paginate(qs, request)
 
         data = []
         for m in page_items:
-            structure = getattr(m, "structure", None)
+            membership = m.structures_membres.first()
+            structure = membership.structure if membership else getattr(m, "structure", None)
             data.append({
                 "id": str(m.id),
                 "nom": m.nom,
@@ -287,11 +291,14 @@ class AdminManagersListView(APIView):
         if not nom or not email:
             return Response({"detail": "Nom et email requis."}, status=400)
         try:
-            gestionnaire = InvitationService.inviter_gestionnaire(nom=nom, email=email)
+            proprietaire = InvitationService.inviter_proprietaire(
+                nom=nom,
+                email=email,
+            )
         except ValueError as e:
             return Response({"detail": str(e)}, status=400)
         return Response(
-            {"message": "Invitation envoyée", "data": UtilisateurSerializer(gestionnaire).data},
+            {"message": "Invitation proprietaire envoyee", "data": UtilisateurSerializer(proprietaire).data},
             status=201,
         )
 
@@ -301,13 +308,14 @@ class AdminManagerDetailView(APIView):
     @admin_required
     def get(self, request, pk):
         try:
-            m = Utilisateur.objects.select_related("structure").get(
-                id=pk, role=RoleUtilisateur.GESTIONNAIRE
+            m = Utilisateur.objects.prefetch_related("structures_membres__structure").get(
+                id=pk, role=RoleUtilisateur.PROPRIETAIRE
             )
         except Utilisateur.DoesNotExist:
-            return Response({"detail": "Gestionnaire introuvable"}, status=404)
+            return Response({"detail": "Proprietaire introuvable"}, status=404)
 
-        structure = getattr(m, "structure", None)
+        membership = m.structures_membres.first()
+        structure = membership.structure if membership else getattr(m, "structure", None)
         return Response({
             "id": str(m.id),
             "nom": m.nom,
@@ -326,22 +334,22 @@ class AdminManagerDetailView(APIView):
     @admin_required
     def patch(self, request, pk):
         try:
-            m = Utilisateur.objects.get(id=pk, role=RoleUtilisateur.GESTIONNAIRE)
+            m = Utilisateur.objects.get(id=pk, role=RoleUtilisateur.PROPRIETAIRE)
         except Utilisateur.DoesNotExist:
-            return Response({"detail": "Gestionnaire introuvable"}, status=404)
+            return Response({"detail": "Proprietaire introuvable"}, status=404)
 
         action = request.data.get("action")
         if action == "suspend":
             m.is_active = False
             m.save(update_fields=["is_active"])
-            return Response({"message": "Gestionnaire suspendu"})
+            return Response({"message": "Proprietaire suspendu"})
         if action == "reactivate":
             m.is_active = True
             m.save(update_fields=["is_active"])
-            return Response({"message": "Gestionnaire réactivé"})
+            return Response({"message": "Proprietaire reactive"})
         if action == "reset_password":
             VerificationService.generate(email=m.email)
-            return Response({"message": "Nouveau mot de passe envoyé par email"})
+            return Response({"message": "Nouveau mot de passe envoyÃ© par email"})
 
         return Response({"detail": "Action invalide"}, status=400)
 

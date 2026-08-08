@@ -1,4 +1,5 @@
 import { User } from "./user";
+import { RoleUtilisateur } from "./user";
 
 export interface Tokens {
   access: string;
@@ -23,4 +24,12 @@ export interface RegisterCredentials {
 
 export interface GoogleCredentials {
   id_token: string;
+}
+
+export interface CheckGestionnaireResponse {
+  is_invited: boolean;
+  is_gestionnaire: boolean;
+  is_invited_structure_user: boolean;
+  requires_otp: boolean;
+  role: RoleUtilisateur | null;
 }

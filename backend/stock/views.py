@@ -1,17 +1,27 @@
 import csv
 import io
 
+from django.db.models import Exists, F, OuterRef
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 
-from .models import StockItem, StockMovement
-from .serializers import StockSerializer, StockMovementSerializer
+from .models import Approvisionnement, Medicament, StockItem, StockMovement
+from .serializers import (
+    ApprovisionnementSerializer,
+    ApprovisionnementCreateSerializer,
+    MedicamentSerializer,
+    StockSerializer,
+    StockMovementSerializer,
+)
 from .services import StockService
 
 from structures.models import Structure
-from structures.permissions import assert_gestionnaire_owns_structure
-from utilisateurs.decorators import gestionnaire_required
+from structures.permissions import (
+    assert_gestionnaire_owns_structure,
+    assert_structure_autorise_stock_direct,
+)
+from utilisateurs.decorators import gestionnaire_required, responsable_structure_required
 
 
 def _parse_csv(file):
@@ -32,7 +42,10 @@ def _parse_excel(file):
     wb = openpyxl.load_workbook(file, read_only=True, data_only=True)
     ws = wb.active
     rows = []
-    headers = [str(cell.value).strip().lower() if cell.value else "" for cell in next(ws.iter_rows(min_row=1, max_row=1))]
+    headers = [
+        str(cell.value).strip().lower() if cell.value else ""
+        for cell in next(ws.iter_rows(min_row=1, max_row=1))
+    ]
 
     for row in ws.iter_rows(min_row=2, values_only=True):
         row_dict = {}
@@ -46,12 +59,13 @@ def _parse_excel(file):
 
 
 class CreateStockView(APIView):
+    """Creation directe d'un article de stock (interdite pour les pharmacies)."""
 
-    @gestionnaire_required
+    @responsable_structure_required
     def post(self, request):
 
         structure_id = request.data.get("structure_id")
-        assert_gestionnaire_owns_structure(request.user, structure_id)
+        assert_structure_autorise_stock_direct(request.user, structure_id)
         structure = Structure.objects.get(id=structure_id)
 
         nom = request.data.get("nom")
@@ -67,7 +81,7 @@ class CreateStockView(APIView):
         item = StockService.ajouter_ou_mettre_a_jour(
             structure=structure,
             nom=nom,
-            type_item=request.data.get("type_item", "MEDICAMENT"),
+            type_item=request.data.get("type_item", StockItem.TYPE_MEDICAMENT),
             quantite=quantite,
             disponible=request.data.get("disponible", True),
             seuil_alerte=int(request.data.get("seuil_alerte", 5)),
@@ -78,15 +92,17 @@ class CreateStockView(APIView):
 
 class ListStockStructureView(APIView):
 
+    @responsable_structure_required
     def get(self, request, structure_id):
 
+        assert_gestionnaire_owns_structure(request.user, structure_id)
         items = StockItem.objects.filter(structure_id=structure_id)
         return Response(StockSerializer(items, many=True).data)
 
 
 class DeleteStockView(APIView):
 
-    @gestionnaire_required
+    @responsable_structure_required
     def delete(self, request, pk):
 
         try:
@@ -109,7 +125,7 @@ class DeleteStockView(APIView):
 
 class RetirerStockView(APIView):
 
-    @gestionnaire_required
+    @responsable_structure_required
     def post(self, request, pk):
 
         item = StockItem.objects.select_related("structure").get(id=pk)
@@ -127,25 +143,9 @@ class RetirerStockView(APIView):
         return Response(StockSerializer(item).data)
 
 
-class EntreeStockView(APIView):
-
-    @gestionnaire_required
-    def post(self, request, pk):
-
-        item = StockItem.objects.select_related("structure").get(id=pk)
-        assert_gestionnaire_owns_structure(request.user, item.structure_id)
-
-        item = StockService.entree_stock(
-            item=item,
-            quantite=int(request.data.get("quantite", 0)),
-            motif=request.data.get("motif", ""),
-        )
-        return Response(StockSerializer(item).data)
-
-
 class StockMovementsView(APIView):
 
-    @gestionnaire_required
+    @responsable_structure_required
     def get(self, request, pk):
 
         item = StockItem.objects.select_related("structure").get(id=pk)
@@ -156,7 +156,7 @@ class StockMovementsView(APIView):
 
 class StockAlertesView(APIView):
 
-    @gestionnaire_required
+    @responsable_structure_required
     def get(self, request, structure_id):
 
         assert_gestionnaire_owns_structure(request.user, structure_id)
@@ -165,12 +165,138 @@ class StockAlertesView(APIView):
         return Response(StockSerializer(items, many=True).data)
 
 
-class ImportMedicamentView(APIView):
+class MedicamentListView(APIView):
+    """Recherche d'autocomplétion pour le formulaire d'approvisionnement."""
+
+    @responsable_structure_required
+    def get(self, request):
+
+        structure_id = request.query_params.get("structure_id")
+        if not structure_id:
+            return Response(
+                {"detail": "structure_id requis"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        assert_gestionnaire_owns_structure(request.user, structure_id)
+
+        queryset = Medicament.objects.filter(structure_id=structure_id)
+        vendable = (
+            (request.query_params.get("vendable") or "").strip().lower()
+            in {"1", "true", "oui", "yes"}
+        )
+        if vendable:
+            stock_disponible = StockItem.objects.filter(
+                structure_id=structure_id,
+                nom=OuterRef("nom"),
+                type_item=StockItem.TYPE_MEDICAMENT,
+                quantite__gt=F("quantite_reservee"),
+            )
+            queryset = (
+                queryset.filter(
+                    prix_vente__gt=0,
+                    en_reserve=False,
+                )
+                .annotate(a_stock_disponible=Exists(stock_disponible))
+                .filter(a_stock_disponible=True)
+            )
+        search = (request.query_params.get("search") or "").strip()
+        if search:
+            queryset = queryset.filter(nom__icontains=search)
+
+        queryset = queryset.order_by("nom")[:20]
+        return Response(MedicamentSerializer(queryset, many=True).data)
+
+
+class ApprovisionnementListCreateView(APIView):
+
+    @responsable_structure_required
+    def get(self, request):
+
+        structure_id = request.query_params.get("structure_id")
+        if not structure_id:
+            return Response(
+                {"detail": "structure_id requis"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        assert_gestionnaire_owns_structure(request.user, structure_id)
+
+        queryset = (
+            Approvisionnement.objects.filter(structure_id=structure_id)
+            .select_related("structure", "cree_par")
+            .prefetch_related("lignes__medicament")
+        )
+        return Response(ApprovisionnementSerializer(queryset, many=True).data)
 
     @gestionnaire_required
     def post(self, request):
+
         structure_id = request.data.get("structure_id")
+        if not structure_id:
+            return Response(
+                {"detail": "structure_id requis"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         assert_gestionnaire_owns_structure(request.user, structure_id)
+        structure = Structure.objects.get(id=structure_id)
+
+        serializer = ApprovisionnementCreateSerializer(
+            data=request.data,
+            context={"request": request, "structure": structure},
+        )
+        serializer.is_valid(raise_exception=True)
+        appro = serializer.save()
+
+        return Response(
+            ApprovisionnementSerializer(appro).data,
+            status=status.HTTP_201_CREATED,
+        )
+
+
+class ApprovisionnementDetailView(APIView):
+
+    @responsable_structure_required
+    def get(self, request, pk):
+
+        try:
+            appro = (
+                Approvisionnement.objects.select_related("structure", "cree_par")
+                .prefetch_related("lignes__medicament")
+                .get(id=pk)
+            )
+        except Approvisionnement.DoesNotExist:
+            return Response(
+                {"detail": "Approvisionnement introuvable"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        assert_gestionnaire_owns_structure(request.user, appro.structure_id)
+        return Response(ApprovisionnementSerializer(appro).data)
+
+
+class EntreeStockView(APIView):
+    """Entree de stock directe (interdite pour les pharmacies)."""
+
+    @responsable_structure_required
+    def post(self, request, pk):
+
+        item = StockItem.objects.select_related("structure").get(id=pk)
+        assert_structure_autorise_stock_direct(request.user, item.structure_id)
+
+        item = StockService.entree_stock(
+            item=item,
+            quantite=int(request.data.get("quantite", 0)),
+            motif=request.data.get("motif", ""),
+        )
+        return Response(StockSerializer(item).data)
+
+
+class ImportMedicamentView(APIView):
+    """Import de medicaments via fichier (interdit pour les pharmacies)."""
+
+    @responsable_structure_required
+    def post(self, request):
+        structure_id = request.data.get("structure_id")
+        assert_structure_autorise_stock_direct(request.user, structure_id)
         structure = Structure.objects.get(id=structure_id)
 
         file = request.FILES.get("file")
@@ -211,7 +337,7 @@ class ImportMedicamentView(APIView):
                 item = StockService.ajouter_ou_mettre_a_jour(
                     structure=structure,
                     nom=nom,
-                    type_item="MEDICAMENT",
+                    type_item=StockItem.TYPE_MEDICAMENT,
                     quantite=quantite,
                     disponible=True,
                     seuil_alerte=5,
@@ -230,11 +356,12 @@ class ImportMedicamentView(APIView):
 
 
 class ImportStockView(APIView):
+    """Import generique de stock via fichier (interdit pour les pharmacies)."""
 
-    @gestionnaire_required
+    @responsable_structure_required
     def post(self, request):
         structure_id = request.data.get("structure_id")
-        assert_gestionnaire_owns_structure(request.user, structure_id)
+        assert_structure_autorise_stock_direct(request.user, structure_id)
         structure = Structure.objects.get(id=structure_id)
 
         file = request.FILES.get("file")
@@ -277,7 +404,11 @@ class ImportStockView(APIView):
                     errors.append({"ligne": i, "erreur": "Nom manquant"})
                     continue
 
-                if type_item not in ("MEDICAMENT", "EQUIPEMENT", "CONSOMMABLE"):
+                if type_item not in (
+                    StockItem.TYPE_MEDICAMENT,
+                    StockItem.TYPE_EQUIPEMENT,
+                    StockItem.TYPE_CONSOMMABLE,
+                ):
                     errors.append({"ligne": i, "erreur": f"Type invalide: {type_item}"})
                     continue
 

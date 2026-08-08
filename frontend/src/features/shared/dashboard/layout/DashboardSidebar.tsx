@@ -10,9 +10,10 @@ import { useDashboardSidebar } from "../hooks/useDashboardSidebar";
 import { useDashboardNavigation } from "../hooks/useDashboardNavigation";
 import { DASHBOARD_SIDEBAR, DASHBOARD_LAYOUT } from "../constants/layout";
 import { SidebarMenu } from "../components/SidebarMenu";
+import type { DashboardType } from "../types";
 
 interface DashboardSidebarProps {
-  type: "HOPITAL" | "PHARMACIE";
+  type: DashboardType;
   className?: string;
 }
 
@@ -51,7 +52,13 @@ export function DashboardSidebar({ type, className }: DashboardSidebarProps) {
     return () => mediaQuery.removeListener(syncResponsiveState);
   }, [setIsMobile, setOpen]);
 
-  const subtitle = type === "HOPITAL" ? "Hôpital" : "Pharmacie";
+  const subtitles: Record<DashboardType, string> = {
+    HOPITAL: "Hôpital",
+    PHARMACIE: "Pharmacie",
+    OWNER: "Propriétaire",
+    CAISSIER: "Caissier",
+  };
+  const subtitle = subtitles[type];
 
   const sidebarContent = useMemo(() => (
     <div className="flex h-full flex-col">

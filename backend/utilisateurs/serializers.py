@@ -1,6 +1,9 @@
 from rest_framework import serializers
+from django.utils import timezone
 
+from structures.models import EquipeStructure, StatutEquipeStructure
 from .models import Utilisateur
+from .models import RoleUtilisateur, TypeAuthentification
 from .services.auth_service import AuthService
 
 
@@ -34,14 +37,65 @@ class RegisterSerializer(serializers.Serializer):
 
     def validate_email(self, value):
         email = value.lower().strip()
-        if Utilisateur.objects.filter(email=email).exists():
-            raise serializers.ValidationError("Cette adresse email est d\u00e9j\u00e0 utilis\u00e9e.")
+        utilisateur = Utilisateur.objects.filter(email=email).first()
+        if utilisateur:
+            est_membre_structure_en_attente = (
+                utilisateur.role in {
+                    RoleUtilisateur.GESTIONNAIRE,
+                    RoleUtilisateur.CAISSIER,
+                }
+                and utilisateur.is_active is False
+                and utilisateur.email_verifie is False
+                and EquipeStructure.objects.filter(
+                    utilisateur=utilisateur,
+                    statut=StatutEquipeStructure.INVITE,
+                ).exists()
+            )
+            if not est_membre_structure_en_attente:
+                raise serializers.ValidationError("Cette adresse email est d\u00e9j\u00e0 utilis\u00e9e.")
         return email
 
     def validate_nom(self, value):
         return value.strip()
 
     def create(self, validated_data):
+        utilisateur = Utilisateur.objects.filter(
+            email=validated_data["email"],
+            role__in=[
+                RoleUtilisateur.GESTIONNAIRE,
+                RoleUtilisateur.CAISSIER,
+            ],
+            is_active=False,
+            email_verifie=False,
+        ).first()
+
+        if utilisateur and EquipeStructure.objects.filter(
+            utilisateur=utilisateur,
+            statut=StatutEquipeStructure.INVITE,
+        ).exists():
+            utilisateur.nom = validated_data["nom"]
+            utilisateur.set_password(validated_data["password"])
+            utilisateur.type_authentification = TypeAuthentification.EMAIL
+            utilisateur.is_active = True
+            utilisateur.email_verifie = True
+            utilisateur.save(
+                update_fields=[
+                    "nom",
+                    "password",
+                    "type_authentification",
+                    "is_active",
+                    "email_verifie",
+                ]
+            )
+            EquipeStructure.objects.filter(
+                utilisateur=utilisateur,
+                statut=StatutEquipeStructure.INVITE,
+            ).update(
+                statut=StatutEquipeStructure.ACTIF,
+                date_activation=timezone.now(),
+            )
+            return utilisateur
+
         return AuthService.register_patient(
             nom=validated_data["nom"],
             email=validated_data["email"],
@@ -102,6 +156,7 @@ class CheckGestionnaireSerializer(serializers.Serializer):
 
 class ActivateGestionnaireSerializer(serializers.Serializer):
     email = serializers.EmailField()
+    nom = serializers.CharField(required=False, allow_blank=True, max_length=150)
     password = serializers.CharField(write_only=True, min_length=8)
 
 

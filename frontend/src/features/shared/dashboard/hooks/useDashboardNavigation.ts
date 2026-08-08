@@ -7,11 +7,19 @@ import {
 import {
   pharmacyNavigation,
 } from "../navigation/pharmacy-navigation";
+import { ownerNavigation } from "../navigation/owner-navigation";
+import { caissierNavigation } from "../navigation/caissier-navigation";
+import type { DashboardNavItem, DashboardType } from "../types";
 
-type DashboardType = "HOPITAL" | "PHARMACIE";
+const NAVIGATION: Record<DashboardType, DashboardNavItem[]> = {
+  HOPITAL: hospitalNavigation,
+  PHARMACIE: pharmacyNavigation,
+  OWNER: ownerNavigation,
+  CAISSIER: caissierNavigation,
+};
 
 function isActiveRoute(pathname: string, href: string): boolean {
-  if (href === "/hospital" || href === "/pharmacy") {
+  if (href === "/hospital" || href === "/pharmacy" || href === "/owner" || href === "/caissier") {
     return pathname === href;
   }
   return pathname === href || pathname.startsWith(href + "/");
@@ -21,8 +29,7 @@ export function useDashboardNavigation(type: DashboardType) {
   const pathname = usePathname();
   const { unreadByNavItem } = useNotifications();
 
-  const baseNavigation =
-    type === "HOPITAL" ? hospitalNavigation : pharmacyNavigation;
+  const baseNavigation = NAVIGATION[type];
 
   const navigation = useMemo(
     () =>

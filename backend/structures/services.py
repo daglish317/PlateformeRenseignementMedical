@@ -1,67 +1,67 @@
 from django.db import transaction
 from django.utils import timezone
 
-from .models import Structure, StatutStructure
-
-from core.utils.distance import DistanceService
-from core.verification.session import VerificationSession
-
 from core.events.dispatcher import EventDispatcher
 from core.events.registry import EventTypes
+from core.utils.distance import DistanceService
+from core.verification.session import VerificationSession
+from .models import StatutStructure, Structure
+from .permissions import get_user_structure
 
 
 class StructureService:
     """
-    Toute la logique métier liée aux structures.
+    Logique metier liee aux structures.
     """
 
     @staticmethod
     @transaction.atomic
     def creer_structure(*, gestionnaire, donnees):
-
-        # Vérifie si structure déjà existante
-        if hasattr(gestionnaire, "structure"):
-            raise ValueError(
-                "Ce gestionnaire possède déjà une structure."
-            )
-
-        # Vérifie OTP validé
         session = VerificationSession.objects.filter(
             email=gestionnaire.email,
-            is_verified=True
+            is_verified=True,
         ).first()
 
         if session is None:
-            raise ValueError(
-                "Votre adresse email n'a pas été vérifiée."
+            raise ValueError("Votre adresse email n'a pas ete verifiee.")
+
+        existing_structure = get_user_structure(gestionnaire)
+        if existing_structure:
+            for field, value in donnees.items():
+                setattr(existing_structure, field, value)
+            existing_structure.statut = StatutStructure.EN_ATTENTE
+            existing_structure.motif_refus = ""
+            existing_structure.save()
+            session.delete()
+
+            EventDispatcher.dispatch(
+                EventTypes.STRUCTURE_CREATED,
+                {"structure": existing_structure},
             )
 
-        # Création structure
+            return existing_structure
+
+        if hasattr(gestionnaire, "structure") and gestionnaire.structure:
+            raise ValueError("Ce compte possede deja une structure.")
+
         structure = Structure.objects.create(
             gestionnaire=gestionnaire,
             statut=StatutStructure.EN_ATTENTE,
             **donnees,
         )
 
-        # Nettoyage session OTP
         session.delete()
 
-        # Event
         EventDispatcher.dispatch(
             EventTypes.STRUCTURE_CREATED,
-            {"structure": structure}
+            {"structure": structure},
         )
 
         return structure
 
-    # ======================================================
-    # VALIDATION
-    # ======================================================
-
     @staticmethod
     @transaction.atomic
     def valider_structure(*, structure, administrateur):
-
         if structure.statut != StatutStructure.EN_ATTENTE:
             raise ValueError("Cette structure n'est plus en attente.")
 
@@ -82,19 +82,14 @@ class StructureService:
             {
                 "structure": structure,
                 "administrateur": administrateur,
-            }
+            },
         )
 
         return structure
 
-    # ======================================================
-    # REFUS
-    # ======================================================
-
     @staticmethod
     @transaction.atomic
     def refuser_structure(*, structure, administrateur, motif):
-
         if structure.statut != StatutStructure.EN_ATTENTE:
             raise ValueError("Cette structure n'est plus en attente.")
 
@@ -114,41 +109,33 @@ class StructureService:
                 "structure": structure,
                 "administrateur": administrateur,
                 "motif": motif,
-            }
+            },
         )
 
         return structure
 
 
-# ======================================================
-# GEO SERVICE (inchangé mais propre)
-# ======================================================
-
 class StructureGeoService:
 
     @staticmethod
     def structures_proches(lat, lon, rayon_km=10):
-
         resultats = []
-
         structures = Structure.objects.filter(statut="ACTIVE", est_supprimee=False)
 
-        for s in structures:
-            if s.latitude and s.longitude:
-
+        for structure in structures:
+            if structure.latitude and structure.longitude:
                 distance = DistanceService.calculer_distance_km(
                     lat,
                     lon,
-                    s.latitude,
-                    s.longitude
+                    structure.latitude,
+                    structure.longitude,
                 )
 
                 if distance is not None and distance <= rayon_km:
                     resultats.append({
-                        "structure": s,
-                        "distance": round(distance, 2)
+                        "structure": structure,
+                        "distance": round(distance, 2),
                     })
 
-        resultats.sort(key=lambda x: x["distance"])
-
+        resultats.sort(key=lambda item: item["distance"])
         return resultats

@@ -1,6 +1,6 @@
 import { User } from "@/features/auth/types/user";
 
-type RedirectPath = "/" | "/admin" | "/gestionnaire";
+type RedirectPath = "/" | "/admin" | "/owner" | "/pharmacy" | "/caissier";
 
 export const getRedirectPath = (user: User): RedirectPath => {
 
@@ -9,8 +9,14 @@ export const getRedirectPath = (user: User): RedirectPath => {
     case "ADMINISTRATEUR":
       return "/admin";
 
+    case "PROPRIETAIRE":
+      return "/owner";
+
     case "GESTIONNAIRE":
-      return "/gestionnaire";
+      return "/pharmacy";
+
+    case "CAISSIER":
+      return "/caissier";
 
     case "PATIENT":
       return "/";

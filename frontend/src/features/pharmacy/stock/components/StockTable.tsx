@@ -6,7 +6,7 @@ import { StockStatusBadge } from "./StockStatusBadge";
 
 interface StockTableProps {
   items: StockItem[];
-  onEdit: (item: StockItem) => void;
+  onEdit?: (item: StockItem) => void;
   onDelete: (item: StockItem) => void;
 }
 
@@ -43,9 +43,11 @@ export function StockTable({ items, onEdit, onDelete }: StockTableProps) {
                 />
               </td>
               <td className="p-3 text-right space-x-1">
-                <Button variant="ghost" size="sm" onClick={() => onEdit(item)}>
-                  <Edit2 className="h-4 w-4" />
-                </Button>
+                {onEdit && (
+                  <Button variant="ghost" size="sm" onClick={() => onEdit(item)}>
+                    <Edit2 className="h-4 w-4" />
+                  </Button>
+                )}
                 <Button variant="ghost" size="sm" onClick={() => onDelete(item)}>
                   <Trash2 className="h-4 w-4" />
                 </Button>

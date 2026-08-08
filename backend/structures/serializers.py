@@ -1,5 +1,13 @@
 from rest_framework import serializers
-from .models import Structure, StructureService, Favori, Horaire
+from .models import (
+    EquipeStructure,
+    RoleEquipeStructure,
+    StatutEquipeStructure,
+    Structure,
+    StructureService,
+    Favori,
+    Horaire,
+)
 
 
 class StructureCreateSerializer(serializers.ModelSerializer):
@@ -54,8 +62,10 @@ class StructureListSerializer(serializers.ModelSerializer):
 
 
 class StructureAdminListSerializer(serializers.ModelSerializer):
-    gestionnaire_nom = serializers.CharField(source="gestionnaire.nom", read_only=True)
-    gestionnaire_email = serializers.CharField(source="gestionnaire.email", read_only=True)
+    proprietaire_nom = serializers.SerializerMethodField()
+    proprietaire_email = serializers.SerializerMethodField()
+    gestionnaire_nom = serializers.SerializerMethodField()
+    gestionnaire_email = serializers.SerializerMethodField()
 
     class Meta:
         model = Structure
@@ -68,12 +78,41 @@ class StructureAdminListSerializer(serializers.ModelSerializer):
             "telephone",
             "statut",
             "motif_refus",
+            "proprietaire_nom",
+            "proprietaire_email",
             "gestionnaire_nom",
             "gestionnaire_email",
             "date_creation",
             "latitude",
             "longitude",
         ]
+
+    def _member(self, obj, role):
+        return (
+            obj.equipe.filter(role=role)
+            .select_related("utilisateur")
+            .first()
+        )
+
+    def get_proprietaire_nom(self, obj):
+        member = self._member(obj, RoleEquipeStructure.PROPRIETAIRE)
+        return member.utilisateur.nom if member else ""
+
+    def get_proprietaire_email(self, obj):
+        member = self._member(obj, RoleEquipeStructure.PROPRIETAIRE)
+        return member.utilisateur.email if member else ""
+
+    def get_gestionnaire_nom(self, obj):
+        member = self._member(obj, RoleEquipeStructure.GESTIONNAIRE)
+        if member:
+            return member.utilisateur.nom
+        return obj.gestionnaire.nom if obj.gestionnaire else ""
+
+    def get_gestionnaire_email(self, obj):
+        member = self._member(obj, RoleEquipeStructure.GESTIONNAIRE)
+        if member:
+            return member.utilisateur.email
+        return obj.gestionnaire.email if obj.gestionnaire else ""
 
 
 class StructureDetailSerializer(serializers.ModelSerializer):
@@ -82,6 +121,7 @@ class StructureDetailSerializer(serializers.ModelSerializer):
     """
 
     gestionnaire = serializers.StringRelatedField()
+    proprietaire = serializers.SerializerMethodField()
 
     class Meta:
         model = Structure
@@ -95,12 +135,30 @@ class StructureDetailSerializer(serializers.ModelSerializer):
             "latitude",
             "longitude",
             "statut",
+            "proprietaire",
             "gestionnaire",
             "motif_refus",
             "valide_par",
             "date_creation",
             "date_validation",
         ]
+
+    def get_proprietaire(self, obj):
+        member = (
+            EquipeStructure.objects.filter(
+                structure=obj,
+                role=RoleEquipeStructure.PROPRIETAIRE,
+            )
+            .select_related("utilisateur")
+            .first()
+        )
+        if not member:
+            return None
+        return {
+            "id": str(member.utilisateur_id),
+            "nom": member.utilisateur.nom,
+            "email": member.utilisateur.email,
+        }
 
 
 class StructureValidationSerializer(serializers.Serializer):
@@ -261,3 +319,73 @@ class StructureServiceCreateUpdateSerializer(serializers.ModelSerializer):
         if queryset.exists():
             raise serializers.ValidationError({"nom": "Un service portant ce nom existe déjà pour ce type."})
         return attrs
+
+
+class EquipeStructureSerializer(serializers.ModelSerializer):
+    utilisateur_id = serializers.UUIDField(source="utilisateur.id", read_only=True)
+    nom = serializers.CharField(source="utilisateur.nom", read_only=True)
+    email = serializers.EmailField(source="utilisateur.email", read_only=True)
+    is_active = serializers.BooleanField(source="utilisateur.is_active", read_only=True)
+
+    class Meta:
+        model = EquipeStructure
+        fields = [
+            "id",
+            "utilisateur_id",
+            "nom",
+            "email",
+            "role",
+            "statut",
+            "is_active",
+            "date_invitation",
+            "date_activation",
+        ]
+
+
+class InviteStructureMemberSerializer(serializers.Serializer):
+    structure_id = serializers.UUIDField()
+    nom = serializers.CharField(max_length=150)
+    email = serializers.EmailField()
+    role = serializers.ChoiceField(
+        choices=[
+            RoleEquipeStructure.GESTIONNAIRE,
+            RoleEquipeStructure.CAISSIER,
+        ]
+    )
+
+    def validate_nom(self, value):
+        value = value.strip()
+        if len(value) < 3:
+            raise serializers.ValidationError("Le nom est trop court.")
+        return value
+
+    def validate_email(self, value):
+        return value.lower().strip()
+
+
+class UpdateStructureMemberStatusSerializer(serializers.Serializer):
+    action = serializers.ChoiceField(
+        choices=[
+            ("ACTIVATE", "ACTIVATE"),
+            ("DEACTIVATE", "DEACTIVATE"),
+        ]
+    )
+
+
+class ProprietaireStructureCreateSerializer(serializers.Serializer):
+    nom = serializers.CharField(max_length=255)
+    type = serializers.ChoiceField(choices=["HOPITAL", "PHARMACIE"])
+    adresse = serializers.CharField(max_length=255, required=False, allow_blank=True)
+    telephone = serializers.CharField(max_length=30, required=False, allow_blank=True)
+
+    def validate_nom(self, value):
+        value = value.strip()
+        if len(value) < 3:
+            raise serializers.ValidationError("Le nom de la structure est trop court.")
+        return value
+
+    def validate_adresse(self, value):
+        return value.strip()
+
+    def validate_telephone(self, value):
+        return value.strip()

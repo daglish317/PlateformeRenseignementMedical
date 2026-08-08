@@ -2,10 +2,11 @@
 
 import { DashboardRoute } from "./DashboardRoute";
 import { DashboardShell } from "./DashboardShell";
+import type { DashboardType } from "../types";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
-  type: "HOPITAL" | "PHARMACIE";
+  type: DashboardType;
 }
 
 export function DashboardLayout({ children, type }: DashboardLayoutProps) {

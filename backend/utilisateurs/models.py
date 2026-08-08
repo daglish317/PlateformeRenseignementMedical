@@ -9,7 +9,9 @@ from .managers import UtilisateurManager
 
 class RoleUtilisateur(models.TextChoices):
     ADMINISTRATEUR = "ADMINISTRATEUR", "Administrateur"
+    PROPRIETAIRE = "PROPRIETAIRE", "Proprietaire"
     GESTIONNAIRE = "GESTIONNAIRE", "Gestionnaire"
+    CAISSIER = "CAISSIER", "Caissier"
     PATIENT = "PATIENT", "Patient"
 
 

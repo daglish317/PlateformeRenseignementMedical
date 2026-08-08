@@ -16,6 +16,10 @@ const nextConfig: NextConfig = {
 
   // Compression automatique
   compress: true,
+
+  // Ne pas rediriger entre /api/.../ et /api/... (Django APPEND_SLASH
+  // provoque une boucle de redirections avec le proxy vers le backend).
+  skipTrailingSlashRedirect: true,
   
   // Headers pour cache et sécurité
   

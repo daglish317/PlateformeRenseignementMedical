@@ -21,8 +21,8 @@ export function ManagersPage() {
   return (
     <div className="space-y-6">
       <AdminPageTitle
-        title="Gestion des gestionnaires"
-        subtitle="Création et gestion des comptes gestionnaires"
+        title="Gestion des proprietaires"
+        subtitle="Creation des structures et invitation des proprietaires"
         actions={<CreateManagerDialog />}
       />
 
@@ -33,7 +33,7 @@ export function ManagersPage() {
       {totalPages > 1 && (
         <div className="flex items-center justify-between">
           <p className="text-sm text-muted-foreground">
-            {total} résultat{total > 1 ? "s" : ""}
+            {total} resultat{total > 1 ? "s" : ""}
           </p>
           <div className="flex items-center gap-2">
             <Button
@@ -43,7 +43,7 @@ export function ManagersPage() {
               disabled={!canPrev}
             >
               <ChevronLeft className="h-4 w-4" />
-              Précédent
+              Precedent
             </Button>
             <span className="text-sm text-muted-foreground">
               Page {filters.page} / {totalPages}

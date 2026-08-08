@@ -19,9 +19,10 @@ import { DASHBOARD_HEADER } from "../constants/layout";
 import { DashboardBreadcrumb } from "./DashboardBreadcrumb";
 import { useAuthStore } from "@/features/auth/store/auth-store";
 import { useNotifications } from "@/providers/notification.provider";
+import type { DashboardType } from "../types";
 
 interface DashboardHeaderProps {
-  type: "HOPITAL" | "PHARMACIE";
+  type: DashboardType;
   className?: string;
 }
 
@@ -30,6 +31,8 @@ export function DashboardHeader({ type, className }: DashboardHeaderProps) {
   const { user, clearAuth } = useAuthStore();
   const router = useRouter();
   const { unreadCount } = useNotifications();
+
+  const showNotificationsLink = type === "HOPITAL" || type === "PHARMACIE";
 
   const initials = user
     ? `${user.nom?.charAt(0) ?? ""}${user.email?.charAt(0) ?? ""}`.toUpperCase()
@@ -60,17 +63,19 @@ export function DashboardHeader({ type, className }: DashboardHeaderProps) {
       </div>
 
       <div className="flex items-center gap-1">
-        <Link
-          href={`/${type.toLowerCase()}/notifications`}
-          className="relative inline-flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
-        >
-          <Bell className="h-5 w-5" />
-          {unreadCount > 0 && (
-            <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold text-destructive-foreground">
-              {unreadCount > 99 ? "99+" : unreadCount}
-            </span>
-          )}
-        </Link>
+        {showNotificationsLink && (
+          <Link
+            href={`/${type.toLowerCase()}/notifications`}
+            className="relative inline-flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
+          >
+            <Bell className="h-5 w-5" />
+            {unreadCount > 0 && (
+              <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold text-destructive-foreground">
+                {unreadCount > 99 ? "99+" : unreadCount}
+              </span>
+            )}
+          </Link>
+        )}
 
         <button
           onClick={handleLogout}

@@ -158,7 +158,7 @@ export function StructureSetupForm() {
       });
       queryClient.invalidateQueries({ queryKey: MY_STRUCTURE_QUERY_KEY });
       toast.success("Structure soumise avec succès !");
-      router.push("/gestionnaire/success");
+        router.push("/gestionnaire");
     } catch (err) {
       const data = (err as AxiosError).response?.data;
       const msg = extractErrorMessage(typeof data === "string" ? data : data as Record<string, unknown>);

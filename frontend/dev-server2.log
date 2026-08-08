@@ -1,0 +1,367 @@
+
+> frontend@0.1.0 dev
+> next dev
+
+▲ Next.js 16.3.0 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.56.1:3000
+- Environments: .env.local, .env
+✓ Ready in 1749ms
+✓ Running next.config.ts took 267ms
+- Experiments (use with caution):
+  · optimizePackageImports
+
+ GET /fr/gestionnaire/success 200 in 8.6s (next.js: 2.9s, generate-params: 3.6s, application-code: 2.0s)
+ GET /manifest.webmanifest 200 in 577ms (next.js: 465ms, application-code: 112ms)
+ GET /fr/owner/team 200 in 2.1s (next.js: 84ms, generate-params: 1649ms, application-code: 377ms)
+ GET /fr/admin/managers 200 in 3.0s (next.js: 117ms, generate-params: 2.2s, application-code: 712ms)
+ GET /fr/gestionnaire/success 200 in 155ms (next.js: 8ms, generate-params: 36ms, application-code: 110ms)
+ GET /manifest.webmanifest 200 in 21ms (next.js: 6ms, application-code: 15ms)
+ GET /fr/connexion 200 in 5.6s (next.js: 2.7s, generate-params: 2.2s, application-code: 684ms)
+ GET /fr/inscription 200 in 4.4s (next.js: 2.2s, generate-params: 2.0s, application-code: 188ms)
+
+thread 'tokio-rt-worker' (31932) panicked at turbopack\crates\turbo-tasks-backend\src\backend\operation\mod.rs:987:14:
+Failed to lookup task ids: Looking up task id for NativeFunction { name: "get_written_endpoint_with_issues_operation", global_name: "next_napi_bindings::next_api::endpoint::get_written_endpoint_with_issues_operation", .. }(this=None) from database failed
+
+Caused by:
+    0: Unable to open static sorted file referenced from 00000015.meta
+    1: failed to open file `\\?\C:\Users\Lionnel\Desktop\cours\projet de stage L2\frontend\.next\dev\cache\turbopack\v16.3.0-d73f5622\00000009.sst`: Le fichier spécifié est introuvable. (os error 2)
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+-----
+[1m[31mFATAL[39m[0m: An unexpected Turbopack error occurred. A panic log has been written to C:\Users\Lionnel\AppData\Local\Temp\next-panic-6b0f59f4251e0bbee41c9dab2b547f58.log.
+
+To help make Turbopack better, report this error by clicking here: https://bugs.nextjs.org/search?category=turbopack-error-report&title=Turbopack%20Error%3A%20Failed%20to%20lookup%20task%20ids%3A%20Looking%20up%20task%20id%20for%20NativeFunction%20%7B%20name%3A%20%22get_written_endpoint_with_issues_operation%22%2C%20global_name%3A%20%22next_napi_bindings%3A%3Anext_api%3A%3Aendpoint%3A%3Aget_written_endpoint_with_issues_operation%22%2C%20..%20%7D%28this%3DNone%29%20from%20database%20failed&body=Turbopack%20version%3A%20%60d73f5622%60%0ANext.js%20version%3A%20%600.0.0%60%0A%0AError%20message%3A%0A%60%60%60%0AFailed%20to%20lookup%20task%20ids%3A%20Looking%20up%20task%20id%20for%20NativeFunction%20%7B%20name%3A%20%22get_written_endpoint_with_issues_operation%22%2C%20global_name%3A%20%22next_napi_bindings%3A%3Anext_api%3A%3Aendpoint%3A%3Aget_written_endpoint_with_issues_operation%22%2C%20..%20%7D%28this%3DNone%29%20from%20database%20failed%0A%0ADebug%20info%3A%0A-%20Failed%20to%20lookup%20task%20ids%3A%20Looking%20up%20task%20id%20for%20NativeFunction%20%7B%20name%3A%20%22get_written_endpoint_with_issues_operation%22%2C%20global_name%3A%20%22next_napi_bindings%3A%3Anext_api%3A%3Aendpoint%3A%3Aget_written_endpoint_with_issues_operation%22%2C%20..%20%7D%28this%3DNone%29%20from%20database%20failed%0A%20%20%0A%20%20Caused%20by%3A%0A%20%20%20%20%20%200%3A%20Unable%20to%20open%20static%20sorted%20file%20referenced%20from%2000000015.meta%0A%20%20%20%20%20%201%3A%20failed%20to%20open%20file%20%60%5C%5C%3F%5CC%3A%5CUsers%5CLionnel%5CDesktop%5Ccours%5Cprojet%20de%20stage%20L2%5Cfrontend%5C.next%5Cdev%5Ccache%5Cturbopack%5Cv16.3.0-d73f5622%5C00000009.sst%60%3A%20Le%20fichier%20sp%C3%A9cifi%C3%A9%20est%20introuvable.%20%28os%20error%202%29%0A%60%60%60&labels=Turbopack,Turbopack%20Panic%20Backtrace
+-----
+
+
+thread 'tokio-rt-worker' (31932) panicked at turbopack\crates\turbo-tasks-backend\src\backend\operation\mod.rs:987:14:
+Failed to lookup task ids: Looking up task id for NativeFunction { name: "get_written_endpoint_with_issues_operation", global_name: "next_napi_bindings::next_api::endpoint::get_written_endpoint_with_issues_operation", .. }(this=None) from database failed
+
+Caused by:
+    0: Unable to open static sorted file referenced from 00000024.meta
+    1: failed to open file `\\?\C:\Users\Lionnel\Desktop\cours\projet de stage L2\frontend\.next\dev\cache\turbopack\v16.3.0-d73f5622\00000020.sst`: Le fichier spécifié est introuvable. (os error 2)
+⨯ Error [TurbopackInternalError]: Failed to lookup task ids: Looking up task id for NativeFunction { name: "get_written_endpoint_with_issues_operation", global_name: "next_napi_bindings::next_api::endpoint::get_written_endpoint_with_issues_operation", .. }(this=None) from database failed
+
+Debug info:
+- Failed to lookup task ids: Looking up task id for NativeFunction { name: "get_written_endpoint_with_issues_operation", global_name: "next_napi_bindings::next_api::endpoint::get_written_endpoint_with_issues_operation", .. }(this=None) from database failed
+  
+  Caused by:
+      0: Unable to open static sorted file referenced from 00000024.meta
+      1: failed to open file `\\?\C:\Users\Lionnel\Desktop\cours\projet de stage L2\frontend\.next\dev\cache\turbopack\v16.3.0-d73f5622\00000020.sst`: Le fichier spécifié est introuvable. (os error 2)
+    at <unknown> (TurbopackInternalError: Failed to lookup task ids: Looking up task id for NativeFunction { name: "get_written_endpoint_with_issues_operation", global_name: "next_napi_bindings::next_api::endpoint::get_written_endpoint_with_issues_operation", .. }(this=None) from database failed) {
+  location: 'turbopack\\crates\\turbo-tasks-backend\\src\\backend\\operation\\mod.rs:987:14'
+}
+
+thread 'tokio-rt-worker' (31932) panicked at turbopack\crates\turbo-tasks-backend\src\backend\operation\mod.rs:987:14:
+Failed to lookup task ids: Looking up task id for NativeFunction { name: "get_written_endpoint_with_issues_operation", global_name: "next_napi_bindings::next_api::endpoint::get_written_endpoint_with_issues_operation", .. }(this=None) from database failed
+
+Caused by:
+    0: Unable to open static sorted file referenced from 00000024.meta
+    1: failed to open file `\\?\C:\Users\Lionnel\Desktop\cours\projet de stage L2\frontend\.next\dev\cache\turbopack\v16.3.0-d73f5622\00000020.sst`: Le fichier spécifié est introuvable. (os error 2)
+Error [TurbopackInternalError]: Failed to lookup task ids: Looking up task id for NativeFunction { name: "get_written_endpoint_with_issues_operation", global_name: "next_napi_bindings::next_api::endpoint::get_written_endpoint_with_issues_operation", .. }(this=None) from database failed
+
+Debug info:
+- Failed to lookup task ids: Looking up task id for NativeFunction { name: "get_written_endpoint_with_issues_operation", global_name: "next_napi_bindings::next_api::endpoint::get_written_endpoint_with_issues_operation", .. }(this=None) from database failed
+  
+  Caused by:
+      0: Unable to open static sorted file referenced from 00000015.meta
+      1: failed to open file `\\?\C:\Users\Lionnel\Desktop\cours\projet de stage L2\frontend\.next\dev\cache\turbopack\v16.3.0-d73f5622\00000009.sst`: Le fichier spécifié est introuvable. (os error 2)
+    at <unknown> (TurbopackInternalError: Failed to lookup task ids: Looking up task id for NativeFunction { name: "get_written_endpoint_with_issues_operation", global_name: "next_napi_bindings::next_api::endpoint::get_written_endpoint_with_issues_operation", .. }(this=None) from database failed) {
+  location: 'turbopack\\crates\\turbo-tasks-backend\\src\\backend\\operation\\mod.rs:987:14'
+}
+
+thread 'tokio-rt-worker' (31932) panicked at turbopack\crates\turbo-tasks-backend\src\backend\operation\mod.rs:987:14:
+Failed to lookup task ids: Looking up task id for NativeFunction { name: "get_written_endpoint_with_issues_operation", global_name: "next_napi_bindings::next_api::endpoint::get_written_endpoint_with_issues_operation", .. }(this=None) from database failed
+
+Caused by:
+    0: Unable to open static sorted file referenced from 00000024.meta
+    1: failed to open file `\\?\C:\Users\Lionnel\Desktop\cours\projet de stage L2\frontend\.next\dev\cache\turbopack\v16.3.0-d73f5622\00000020.sst`: Le fichier spécifié est introuvable. (os error 2)
+⨯ Error [TurbopackInternalError]: Failed to lookup task ids: Looking up task id for NativeFunction { name: "get_written_endpoint_with_issues_operation", global_name: "next_napi_bindings::next_api::endpoint::get_written_endpoint_with_issues_operation", .. }(this=None) from database failed
+
+Debug info:
+- Failed to lookup task ids: Looking up task id for NativeFunction { name: "get_written_endpoint_with_issues_operation", global_name: "next_napi_bindings::next_api::endpoint::get_written_endpoint_with_issues_operation", .. }(this=None) from database failed
+  
+  Caused by:
+      0: Unable to open static sorted file referenced from 00000024.meta
+      1: failed to open file `\\?\C:\Users\Lionnel\Desktop\cours\projet de stage L2\frontend\.next\dev\cache\turbopack\v16.3.0-d73f5622\00000020.sst`: Le fichier spécifié est introuvable. (os error 2)
+    at <unknown> (TurbopackInternalError: Failed to lookup task ids: Looking up task id for NativeFunction { name: "get_written_endpoint_with_issues_operation", global_name: "next_napi_bindings::next_api::endpoint::get_written_endpoint_with_issues_operation", .. }(this=None) from database failed) {
+  location: 'turbopack\\crates\\turbo-tasks-backend\\src\\backend\\operation\\mod.rs:987:14'
+}
+
+thread 'tokio-rt-worker' (31932) panicked at turbopack\crates\turbo-tasks-backend\src\backend\operation\mod.rs:987:14:
+Failed to lookup task ids: Looking up task id for NativeFunction { name: "get_written_endpoint_with_issues_operation", global_name: "next_napi_bindings::next_api::endpoint::get_written_endpoint_with_issues_operation", .. }(this=None) from database failed
+
+Caused by:
+    0: Unable to open static sorted file referenced from 00000024.meta
+    1: failed to open file `\\?\C:\Users\Lionnel\Desktop\cours\projet de stage L2\frontend\.next\dev\cache\turbopack\v16.3.0-d73f5622\00000020.sst`: Le fichier spécifié est introuvable. (os error 2)
+Error [TurbopackInternalError]: Failed to lookup task ids: Looking up task id for NativeFunction { name: "get_written_endpoint_with_issues_operation", global_name: "next_napi_bindings::next_api::endpoint::get_written_endpoint_with_issues_operation", .. }(this=None) from database failed
+
+Debug info:
+- Failed to lookup task ids: Looking up task id for NativeFunction { name: "get_written_endpoint_with_issues_operation", global_name: "next_napi_bindings::next_api::endpoint::get_written_endpoint_with_issues_operation", .. }(this=None) from database failed
+  
+  Caused by:
+      0: Unable to open static sorted file referenced from 00000024.meta
+      1: failed to open file `\\?\C:\Users\Lionnel\Desktop\cours\projet de stage L2\frontend\.next\dev\cache\turbopack\v16.3.0-d73f5622\00000020.sst`: Le fichier spécifié est introuvable. (os error 2)
+    at <unknown> (TurbopackInternalError: Failed to lookup task ids: Looking up task id for NativeFunction { name: "get_written_endpoint_with_issues_operation", global_name: "next_napi_bindings::next_api::endpoint::get_written_endpoint_with_issues_operation", .. }(this=None) from database failed) {
+  location: 'turbopack\\crates\\turbo-tasks-backend\\src\\backend\\operation\\mod.rs:987:14'
+}
+
+thread 'tokio-rt-worker' (28764) panicked at turbopack\crates\turbo-tasks-backend\src\backend\operation\mod.rs:987:14:
+Failed to lookup task ids: Looking up task id for NativeFunction { name: "get_written_endpoint_with_issues_operation", global_name: "next_napi_bindings::next_api::endpoint::get_written_endpoint_with_issues_operation", .. }(this=None) from database failed
+
+Caused by:
+    0: Unable to open static sorted file referenced from 00000015.meta
+    1: failed to open file `\\?\C:\Users\Lionnel\Desktop\cours\projet de stage L2\frontend\.next\dev\cache\turbopack\v16.3.0-d73f5622\00000009.sst`: Le fichier spécifié est introuvable. (os error 2)
+
+-----
+[1m[31mFATAL[39m[0m: An unexpected Turbopack error occurred. A panic log has been written to C:\Users\Lionnel\AppData\Local\Temp\next-panic-6b0f59f4251e0bbee41c9dab2b547f58.log.
+
+To help make Turbopack better, report this error by clicking here: https://bugs.nextjs.org/search?category=turbopack-error-report&title=Turbopack%20Error%3A%20Failed%20to%20lookup%20task%20ids%3A%20Looking%20up%20task%20id%20for%20NativeFunction%20%7B%20name%3A%20%22get_written_endpoint_with_issues_operation%22%2C%20global_name%3A%20%22next_napi_bindings%3A%3Anext_api%3A%3Aendpoint%3A%3Aget_written_endpoint_with_issues_operation%22%2C%20..%20%7D%28this%3DNone%29%20from%20database%20failed&body=Turbopack%20version%3A%20%60d73f5622%60%0ANext.js%20version%3A%20%600.0.0%60%0A%0AError%20message%3A%0A%60%60%60%0AFailed%20to%20lookup%20task%20ids%3A%20Looking%20up%20task%20id%20for%20NativeFunction%20%7B%20name%3A%20%22get_written_endpoint_with_issues_operation%22%2C%20global_name%3A%20%22next_napi_bindings%3A%3Anext_api%3A%3Aendpoint%3A%3Aget_written_endpoint_with_issues_operation%22%2C%20..%20%7D%28this%3DNone%29%20from%20database%20failed%0A%0ADebug%20info%3A%0A-%20Failed%20to%20lookup%20task%20ids%3A%20Looking%20up%20task%20id%20for%20NativeFunction%20%7B%20name%3A%20%22get_written_endpoint_with_issues_operation%22%2C%20global_name%3A%20%22next_napi_bindings%3A%3Anext_api%3A%3Aendpoint%3A%3Aget_written_endpoint_with_issues_operation%22%2C%20..%20%7D%28this%3DNone%29%20from%20database%20failed%0A%20%20%0A%20%20Caused%20by%3A%0A%20%20%20%20%20%200%3A%20Unable%20to%20open%20static%20sorted%20file%20referenced%20from%2000000015.meta%0A%20%20%20%20%20%201%3A%20failed%20to%20open%20file%20%60%5C%5C%3F%5CC%3A%5CUsers%5CLionnel%5CDesktop%5Ccours%5Cprojet%20de%20stage%20L2%5Cfrontend%5C.next%5Cdev%5Ccache%5Cturbopack%5Cv16.3.0-d73f5622%5C00000009.sst%60%3A%20Le%20fichier%20sp%C3%A9cifi%C3%A9%20est%20introuvable.%20%28os%20error%202%29%0A%60%60%60&labels=Turbopack,Turbopack%20Panic%20Backtrace
+-----
+
+
+thread 'tokio-rt-worker' (31932) panicked at turbopack\crates\turbo-tasks-backend\src\backend\operation\mod.rs:987:14:
+Failed to lookup task ids: Looking up task id for NativeFunction { name: "get_written_endpoint_with_issues_operation", global_name: "next_napi_bindings::next_api::endpoint::get_written_endpoint_with_issues_operation", .. }(this=None) from database failed
+
+Caused by:
+    0: Unable to open static sorted file referenced from 00000024.meta
+    1: failed to open file `\\?\C:\Users\Lionnel\Desktop\cours\projet de stage L2\frontend\.next\dev\cache\turbopack\v16.3.0-d73f5622\00000020.sst`: Le fichier spécifié est introuvable. (os error 2)
+⨯ Error [TurbopackInternalError]: Failed to lookup task ids: Looking up task id for NativeFunction { name: "get_written_endpoint_with_issues_operation", global_name: "next_napi_bindings::next_api::endpoint::get_written_endpoint_with_issues_operation", .. }(this=None) from database failed
+
+Debug info:
+- Failed to lookup task ids: Looking up task id for NativeFunction { name: "get_written_endpoint_with_issues_operation", global_name: "next_napi_bindings::next_api::endpoint::get_written_endpoint_with_issues_operation", .. }(this=None) from database failed
+  
+  Caused by:
+      0: Unable to open static sorted file referenced from 00000024.meta
+      1: failed to open file `\\?\C:\Users\Lionnel\Desktop\cours\projet de stage L2\frontend\.next\dev\cache\turbopack\v16.3.0-d73f5622\00000020.sst`: Le fichier spécifié est introuvable. (os error 2)
+    at <unknown> (TurbopackInternalError: Failed to lookup task ids: Looking up task id for NativeFunction { name: "get_written_endpoint_with_issues_operation", global_name: "next_napi_bindings::next_api::endpoint::get_written_endpoint_with_issues_operation", .. }(this=None) from database failed) {
+  location: 'turbopack\\crates\\turbo-tasks-backend\\src\\backend\\operation\\mod.rs:987:14'
+}
+
+thread 'tokio-rt-worker' (28764) panicked at turbopack\crates\turbo-tasks-backend\src\backend\operation\mod.rs:987:14:
+Failed to lookup task ids: Looking up task id for NativeFunction { name: "get_written_endpoint_with_issues_operation", global_name: "next_napi_bindings::next_api::endpoint::get_written_endpoint_with_issues_operation", .. }(this=None) from database failed
+
+Caused by:
+    0: Unable to open static sorted file referenced from 00000024.meta
+    1: failed to open file `\\?\C:\Users\Lionnel\Desktop\cours\projet de stage L2\frontend\.next\dev\cache\turbopack\v16.3.0-d73f5622\00000020.sst`: Le fichier spécifié est introuvable. (os error 2)
+Error [TurbopackInternalError]: Failed to lookup task ids: Looking up task id for NativeFunction { name: "get_written_endpoint_with_issues_operation", global_name: "next_napi_bindings::next_api::endpoint::get_written_endpoint_with_issues_operation", .. }(this=None) from database failed
+
+Debug info:
+- Failed to lookup task ids: Looking up task id for NativeFunction { name: "get_written_endpoint_with_issues_operation", global_name: "next_napi_bindings::next_api::endpoint::get_written_endpoint_with_issues_operation", .. }(this=None) from database failed
+  
+  Caused by:
+      0: Unable to open static sorted file referenced from 00000015.meta
+      1: failed to open file `\\?\C:\Users\Lionnel\Desktop\cours\projet de stage L2\frontend\.next\dev\cache\turbopack\v16.3.0-d73f5622\00000009.sst`: Le fichier spécifié est introuvable. (os error 2)
+    at <unknown> (TurbopackInternalError: Failed to lookup task ids: Looking up task id for NativeFunction { name: "get_written_endpoint_with_issues_operation", global_name: "next_napi_bindings::next_api::endpoint::get_written_endpoint_with_issues_operation", .. }(this=None) from database failed) {
+  location: 'turbopack\\crates\\turbo-tasks-backend\\src\\backend\\operation\\mod.rs:987:14'
+}
+
+thread 'tokio-rt-worker' (28764) panicked at turbopack\crates\turbo-tasks-backend\src\backend\operation\mod.rs:987:14:
+Failed to lookup task ids: Looking up task id for NativeFunction { name: "get_written_endpoint_with_issues_operation", global_name: "next_napi_bindings::next_api::endpoint::get_written_endpoint_with_issues_operation", .. }(this=None) from database failed
+
+Caused by:
+    0: Unable to open static sorted file referenced from 00000024.meta
+    1: failed to open file `\\?\C:\Users\Lionnel\Desktop\cours\projet de stage L2\frontend\.next\dev\cache\turbopack\v16.3.0-d73f5622\00000020.sst`: Le fichier spécifié est introuvable. (os error 2)
+⨯ Error [TurbopackInternalError]: Failed to lookup task ids: Looking up task id for NativeFunction { name: "get_written_endpoint_with_issues_operation", global_name: "next_napi_bindings::next_api::endpoint::get_written_endpoint_with_issues_operation", .. }(this=None) from database failed
+
+Debug info:
+- Failed to lookup task ids: Looking up task id for NativeFunction { name: "get_written_endpoint_with_issues_operation", global_name: "next_napi_bindings::next_api::endpoint::get_written_endpoint_with_issues_operation", .. }(this=None) from database failed
+  
+  Caused by:
+      0: Unable to open static sorted file referenced from 00000024.meta
+      1: failed to open file `\\?\C:\Users\Lionnel\Desktop\cours\projet de stage L2\frontend\.next\dev\cache\turbopack\v16.3.0-d73f5622\00000020.sst`: Le fichier spécifié est introuvable. (os error 2)
+    at <unknown> (TurbopackInternalError: Failed to lookup task ids: Looking up task id for NativeFunction { name: "get_written_endpoint_with_issues_operation", global_name: "next_napi_bindings::next_api::endpoint::get_written_endpoint_with_issues_operation", .. }(this=None) from database failed) {
+  location: 'turbopack\\crates\\turbo-tasks-backend\\src\\backend\\operation\\mod.rs:987:14'
+}
+
+thread 'tokio-rt-worker' (31932) panicked at turbopack\crates\turbo-tasks-backend\src\backend\operation\mod.rs:987:14:
+Failed to lookup task ids: Looking up task id for NativeFunction { name: "get_written_endpoint_with_issues_operation", global_name: "next_napi_bindings::next_api::endpoint::get_written_endpoint_with_issues_operation", .. }(this=None) from database failed
+
+Caused by:
+    0: Unable to open static sorted file referenced from 00000024.meta
+    1: failed to open file `\\?\C:\Users\Lionnel\Desktop\cours\projet de stage L2\frontend\.next\dev\cache\turbopack\v16.3.0-d73f5622\00000020.sst`: Le fichier spécifié est introuvable. (os error 2)
+Error [TurbopackInternalError]: Failed to lookup task ids: Looking up task id for NativeFunction { name: "get_written_endpoint_with_issues_operation", global_name: "next_napi_bindings::next_api::endpoint::get_written_endpoint_with_issues_operation", .. }(this=None) from database failed
+
+Debug info:
+- Failed to lookup task ids: Looking up task id for NativeFunction { name: "get_written_endpoint_with_issues_operation", global_name: "next_napi_bindings::next_api::endpoint::get_written_endpoint_with_issues_operation", .. }(this=None) from database failed
+  
+  Caused by:
+      0: Unable to open static sorted file referenced from 00000024.meta
+      1: failed to open file `\\?\C:\Users\Lionnel\Desktop\cours\projet de stage L2\frontend\.next\dev\cache\turbopack\v16.3.0-d73f5622\00000020.sst`: Le fichier spécifié est introuvable. (os error 2)
+    at <unknown> (TurbopackInternalError: Failed to lookup task ids: Looking up task id for NativeFunction { name: "get_written_endpoint_with_issues_operation", global_name: "next_napi_bindings::next_api::endpoint::get_written_endpoint_with_issues_operation", .. }(this=None) from database failed) {
+  location: 'turbopack\\crates\\turbo-tasks-backend\\src\\backend\\operation\\mod.rs:987:14'
+}
+
+thread 'tokio-rt-worker' (25056) panicked at turbopack\crates\turbo-tasks-backend\src\backend\operation\mod.rs:987:14:
+Failed to lookup task ids: Looking up task id for NativeFunction { name: "get_written_endpoint_with_issues_operation", global_name: "next_napi_bindings::next_api::endpoint::get_written_endpoint_with_issues_operation", .. }(this=None) from database failed
+
+Caused by:
+    0: Unable to open static sorted file referenced from 00000015.meta
+    1: failed to open file `\\?\C:\Users\Lionnel\Desktop\cours\projet de stage L2\frontend\.next\dev\cache\turbopack\v16.3.0-d73f5622\00000009.sst`: Le fichier spécifié est introuvable. (os error 2)
+
+-----
+[1m[31mFATAL[39m[0m: An unexpected Turbopack error occurred. A panic log has been written to C:\Users\Lionnel\AppData\Local\Temp\next-panic-6b0f59f4251e0bbee41c9dab2b547f58.log.
+
+To help make Turbopack better, report this error by clicking here: https://bugs.nextjs.org/search?category=turbopack-error-report&title=Turbopack%20Error%3A%20Failed%20to%20lookup%20task%20ids%3A%20Looking%20up%20task%20id%20for%20NativeFunction%20%7B%20name%3A%20%22get_written_endpoint_with_issues_operation%22%2C%20global_name%3A%20%22next_napi_bindings%3A%3Anext_api%3A%3Aendpoint%3A%3Aget_written_endpoint_with_issues_operation%22%2C%20..%20%7D%28this%3DNone%29%20from%20database%20failed&body=Turbopack%20version%3A%20%60d73f5622%60%0ANext.js%20version%3A%20%600.0.0%60%0A%0AError%20message%3A%0A%60%60%60%0AFailed%20to%20lookup%20task%20ids%3A%20Looking%20up%20task%20id%20for%20NativeFunction%20%7B%20name%3A%20%22get_written_endpoint_with_issues_operation%22%2C%20global_name%3A%20%22next_napi_bindings%3A%3Anext_api%3A%3Aendpoint%3A%3Aget_written_endpoint_with_issues_operation%22%2C%20..%20%7D%28this%3DNone%29%20from%20database%20failed%0A%0ADebug%20info%3A%0A-%20Failed%20to%20lookup%20task%20ids%3A%20Looking%20up%20task%20id%20for%20NativeFunction%20%7B%20name%3A%20%22get_written_endpoint_with_issues_operation%22%2C%20global_name%3A%20%22next_napi_bindings%3A%3Anext_api%3A%3Aendpoint%3A%3Aget_written_endpoint_with_issues_operation%22%2C%20..%20%7D%28this%3DNone%29%20from%20database%20failed%0A%20%20%0A%20%20Caused%20by%3A%0A%20%20%20%20%20%200%3A%20Unable%20to%20open%20static%20sorted%20file%20referenced%20from%2000000015.meta%0A%20%20%20%20%20%201%3A%20failed%20to%20open%20file%20%60%5C%5C%3F%5CC%3A%5CUsers%5CLionnel%5CDesktop%5Ccours%5Cprojet%20de%20stage%20L2%5Cfrontend%5C.next%5Cdev%5Ccache%5Cturbopack%5Cv16.3.0-d73f5622%5C00000009.sst%60%3A%20Le%20fichier%20sp%C3%A9cifi%C3%A9%20est%20introuvable.%20%28os%20error%202%29%0A%60%60%60&labels=Turbopack,Turbopack%20Panic%20Backtrace
+-----
+
+
+thread 'tokio-rt-worker' (31932) panicked at turbopack\crates\turbo-tasks-backend\src\backend\operation\mod.rs:987:14:
+Failed to lookup task ids: Looking up task id for NativeFunction { name: "get_written_endpoint_with_issues_operation", global_name: "next_napi_bindings::next_api::endpoint::get_written_endpoint_with_issues_operation", .. }(this=None) from database failed
+
+Caused by:
+    0: Unable to open static sorted file referenced from 00000024.meta
+    1: failed to open file `\\?\C:\Users\Lionnel\Desktop\cours\projet de stage L2\frontend\.next\dev\cache\turbopack\v16.3.0-d73f5622\00000020.sst`: Le fichier spécifié est introuvable. (os error 2)
+⨯ Error [TurbopackInternalError]: Failed to lookup task ids: Looking up task id for NativeFunction { name: "get_written_endpoint_with_issues_operation", global_name: "next_napi_bindings::next_api::endpoint::get_written_endpoint_with_issues_operation", .. }(this=None) from database failed
+
+Debug info:
+- Failed to lookup task ids: Looking up task id for NativeFunction { name: "get_written_endpoint_with_issues_operation", global_name: "next_napi_bindings::next_api::endpoint::get_written_endpoint_with_issues_operation", .. }(this=None) from database failed
+  
+  Caused by:
+      0: Unable to open static sorted file referenced from 00000024.meta
+      1: failed to open file `\\?\C:\Users\Lionnel\Desktop\cours\projet de stage L2\frontend\.next\dev\cache\turbopack\v16.3.0-d73f5622\00000020.sst`: Le fichier spécifié est introuvable. (os error 2)
+    at <unknown> (TurbopackInternalError: Failed to lookup task ids: Looking up task id for NativeFunction { name: "get_written_endpoint_with_issues_operation", global_name: "next_napi_bindings::next_api::endpoint::get_written_endpoint_with_issues_operation", .. }(this=None) from database failed) {
+  location: 'turbopack\\crates\\turbo-tasks-backend\\src\\backend\\operation\\mod.rs:987:14'
+}
+
+thread 'tokio-rt-worker' (28764) panicked at turbopack\crates\turbo-tasks-backend\src\backend\operation\mod.rs:987:14:
+Failed to lookup task ids: Looking up task id for NativeFunction { name: "get_written_endpoint_with_issues_operation", global_name: "next_napi_bindings::next_api::endpoint::get_written_endpoint_with_issues_operation", .. }(this=None) from database failed
+
+Caused by:
+    0: Unable to open static sorted file referenced from 00000024.meta
+    1: failed to open file `\\?\C:\Users\Lionnel\Desktop\cours\projet de stage L2\frontend\.next\dev\cache\turbopack\v16.3.0-d73f5622\00000020.sst`: Le fichier spécifié est introuvable. (os error 2)
+Error [TurbopackInternalError]: Failed to lookup task ids: Looking up task id for NativeFunction { name: "get_written_endpoint_with_issues_operation", global_name: "next_napi_bindings::next_api::endpoint::get_written_endpoint_with_issues_operation", .. }(this=None) from database failed
+
+Debug info:
+- Failed to lookup task ids: Looking up task id for NativeFunction { name: "get_written_endpoint_with_issues_operation", global_name: "next_napi_bindings::next_api::endpoint::get_written_endpoint_with_issues_operation", .. }(this=None) from database failed
+  
+  Caused by:
+      0: Unable to open static sorted file referenced from 00000015.meta
+      1: failed to open file `\\?\C:\Users\Lionnel\Desktop\cours\projet de stage L2\frontend\.next\dev\cache\turbopack\v16.3.0-d73f5622\00000009.sst`: Le fichier spécifié est introuvable. (os error 2)
+    at <unknown> (TurbopackInternalError: Failed to lookup task ids: Looking up task id for NativeFunction { name: "get_written_endpoint_with_issues_operation", global_name: "next_napi_bindings::next_api::endpoint::get_written_endpoint_with_issues_operation", .. }(this=None) from database failed) {
+  location: 'turbopack\\crates\\turbo-tasks-backend\\src\\backend\\operation\\mod.rs:987:14'
+}
+
+thread 'tokio-rt-worker' (19276) panicked at turbopack\crates\turbo-tasks-backend\src\backend\operation\mod.rs:987:14:
+Failed to lookup task ids: Looking up task id for NativeFunction { name: "get_written_endpoint_with_issues_operation", global_name: "next_napi_bindings::next_api::endpoint::get_written_endpoint_with_issues_operation", .. }(this=None) from database failed
+
+Caused by:
+    0: Unable to open static sorted file referenced from 00000024.meta
+    1: failed to open file `\\?\C:\Users\Lionnel\Desktop\cours\projet de stage L2\frontend\.next\dev\cache\turbopack\v16.3.0-d73f5622\00000020.sst`: Le fichier spécifié est introuvable. (os error 2)
+⨯ Error [TurbopackInternalError]: Failed to lookup task ids: Looking up task id for NativeFunction { name: "get_written_endpoint_with_issues_operation", global_name: "next_napi_bindings::next_api::endpoint::get_written_endpoint_with_issues_operation", .. }(this=None) from database failed
+
+Debug info:
+- Failed to lookup task ids: Looking up task id for NativeFunction { name: "get_written_endpoint_with_issues_operation", global_name: "next_napi_bindings::next_api::endpoint::get_written_endpoint_with_issues_operation", .. }(this=None) from database failed
+  
+  Caused by:
+      0: Unable to open static sorted file referenced from 00000024.meta
+      1: failed to open file `\\?\C:\Users\Lionnel\Desktop\cours\projet de stage L2\frontend\.next\dev\cache\turbopack\v16.3.0-d73f5622\00000020.sst`: Le fichier spécifié est introuvable. (os error 2)
+    at <unknown> (TurbopackInternalError: Failed to lookup task ids: Looking up task id for NativeFunction { name: "get_written_endpoint_with_issues_operation", global_name: "next_napi_bindings::next_api::endpoint::get_written_endpoint_with_issues_operation", .. }(this=None) from database failed) {
+  location: 'turbopack\\crates\\turbo-tasks-backend\\src\\backend\\operation\\mod.rs:987:14'
+}
+
+thread 'tokio-rt-worker' (31932) panicked at turbopack\crates\turbo-tasks-backend\src\backend\operation\mod.rs:987:14:
+Failed to lookup task ids: Looking up task id for NativeFunction { name: "get_written_endpoint_with_issues_operation", global_name: "next_napi_bindings::next_api::endpoint::get_written_endpoint_with_issues_operation", .. }(this=None) from database failed
+
+Caused by:
+    0: Unable to open static sorted file referenced from 00000024.meta
+    1: failed to open file `\\?\C:\Users\Lionnel\Desktop\cours\projet de stage L2\frontend\.next\dev\cache\turbopack\v16.3.0-d73f5622\00000020.sst`: Le fichier spécifié est introuvable. (os error 2)
+Error [TurbopackInternalError]: Failed to lookup task ids: Looking up task id for NativeFunction { name: "get_written_endpoint_with_issues_operation", global_name: "next_napi_bindings::next_api::endpoint::get_written_endpoint_with_issues_operation", .. }(this=None) from database failed
+
+Debug info:
+- Failed to lookup task ids: Looking up task id for NativeFunction { name: "get_written_endpoint_with_issues_operation", global_name: "next_napi_bindings::next_api::endpoint::get_written_endpoint_with_issues_operation", .. }(this=None) from database failed
+  
+  Caused by:
+      0: Unable to open static sorted file referenced from 00000024.meta
+      1: failed to open file `\\?\C:\Users\Lionnel\Desktop\cours\projet de stage L2\frontend\.next\dev\cache\turbopack\v16.3.0-d73f5622\00000020.sst`: Le fichier spécifié est introuvable. (os error 2)
+    at <unknown> (TurbopackInternalError: Failed to lookup task ids: Looking up task id for NativeFunction { name: "get_written_endpoint_with_issues_operation", global_name: "next_napi_bindings::next_api::endpoint::get_written_endpoint_with_issues_operation", .. }(this=None) from database failed) {
+  location: 'turbopack\\crates\\turbo-tasks-backend\\src\\backend\\operation\\mod.rs:987:14'
+}
+
+thread 'tokio-rt-worker' (28764) panicked at turbopack\crates\turbo-tasks-backend\src\backend\operation\mod.rs:987:14:
+Failed to lookup task ids: Looking up task id for NativeFunction { name: "get_written_endpoint_with_issues_operation", global_name: "next_napi_bindings::next_api::endpoint::get_written_endpoint_with_issues_operation", .. }(this=None) from database failed
+
+Caused by:
+    0: Unable to open static sorted file referenced from 00000015.meta
+    1: failed to open file `\\?\C:\Users\Lionnel\Desktop\cours\projet de stage L2\frontend\.next\dev\cache\turbopack\v16.3.0-d73f5622\00000009.sst`: Le fichier spécifié est introuvable. (os error 2)
+
+-----
+[1m[31mFATAL[39m[0m: An unexpected Turbopack error occurred. A panic log has been written to C:\Users\Lionnel\AppData\Local\Temp\next-panic-6b0f59f4251e0bbee41c9dab2b547f58.log.
+
+To help make Turbopack better, report this error by clicking here: https://bugs.nextjs.org/search?category=turbopack-error-report&title=Turbopack%20Error%3A%20Failed%20to%20lookup%20task%20ids%3A%20Looking%20up%20task%20id%20for%20NativeFunction%20%7B%20name%3A%20%22get_written_endpoint_with_issues_operation%22%2C%20global_name%3A%20%22next_napi_bindings%3A%3Anext_api%3A%3Aendpoint%3A%3Aget_written_endpoint_with_issues_operation%22%2C%20..%20%7D%28this%3DNone%29%20from%20database%20failed&body=Turbopack%20version%3A%20%60d73f5622%60%0ANext.js%20version%3A%20%600.0.0%60%0A%0AError%20message%3A%0A%60%60%60%0AFailed%20to%20lookup%20task%20ids%3A%20Looking%20up%20task%20id%20for%20NativeFunction%20%7B%20name%3A%20%22get_written_endpoint_with_issues_operation%22%2C%20global_name%3A%20%22next_napi_bindings%3A%3Anext_api%3A%3Aendpoint%3A%3Aget_written_endpoint_with_issues_operation%22%2C%20..%20%7D%28this%3DNone%29%20from%20database%20failed%0A%0ADebug%20info%3A%0A-%20Failed%20to%20lookup%20task%20ids%3A%20Looking%20up%20task%20id%20for%20NativeFunction%20%7B%20name%3A%20%22get_written_endpoint_with_issues_operation%22%2C%20global_name%3A%20%22next_napi_bindings%3A%3Anext_api%3A%3Aendpoint%3A%3Aget_written_endpoint_with_issues_operation%22%2C%20..%20%7D%28this%3DNone%29%20from%20database%20failed%0A%20%20%0A%20%20Caused%20by%3A%0A%20%20%20%20%20%200%3A%20Unable%20to%20open%20static%20sorted%20file%20referenced%20from%2000000015.meta%0A%20%20%20%20%20%201%3A%20failed%20to%20open%20file%20%60%5C%5C%3F%5CC%3A%5CUsers%5CLionnel%5CDesktop%5Ccours%5Cprojet%20de%20stage%20L2%5Cfrontend%5C.next%5Cdev%5Ccache%5Cturbopack%5Cv16.3.0-d73f5622%5C00000009.sst%60%3A%20Le%20fichier%20sp%C3%A9cifi%C3%A9%20est%20introuvable.%20%28os%20error%202%29%0A%60%60%60&labels=Turbopack,Turbopack%20Panic%20Backtrace
+-----
+
+
+thread 'tokio-rt-worker' (31932) panicked at turbopack\crates\turbo-tasks-backend\src\backend\operation\mod.rs:987:14:
+Failed to lookup task ids: Looking up task id for NativeFunction { name: "get_written_endpoint_with_issues_operation", global_name: "next_napi_bindings::next_api::endpoint::get_written_endpoint_with_issues_operation", .. }(this=None) from database failed
+
+Caused by:
+    0: Unable to open static sorted file referenced from 00000024.meta
+    1: failed to open file `\\?\C:\Users\Lionnel\Desktop\cours\projet de stage L2\frontend\.next\dev\cache\turbopack\v16.3.0-d73f5622\00000020.sst`: Le fichier spécifié est introuvable. (os error 2)
+⨯ Error [TurbopackInternalError]: Failed to lookup task ids: Looking up task id for NativeFunction { name: "get_written_endpoint_with_issues_operation", global_name: "next_napi_bindings::next_api::endpoint::get_written_endpoint_with_issues_operation", .. }(this=None) from database failed
+
+Debug info:
+- Failed to lookup task ids: Looking up task id for NativeFunction { name: "get_written_endpoint_with_issues_operation", global_name: "next_napi_bindings::next_api::endpoint::get_written_endpoint_with_issues_operation", .. }(this=None) from database failed
+  
+  Caused by:
+      0: Unable to open static sorted file referenced from 00000024.meta
+      1: failed to open file `\\?\C:\Users\Lionnel\Desktop\cours\projet de stage L2\frontend\.next\dev\cache\turbopack\v16.3.0-d73f5622\00000020.sst`: Le fichier spécifié est introuvable. (os error 2)
+    at <unknown> (TurbopackInternalError: Failed to lookup task ids: Looking up task id for NativeFunction { name: "get_written_endpoint_with_issues_operation", global_name: "next_napi_bindings::next_api::endpoint::get_written_endpoint_with_issues_operation", .. }(this=None) from database failed) {
+  location: 'turbopack\\crates\\turbo-tasks-backend\\src\\backend\\operation\\mod.rs:987:14'
+}
+
+thread 'tokio-rt-worker' (31932) panicked at turbopack\crates\turbo-tasks-backend\src\backend\operation\mod.rs:987:14:
+Failed to lookup task ids: Looking up task id for NativeFunction { name: "get_written_endpoint_with_issues_operation", global_name: "next_napi_bindings::next_api::endpoint::get_written_endpoint_with_issues_operation", .. }(this=None) from database failed
+
+Caused by:
+    0: Unable to open static sorted file referenced from 00000024.meta
+    1: failed to open file `\\?\C:\Users\Lionnel\Desktop\cours\projet de stage L2\frontend\.next\dev\cache\turbopack\v16.3.0-d73f5622\00000020.sst`: Le fichier spécifié est introuvable. (os error 2)
+Error [TurbopackInternalError]: Failed to lookup task ids: Looking up task id for NativeFunction { name: "get_written_endpoint_with_issues_operation", global_name: "next_napi_bindings::next_api::endpoint::get_written_endpoint_with_issues_operation", .. }(this=None) from database failed
+
+Debug info:
+- Failed to lookup task ids: Looking up task id for NativeFunction { name: "get_written_endpoint_with_issues_operation", global_name: "next_napi_bindings::next_api::endpoint::get_written_endpoint_with_issues_operation", .. }(this=None) from database failed
+  
+  Caused by:
+      0: Unable to open static sorted file referenced from 00000015.meta
+      1: failed to open file `\\?\C:\Users\Lionnel\Desktop\cours\projet de stage L2\frontend\.next\dev\cache\turbopack\v16.3.0-d73f5622\00000009.sst`: Le fichier spécifié est introuvable. (os error 2)
+    at <unknown> (TurbopackInternalError: Failed to lookup task ids: Looking up task id for NativeFunction { name: "get_written_endpoint_with_issues_operation", global_name: "next_napi_bindings::next_api::endpoint::get_written_endpoint_with_issues_operation", .. }(this=None) from database failed) {
+  location: 'turbopack\\crates\\turbo-tasks-backend\\src\\backend\\operation\\mod.rs:987:14'
+}
+
+thread 'tokio-rt-worker' (31932) panicked at turbopack\crates\turbo-tasks-backend\src\backend\operation\mod.rs:987:14:
+Failed to lookup task ids: Looking up task id for NativeFunction { name: "get_written_endpoint_with_issues_operation", global_name: "next_napi_bindings::next_api::endpoint::get_written_endpoint_with_issues_operation", .. }(this=None) from database failed
+
+Caused by:
+    0: Unable to open static sorted file referenced from 00000024.meta
+    1: failed to open file `\\?\C:\Users\Lionnel\Desktop\cours\projet de stage L2\frontend\.next\dev\cache\turbopack\v16.3.0-d73f5622\00000020.sst`: Le fichier spécifié est introuvable. (os error 2)
+⨯ Error [TurbopackInternalError]: Failed to lookup task ids: Looking up task id for NativeFunction { name: "get_written_endpoint_with_issues_operation", global_name: "next_napi_bindings::next_api::endpoint::get_written_endpoint_with_issues_operation", .. }(this=None) from database failed
+
+Debug info:
+- Failed to lookup task ids: Looking up task id for NativeFunction { name: "get_written_endpoint_with_issues_operation", global_name: "next_napi_bindings::next_api::endpoint::get_written_endpoint_with_issues_operation", .. }(this=None) from database failed
+  
+  Caused by:
+      0: Unable to open static sorted file referenced from 00000024.meta
+      1: failed to open file `\\?\C:\Users\Lionnel\Desktop\cours\projet de stage L2\frontend\.next\dev\cache\turbopack\v16.3.0-d73f5622\00000020.sst`: Le fichier spécifié est introuvable. (os error 2)
+    at <unknown> (TurbopackInternalError: Failed to lookup task ids: Looking up task id for NativeFunction { name: "get_written_endpoint_with_issues_operation", global_name: "next_napi_bindings::next_api::endpoint::get_written_endpoint_with_issues_operation", .. }(this=None) from database failed) {
+  location: 'turbopack\\crates\\turbo-tasks-backend\\src\\backend\\operation\\mod.rs:987:14'
+}
+
+thread 'tokio-rt-worker' (31932) panicked at turbopack\crates\turbo-tasks-backend\src\backend\operation\mod.rs:987:14:
+Failed to lookup task ids: Looking up task id for NativeFunction { name: "get_written_endpoint_with_issues_operation", global_name: "next_napi_bindings::next_api::endpoint::get_written_endpoint_with_issues_operation", .. }(this=None) from database failed
+
+Caused by:
+    0: Unable to open static sorted file referenced from 00000024.meta
+    1: failed to open file `\\?\C:\Users\Lionnel\Desktop\cours\projet de stage L2\frontend\.next\dev\cache\turbopack\v16.3.0-d73f5622\00000020.sst`: Le fichier spécifié est introuvable. (os error 2)
+Error [TurbopackInternalError]: Failed to lookup task ids: Looking up task id for NativeFunction { name: "get_written_endpoint_with_issues_operation", global_name: "next_napi_bindings::next_api::endpoint::get_written_endpoint_with_issues_operation", .. }(this=None) from database failed
+
+Debug info:
+- Failed to lookup task ids: Looking up task id for NativeFunction { name: "get_written_endpoint_with_issues_operation", global_name: "next_napi_bindings::next_api::endpoint::get_written_endpoint_with_issues_operation", .. }(this=None) from database failed
+  
+  Caused by:
+      0: Unable to open static sorted file referenced from 00000024.meta
+      1: failed to open file `\\?\C:\Users\Lionnel\Desktop\cours\projet de stage L2\frontend\.next\dev\cache\turbopack\v16.3.0-d73f5622\00000020.sst`: Le fichier spécifié est introuvable. (os error 2)
+    at <unknown> (TurbopackInternalError: Failed to lookup task ids: Looking up task id for NativeFunction { name: "get_written_endpoint_with_issues_operation", global_name: "next_napi_bindings::next_api::endpoint::get_written_endpoint_with_issues_operation", .. }(this=None) from database failed) {
+  location: 'turbopack\\crates\\turbo-tasks-backend\\src\\backend\\operation\\mod.rs:987:14'
+}
+[?25h

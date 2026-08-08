@@ -4,10 +4,11 @@ import { DashboardSidebar } from "./DashboardSidebar";
 import { DashboardHeader } from "./DashboardHeader";
 import { DashboardContent } from "./DashboardContent";
 import { DashboardFooter } from "./DashboardFooter";
+import type { DashboardType } from "../types";
 
 interface DashboardShellProps {
   children: React.ReactNode;
-  type: "HOPITAL" | "PHARMACIE";
+  type: DashboardType;
 }
 
 export function DashboardShell({ children, type }: DashboardShellProps) {
