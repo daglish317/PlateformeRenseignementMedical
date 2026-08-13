@@ -36,11 +36,18 @@ export function useVentesAttente(params: VentesAttenteParams, enabled = true) {
 export function usePaiementsRealises(
   recherche: string,
   structureId?: string,
+  datePaiement?: string,
   enabled = true
 ) {
   return useQuery({
-    queryKey: [...CAISSE_PAIEMENTS_QUERY_KEY, recherche, structureId ?? ""],
-    queryFn: () => getPaiementsRealises(recherche || undefined, structureId),
+    queryKey: [
+      ...CAISSE_PAIEMENTS_QUERY_KEY,
+      recherche,
+      structureId ?? "",
+      datePaiement ?? "",
+    ],
+    queryFn: () =>
+      getPaiementsRealises(recherche || undefined, structureId, datePaiement),
     enabled,
   });
 }
@@ -82,8 +89,11 @@ export function useCreerRetour() {
 export function useValiderPaiement() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (payload: { venteId: string; mode: ModePaiementValue }) =>
-      validerPaiement(payload.venteId, payload.mode),
+    mutationFn: (payload: {
+      venteId: string;
+      mode: ModePaiementValue;
+      nomClient?: string;
+    }) => validerPaiement(payload.venteId, payload.mode, payload.nomClient),
     onSuccess: () => {
       toast.success("Paiement validé avec succès.");
       queryClient.invalidateQueries({ queryKey: CAISSE_ATTENTE_QUERY_KEY });

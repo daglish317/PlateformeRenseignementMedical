@@ -597,6 +597,7 @@ class ExpirationTests(VenteBaseTestCase):
         Vente.objects.filter(id=self.vente.id).update(
             date_expiration=timezone.now() - timedelta(minutes=5)
         )
+        call_command("expirer_ventes")
         self._as_caissier()
         response = self.client.get("/api/ventes/caisse/attente/?statut=attente")
         self.assertEqual(response.status_code, 200)
@@ -908,6 +909,7 @@ class AttenteFiltresRechercheTests(VenteBaseTestCase):
         Vente.objects.filter(id=self.vente.id).update(
             date_expiration=timezone.now() - timedelta(minutes=5)
         )
+        call_command("expirer_ventes")
         self._as_caissier()
         response = self.client.get("/api/ventes/caisse/attente/?statut=expirees")
         self.assertEqual(response.status_code, 200)

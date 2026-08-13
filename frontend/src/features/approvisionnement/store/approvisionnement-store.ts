@@ -5,10 +5,12 @@ interface ApprovisionnementState {
   dateReception: string;
   fournisseur: string;
   referenceBon: string;
+  montantTotalDeclare: string;
   lignes: LigneInput[];
   setDateReception: (dateReception: string) => void;
   setFournisseur: (fournisseur: string) => void;
   setReferenceBon: (referenceBon: string) => void;
+  setMontantTotalDeclare: (montantTotalDeclare: string) => void;
   addLigne: (ligne: LigneInput) => void;
   updateLigne: (index: number, ligne: LigneInput) => void;
   removeLigne: (index: number) => void;
@@ -21,10 +23,12 @@ export const useApprovisionnementStore = create<ApprovisionnementState>((set) =>
   dateReception: initialDateReception(),
   fournisseur: "",
   referenceBon: "",
+  montantTotalDeclare: "",
   lignes: [],
   setDateReception: (dateReception) => set({ dateReception }),
   setFournisseur: (fournisseur) => set({ fournisseur }),
   setReferenceBon: (referenceBon) => set({ referenceBon }),
+  setMontantTotalDeclare: (montantTotalDeclare) => set({ montantTotalDeclare }),
   addLigne: (ligne) => set((state) => ({ lignes: [...state.lignes, ligne] })),
   updateLigne: (index, ligne) =>
     set((state) => ({
@@ -39,6 +43,7 @@ export const useApprovisionnementStore = create<ApprovisionnementState>((set) =>
       dateReception: initialDateReception(),
       fournisseur: "",
       referenceBon: "",
+      montantTotalDeclare: "",
       lignes: [],
     }),
 }));

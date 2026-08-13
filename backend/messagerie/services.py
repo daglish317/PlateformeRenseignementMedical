@@ -86,8 +86,14 @@ class MessagerieService:
                 statut="ACTIVE",
                 est_supprimee=False,
             )
-            for structure in active_structures:
-                MessagerieService.get_or_create_conversation(structure=structure)
+            existing_ids = Conversation.objects.filter(
+                structure__in=active_structures,
+            ).values_list("structure_id", flat=True)
+            manquantes = active_structures.exclude(id__in=existing_ids)
+            if manquantes.exists():
+                Conversation.objects.bulk_create(
+                    [Conversation(structure=s) for s in manquantes]
+                )
 
             conversations = Conversation.objects.filter(
                 structure__isnull=False,

@@ -1,4 +1,3 @@
-"use client";
 import { DashboardHomePage } from "@/features/shared/dashboard-home/pages/DashboardHomePage";
 
 export default function HospitalDashboardPage() {

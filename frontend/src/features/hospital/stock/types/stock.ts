@@ -6,6 +6,8 @@ export interface StockItem {
   structure: string;
   nom: string;
   type_item: StockItemType;
+  forme_pharmaceutique?: string | null;
+  forme_label?: string | null;
   quantite: number;
   seuil_alerte: number;
   disponible: boolean;

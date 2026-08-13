@@ -87,29 +87,33 @@ class StructureAdminListSerializer(serializers.ModelSerializer):
             "longitude",
         ]
 
-    def _member(self, obj, role):
-        return (
-            obj.equipe.filter(role=role)
-            .select_related("utilisateur")
-            .first()
-        )
+    def _members(self, obj):
+        """Membres par rôle, réutilise le prefetch `equipe__utilisateur`."""
+        cache = getattr(self, "_members_cache", None)
+        if cache is None:
+            cache = self._members_cache = {}
+        members = cache.get(obj.pk)
+        if members is None:
+            members = {m.role: m for m in obj.equipe.all()}
+            cache[obj.pk] = members
+        return members
 
     def get_proprietaire_nom(self, obj):
-        member = self._member(obj, RoleEquipeStructure.PROPRIETAIRE)
+        member = self._members(obj).get(RoleEquipeStructure.PROPRIETAIRE)
         return member.utilisateur.nom if member else ""
 
     def get_proprietaire_email(self, obj):
-        member = self._member(obj, RoleEquipeStructure.PROPRIETAIRE)
+        member = self._members(obj).get(RoleEquipeStructure.PROPRIETAIRE)
         return member.utilisateur.email if member else ""
 
     def get_gestionnaire_nom(self, obj):
-        member = self._member(obj, RoleEquipeStructure.GESTIONNAIRE)
+        member = self._members(obj).get(RoleEquipeStructure.GESTIONNAIRE)
         if member:
             return member.utilisateur.nom
         return obj.gestionnaire.nom if obj.gestionnaire else ""
 
     def get_gestionnaire_email(self, obj):
-        member = self._member(obj, RoleEquipeStructure.GESTIONNAIRE)
+        member = self._members(obj).get(RoleEquipeStructure.GESTIONNAIRE)
         if member:
             return member.utilisateur.email
         return obj.gestionnaire.email if obj.gestionnaire else ""

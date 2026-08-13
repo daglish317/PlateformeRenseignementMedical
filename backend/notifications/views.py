@@ -16,8 +16,6 @@ class MyNotificationsView(APIView):
 
     def get(self, request):
 
-        NotificationService.expirer_anciennes()
-
         notifications = Notification.objects.filter(
             utilisateur=request.user,
         ).select_related("structure").order_by("-date_creation")
@@ -162,8 +160,12 @@ class MarkAllAsReadView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        updated = Notification.objects.filter(
+        queryset = Notification.objects.filter(
             utilisateur=request.user,
             est_lue=False,
-        ).update(est_lue=True)
+        )
+        nav_item = (request.data.get("nav_item") or "").strip()
+        if nav_item:
+            queryset = queryset.filter(nav_item=nav_item)
+        updated = queryset.update(est_lue=True)
         return Response({"message": f"{updated} notification(s) marquée(s) comme lue(s)"})

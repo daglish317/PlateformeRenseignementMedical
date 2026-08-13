@@ -10,9 +10,12 @@ import { StockTable } from "../components/StockTable";
 import { StockFilters } from "../components/StockFilters";
 import { DeleteStockDialog } from "../components/DeleteStockDialog";
 import { useMyStructureId } from "@/features/shared/dashboard/hooks/useMyStructureId";
+import { useAuthStore } from "@/features/auth/store/auth-store";
 
 export default function StockPage() {
   const { data: structureId } = useMyStructureId();
+  const user = useAuthStore((state) => state.user);
+  const canDeleteStock = user?.role === "PROPRIETAIRE";
   const { data: items, isLoading, error } = useStock(structureId ?? "");
   const deleteMutation = useDeleteStock(structureId ?? "");
 
@@ -20,8 +23,8 @@ export default function StockPage() {
   const [filter, setFilter] = useState("all");
 
   const filteredItems = (items ?? []).filter((item) => {
-    if (filter === "available") return item.disponible && item.quantite > item.seuil_alerte;
-    if (filter === "low") return item.disponible && item.quantite <= item.seuil_alerte && item.quantite > 0;
+    if (filter === "available") return item.disponible && item.quantite >= 10;
+    if (filter === "low") return item.disponible && item.quantite > 0 && item.quantite < 10;
     if (filter === "out") return !item.disponible || item.quantite === 0;
     return true;
   });
@@ -50,7 +53,7 @@ export default function StockPage() {
         {items && (
           <StockTable
             items={filteredItems}
-            onDelete={setDeletingItem}
+            onDelete={canDeleteStock ? setDeletingItem : undefined}
           />
         )}
       </SectionCard>

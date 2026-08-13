@@ -72,6 +72,14 @@ class InventaireListeSerializer(serializers.ModelSerializer):
         return obj.cree_le.strftime("%H:%M") if obj.cree_le else None
 
     def _compteurs(self, obj):
+        total = getattr(obj, "_nb_total", None)
+        if total is not None:
+            return {
+                "total": total,
+                "disponibles": getattr(obj, "_nb_disponibles", 0) or 0,
+                "stock_faible": getattr(obj, "_nb_stock_faible", 0) or 0,
+                "ruptures": getattr(obj, "_nb_ruptures", 0) or 0,
+            }
         return obj.lignes.aggregate(
             total=Count("id"),
             disponibles=Count(

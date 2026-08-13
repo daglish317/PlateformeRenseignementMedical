@@ -1,4 +1,3 @@
-"use client";
 import { Lock } from "lucide-react";
 import { PageTitle } from "@/features/shared/dashboard/components/PageTitle";
 

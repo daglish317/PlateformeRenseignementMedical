@@ -34,3 +34,40 @@ export async function createApprovisionnement(
   });
   return data;
 }
+
+async function telechargerDocument(
+  url: string,
+  nomFichier: string
+): Promise<void> {
+  const response = await api.get(url, { responseType: "blob" });
+  const disposition = response.headers["content-disposition"] ?? "";
+  const match = /filename="?([^"]+)"?/.exec(disposition);
+  const nom = match?.[1] ?? nomFichier;
+
+  const urlObjet = window.URL.createObjectURL(new Blob([response.data]));
+  const lien = document.createElement("a");
+  lien.href = urlObjet;
+  lien.download = nom;
+  document.body.appendChild(lien);
+  lien.click();
+  document.body.removeChild(lien);
+  window.URL.revokeObjectURL(urlObjet);
+}
+
+export async function telechargerApprovisionnementPdf(
+  approvisionnementId: string
+): Promise<void> {
+  await telechargerDocument(
+    `/stocks/approvisionnements/${approvisionnementId}/export/pdf/`,
+    `approvisionnement_${approvisionnementId}.pdf`
+  );
+}
+
+export async function telechargerApprovisionnementExcel(
+  approvisionnementId: string
+): Promise<void> {
+  await telechargerDocument(
+    `/stocks/approvisionnements/${approvisionnementId}/export/excel/`,
+    `approvisionnement_${approvisionnementId}.xlsx`
+  );
+}

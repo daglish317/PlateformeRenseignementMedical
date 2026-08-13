@@ -6,6 +6,7 @@ import { SectionCard } from "@/features/shared/dashboard/components/SectionCard"
 import { PageContainer } from "@/features/shared/dashboard/components/PageContainer";
 import { useMyStructureId } from "@/features/shared/dashboard/hooks/useMyStructureId";
 import { useAuthStore } from "@/features/auth/store/auth-store";
+import { useNotifications } from "@/providers/notification.provider";
 import {
   useAlertes,
   useMarquerLue,
@@ -24,6 +25,7 @@ export default function AlertesPage() {
   const { data: structureId } = useMyStructureId();
   const user = useAuthStore((state) => state.user);
   const role = user?.role ?? "GESTIONNAIRE";
+  const { markAllRead } = useNotifications();
 
   const [recherche, setRecherche] = useState("");
   const [rechercheAppliquee, setRechercheAppliquee] = useState("");
@@ -36,6 +38,10 @@ export default function AlertesPage() {
     const timer = setTimeout(() => setRechercheAppliquee(recherche.trim()), 400);
     return () => clearTimeout(timer);
   }, [recherche]);
+
+  useEffect(() => {
+    markAllRead("alertes");
+  }, [markAllRead]);
 
   const { data: alertes, isLoading, error } = useAlertes(structureId ?? "", {
     recherche: rechercheAppliquee,

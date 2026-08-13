@@ -312,7 +312,7 @@ class VenteService:
 
     @staticmethod
     @transaction.atomic
-    def envoyer_a_la_caisse(vente, adresse_ip=None):
+    def envoyer_a_la_caisse(vente, adresse_ip=None, nom_client=None):
         """Valide puis réserve les quantités. Le stock physique reste inchangé.
 
         En cas d'erreur, la transaction est annulée, la vente reste ouverte
@@ -348,6 +348,9 @@ class VenteService:
         if erreurs:
             raise VenteErreur(" ; ".join(erreurs))
 
+        if nom_client is not None:
+            vente.nom_client = (nom_client or "").strip()
+
         for ligne in lignes:
             item = StockItem.objects.select_for_update().get(
                 structure=vente.structure_id,
@@ -360,7 +363,7 @@ class VenteService:
         vente.etat = EtatVente.EN_ATTENTE_PAIEMENT
         vente.transmise_le = timezone.now()
         vente.date_expiration = timezone.now() + VenteService.delai_paiement()
-        vente.save(update_fields=["etat", "transmise_le", "date_expiration"])
+        vente.save(update_fields=["etat", "transmise_le", "date_expiration", "nom_client"])
 
         VenteService._journal(
             structure=vente.structure,
@@ -389,7 +392,7 @@ class VenteService:
 
     @staticmethod
     @transaction.atomic
-    def valider_paiement(vente, caissier, mode, adresse_ip=None):
+    def valider_paiement(vente, caissier, mode, adresse_ip=None, nom_client=None):
         """Valide la vente dans une seule transaction logique.
 
         - marque la vente payée ;
@@ -417,6 +420,9 @@ class VenteService:
             )
 
         lignes = list(LigneVente.objects.filter(vente=vente).select_related("medicament"))
+
+        if nom_client is not None and not vente.nom_client:
+            vente.nom_client = (nom_client or "").strip()
 
         for ligne in lignes:
             try:
@@ -468,7 +474,7 @@ class VenteService:
 
         vente.etat = EtatVente.PAYEE
         vente.validee_le = timezone.now()
-        vente.save(update_fields=["etat", "validee_le"])
+        vente.save(update_fields=["etat", "validee_le", "nom_client"])
 
         VenteService._journal(
             structure=vente.structure,
@@ -666,8 +672,6 @@ class VenteService:
     def statistiques(structure_id):
         """Indicateurs de vente et de retours (réservés au propriétaire)."""
         from django.db.models import Sum
-
-        VenteService.expirer_ventes()
 
         base = Vente.objects.filter(structure_id=structure_id)
         aujourdhui = timezone.localdate()

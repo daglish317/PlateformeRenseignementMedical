@@ -5,6 +5,26 @@ const withNextIntl = createNextIntlPlugin(
   "./src/i18n/request.ts"
 );
 
+let withPWA = (config: NextConfig) => config;
+
+try {
+  // Utilise le plugin si la dependance est installee. En cas de connexion npm
+  // instable, la PWA native reste fonctionnelle sans bloquer Next.
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const nextPWA = require("@ducanh2912/next-pwa").default;
+  withPWA = nextPWA({
+    dest: "public",
+    register: false,
+    sw: "next-pwa-sw.js",
+    fallbackRoutes: {
+      document: "/offline",
+    },
+    disable: process.env.NODE_ENV === "development",
+  });
+} catch {
+  withPWA = (config: NextConfig) => config;
+}
+
 const nextConfig: NextConfig = {
   // Optimisation des images
   images: {
@@ -16,6 +36,13 @@ const nextConfig: NextConfig = {
 
   // Compression automatique
   compress: true,
+
+  // En developpement, garder davantage de routes compilees en memoire.
+  // Cela evite de recompiler les pages dashboard a chaque aller-retour.
+  onDemandEntries: {
+    maxInactiveAge: 60 * 60 * 1000,
+    pagesBufferLength: 100,
+  },
 
   // Ne pas rediriger entre /api/.../ et /api/... (Django APPEND_SLASH
   // provoque une boucle de redirections avec le proxy vers le backend).
@@ -102,9 +129,8 @@ const nextConfig: NextConfig = {
   ];
 },
 
-  // Optimisations expérimentales
   experimental: {
-    optimizePackageImports: ['lucide-react', 'react-leaflet', '@radix-ui/react-label'],
+    optimizePackageImports: ['lucide-react'],
   },
 
   // Production optimizations
@@ -112,4 +138,4 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
 };
 
-export default withNextIntl(nextConfig);
+export default withPWA(withNextIntl(nextConfig));

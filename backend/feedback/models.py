@@ -59,9 +59,10 @@ class Feedback(models.Model):
         max_length=20,
         choices=StatutFeedback.choices,
         default=StatutFeedback.NON_LU,
+        db_index=True,
     )
 
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
 
     class Meta:
         ordering = ["-created_at"]

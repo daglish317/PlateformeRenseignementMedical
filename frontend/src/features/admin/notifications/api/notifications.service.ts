@@ -38,8 +38,10 @@ export const notificationsService = {
     return response.data;
   },
 
-  markAllAsRead: async (): Promise<{ message: string }> => {
-    const response = await api.post<{ message: string }>("/notifications/read-all/");
+  markAllAsRead: async (navItem?: string): Promise<{ message: string }> => {
+    const response = await api.post<{ message: string }>("/notifications/read-all/", {
+      nav_item: navItem || undefined,
+    });
     return response.data;
   },
 };

@@ -26,6 +26,9 @@ export interface Medicament {
   prix_vente: number | null;
   tva: boolean;
   en_reserve: boolean;
+  stock_avant: number;
+  stock_physique: number;
+  stock_disponible: number;
   date_creation: string;
 }
 
@@ -41,6 +44,7 @@ export interface LigneApprovisionnement {
   date_peremption: string;
   tva: boolean;
   en_reserve: boolean;
+  stock_avant: number;
 }
 
 export interface Approvisionnement {
@@ -49,6 +53,7 @@ export interface Approvisionnement {
   date_reception: string;
   fournisseur: string;
   reference_bon: string;
+  montant_total_declare: number;
   cree_par: string;
   cree_par_nom: string;
   cree_le: string;
@@ -64,6 +69,7 @@ export interface LigneInput {
   date_peremption: string;
   tva: boolean;
   en_reserve: boolean;
+  stock_avant: number;
 }
 
 export interface LigneError {
@@ -76,6 +82,7 @@ export interface CreateApprovisionnementPayload {
   date_reception: string;
   fournisseur: string;
   reference_bon: string;
+  montant_total_declare: number;
   lignes: LigneInput[];
 }
 

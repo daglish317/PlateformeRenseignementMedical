@@ -7,7 +7,7 @@ import { VENTE_PREPARATION_QUERY_KEY } from "./useVentePreparation";
 export function useEnvoyerVenteCaisse(venteId: string, structureId: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: () => envoyerVenteCaisse(venteId),
+    mutationFn: (nomClient?: string) => envoyerVenteCaisse(venteId, nomClient),
     onSuccess: () => {
       toast.success("Vente envoyée à la caisse.");
       queryClient.invalidateQueries({

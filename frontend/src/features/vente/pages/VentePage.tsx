@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { Send, Trash2 } from "lucide-react";
 import { PageContainer } from "@/features/shared/dashboard/components/PageContainer";
 import { PageTitle } from "@/features/shared/dashboard/components/PageTitle";
@@ -24,6 +25,7 @@ export default function VentePage() {
   const createVenteMutation = useCreateVente(structure);
 
   const [annulationOpen, setAnnulationOpen] = useState(false);
+  const [nomClient, setNomClient] = useState("");
 
   const ajouterMutation = useAjouterLigne(vente?.id ?? "", structure);
   const modifierMutation = useModifierLigne(vente?.id ?? "", structure);
@@ -94,6 +96,19 @@ export default function VentePage() {
                 {vente.nb_articles} · {formatMontant(vente.montant_total)}
               </p>
             </div>
+            <div className="sm:col-span-2">
+              <label className="mb-1 block text-muted-foreground" htmlFor="nom-client">
+                Beneficiaire
+              </label>
+              <Input
+                id="nom-client"
+                key={vente?.id ?? "nouvelle-vente"}
+                defaultValue={vente?.nom_client ?? ""}
+                onChange={(event) => setNomClient(event.target.value)}
+                placeholder="Nom du beneficiaire"
+                disabled={busy}
+              />
+            </div>
           </div>
         ) : (
           <p className="text-sm text-muted-foreground">
@@ -145,7 +160,7 @@ export default function VentePage() {
                   Annuler la vente
                 </Button>
                 <Button
-                  onClick={() => envoyerMutation.mutate()}
+                  onClick={() => envoyerMutation.mutate(nomClient)}
                   disabled={busy || lignes.length === 0}
                 >
                   <Send className="mr-2 size-4" />

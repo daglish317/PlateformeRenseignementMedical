@@ -74,6 +74,12 @@ export function FactureDialog({ vente, open, onOpenChange }: FactureDialogProps)
               </span>
             </div>
             <div className="flex justify-between text-muted-foreground">
+              <span>Bénéficiaire</span>
+              <span className="font-medium text-foreground">
+                {factureVente.nom_client || "—"}
+              </span>
+            </div>
+            <div className="flex justify-between text-muted-foreground">
               <span>Préparée par</span>
               <span className="font-medium text-foreground">
                 {factureVente.prepare_par_nom}

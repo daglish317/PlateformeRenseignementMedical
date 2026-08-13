@@ -64,6 +64,8 @@ export interface Vente {
   annulee_par: string | null;
   date_expiration: string | null;
   motif_annulation: string;
+  nom_client: string;
+  telephone_client: string;
   montant_total: number;
   nb_articles: number;
   lignes: LigneVente[];

@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Dialog,
   DialogContent,
@@ -37,9 +38,12 @@ export function EncaissementDialog({
 
   if (!vente) return null;
 
-  const handleConfirm = () => {
+  const handleConfirm = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    const nomClient = String(formData.get("nom_client") ?? "");
     paiementMutation.mutate(
-      { venteId: vente.id, mode },
+      { venteId: vente.id, mode, nomClient },
       {
         onSuccess: (data) => {
           onOpenChange(false);
@@ -81,20 +85,38 @@ export function EncaissementDialog({
           </div>
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="mode-paiement">Mode de paiement</Label>
-          <Select
-            id="mode-paiement"
-            value={mode}
-            onChange={(e) => setMode(e.target.value as ModePaiementValue)}
-          >
-            {MODES_PAIEMENT.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </Select>
-        </div>
+        <form
+          id="encaissement-form"
+          onSubmit={handleConfirm}
+          className="space-y-4"
+        >
+          <div className="space-y-2">
+            <Label htmlFor="beneficiaire">Beneficiaire</Label>
+            <Input
+              key={vente.id}
+              id="beneficiaire"
+              name="nom_client"
+              defaultValue={vente.nom_client ?? ""}
+              placeholder="Nom du beneficiaire"
+              disabled={paiementMutation.isPending || Boolean(vente.nom_client)}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="mode-paiement">Mode de paiement</Label>
+            <Select
+              id="mode-paiement"
+              value={mode}
+              onChange={(e) => setMode(e.target.value as ModePaiementValue)}
+            >
+              {MODES_PAIEMENT.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </Select>
+          </div>
+        </form>
 
         <DialogFooter>
           <Button
@@ -104,7 +126,11 @@ export function EncaissementDialog({
           >
             Retour
           </Button>
-          <Button onClick={handleConfirm} disabled={paiementMutation.isPending}>
+          <Button
+            type="submit"
+            form="encaissement-form"
+            disabled={paiementMutation.isPending}
+          >
             {paiementMutation.isPending ? "Validation..." : "Valider l'encaissement"}
           </Button>
         </DialogFooter>

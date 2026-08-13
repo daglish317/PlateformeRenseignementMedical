@@ -12,7 +12,7 @@ interface NotificationContextValue {
   unreadCount: number;
   unreadByNavItem: Record<string, number>;
   getUnreadCount: (navItem: string) => number;
-  markAllRead: () => void;
+  markAllRead: (navItem?: string) => void;
 }
 
 const NotificationContext = createContext<NotificationContextValue>({
@@ -78,13 +78,22 @@ export default function NotificationProvider({ children }: { children: React.Rea
     });
   }, [subscribe, queryClient]);
 
-  const markAllRead = useCallback(async () => {
+  const markAllRead = useCallback(async (navItem?: string) => {
     try {
-      await notificationsService.markAllAsRead();
+      await notificationsService.markAllAsRead(navItem);
     } catch {
       // silently fail
     }
-    setUnreadByNavItem({});
+    setUnreadByNavItem((prev) => {
+      if (!navItem) return {};
+      const count = prev[navItem] || 0;
+      const total = Math.max((prev.total || 0) - count, 0);
+      return {
+        ...prev,
+        [navItem]: 0,
+        total,
+      };
+    });
     queryClient.invalidateQueries({
       queryKey: ["notifications"],
       refetchType: "inactive",

@@ -32,7 +32,7 @@ export function StockTable({ items, onEdit, onDelete }: StockTableProps) {
           {items.map((item) => (
             <tr key={item.id} className="border-b">
               <td className="p-3 font-medium">{item.nom}</td>
-              <td className="p-3">{item.type_item}</td>
+              <td className="p-3">{item.forme_label ?? item.type_item}</td>
               <td className="p-3">{item.quantite}</td>
               <td className="p-3">{item.seuil_alerte}</td>
               <td className="p-3">

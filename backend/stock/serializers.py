@@ -13,6 +13,8 @@ from .services import ApprovisionnementService
 class StockSerializer(serializers.ModelSerializer):
 
     stock_disponible = serializers.SerializerMethodField()
+    forme_pharmaceutique = serializers.SerializerMethodField()
+    forme_label = serializers.SerializerMethodField()
 
     class Meta:
         model = StockItem
@@ -21,6 +23,8 @@ class StockSerializer(serializers.ModelSerializer):
             "structure",
             "nom",
             "type_item",
+            "forme_pharmaceutique",
+            "forme_label",
             "quantite",
             "quantite_reservee",
             "stock_disponible",
@@ -32,6 +36,24 @@ class StockSerializer(serializers.ModelSerializer):
 
     def get_stock_disponible(self, obj):
         return obj.stock_disponible
+
+    def _medicament(self, obj):
+        return (
+            Medicament.objects.filter(
+                structure=obj.structure,
+                nom=obj.nom,
+            ).first()
+        )
+
+    def get_forme_pharmaceutique(self, obj):
+        medicament = self._medicament(obj)
+        return medicament.forme_pharmaceutique if medicament else None
+
+    def get_forme_label(self, obj):
+        medicament = self._medicament(obj)
+        if medicament:
+            return medicament.get_forme_pharmaceutique_display()
+        return None
 
 
 class StockMovementSerializer(serializers.ModelSerializer):
@@ -50,6 +72,7 @@ class MedicamentSerializer(serializers.ModelSerializer):
 
     stock_physique = serializers.SerializerMethodField()
     stock_disponible = serializers.SerializerMethodField()
+    stock_avant = serializers.SerializerMethodField()
 
     class Meta:
         model = Medicament
@@ -61,6 +84,7 @@ class MedicamentSerializer(serializers.ModelSerializer):
             "prix_vente",
             "tva",
             "en_reserve",
+            "stock_avant",
             "stock_physique",
             "stock_disponible",
             "date_creation",
@@ -72,17 +96,30 @@ class MedicamentSerializer(serializers.ModelSerializer):
             StockItem.objects.filter(
                 structure=obj.structure,
                 nom=obj.nom,
-                type_item=StockItem.TYPE_MEDICAMENT,
             ).first()
         )
 
     def get_stock_physique(self, obj):
-        item = self._stock_item(obj)
-        return item.quantite if item else 0
+        value = getattr(obj, "_stock_physique", None)
+        if value is None:
+            item = self._stock_item(obj)
+            return item.quantite if item else 0
+        return value
 
     def get_stock_disponible(self, obj):
+        physique = getattr(obj, "_stock_physique", None)
+        if physique is None:
+            item = self._stock_item(obj)
+            return item.stock_disponible if item else 0
+        reservee = getattr(obj, "_stock_reservee", None) or 0
+        return max(physique - reservee, 0)
+
+    def get_stock_avant(self, obj):
+        value = getattr(obj, "_stock_avant", None)
+        if value is not None:
+            return value
         item = self._stock_item(obj)
-        return item.stock_disponible if item else 0
+        return item.quantite if item else 0
 
 
 class LigneApprovisionnementSerializer(serializers.ModelSerializer):
@@ -111,6 +148,7 @@ class LigneApprovisionnementSerializer(serializers.ModelSerializer):
             "date_peremption",
             "tva",
             "en_reserve",
+            "stock_avant",
         ]
 
 
@@ -132,6 +170,7 @@ class ApprovisionnementSerializer(serializers.ModelSerializer):
             "date_reception",
             "fournisseur",
             "reference_bon",
+            "montant_total_declare",
             "cree_par",
             "cree_par_nom",
             "cree_le",
@@ -155,6 +194,7 @@ class LigneApprovisionnementInputSerializer(serializers.Serializer):
     date_peremption = serializers.DateField()
     tva = serializers.BooleanField(required=False, default=False)
     en_reserve = serializers.BooleanField(required=False, default=False)
+    stock_avant = serializers.IntegerField(required=False, min_value=0)
 
 
 class ApprovisionnementCreateSerializer(serializers.Serializer):
@@ -162,6 +202,7 @@ class ApprovisionnementCreateSerializer(serializers.Serializer):
     date_reception = serializers.DateField()
     fournisseur = serializers.CharField(required=False, allow_blank=True, default="")
     reference_bon = serializers.CharField(required=False, allow_blank=True, default="")
+    montant_total_declare = serializers.DecimalField(max_digits=12, decimal_places=2)
     lignes = serializers.ListField(child=serializers.DictField())
 
     def validate_lignes(self, value):
@@ -206,3 +247,54 @@ class ApprovisionnementCreateSerializer(serializers.Serializer):
             cree_par=self.context["request"].user,
             **validated_data,
         )
+
+
+class ProduitPeremptionSerializer(serializers.ModelSerializer):
+
+    nom = serializers.CharField(source="medicament.nom", read_only=True)
+    type = serializers.CharField(source="get_forme_pharmaceutique_display", read_only=True)
+    quantite_actuelle = serializers.SerializerMethodField()
+    temps_restant = serializers.SerializerMethodField()
+    statut = serializers.SerializerMethodField()
+
+    class Meta:
+        model = LigneApprovisionnement
+        fields = [
+            "id",
+            "nom",
+            "type",
+            "quantite_actuelle",
+            "date_peremption",
+            "temps_restant",
+            "statut",
+        ]
+
+    def get_quantite_actuelle(self, obj):
+        item = (
+            StockItem.objects.filter(
+                structure=obj.approvisionnement.structure,
+                nom=obj.medicament.nom,
+            ).first()
+        )
+        return item.quantite if item else 0
+
+    def get_statut(self, obj):
+        from django.utils import timezone
+
+        if obj.date_peremption < timezone.localdate():
+            return "EXPIRE"
+        return "PROCHE"
+
+    def get_temps_restant(self, obj):
+        from django.utils import timezone
+
+        today = timezone.localdate()
+        delta = (obj.date_peremption - today).days
+        if delta < 0:
+            return f"Expire depuis {abs(delta)} jour(s)"
+        if delta == 0:
+            return "Expire aujourd'hui"
+        if delta < 31:
+            return f"Expire dans {delta} jour(s)"
+        months = max(round(delta / 30), 1)
+        return f"Expire dans {months} mois"

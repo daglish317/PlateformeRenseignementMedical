@@ -120,7 +120,8 @@ class StockService:
     def items_en_alerte(structure):
         return StockItem.objects.filter(
             structure=structure,
-            quantite__lte=models.F("seuil_alerte"),
+            quantite__gt=0,
+            quantite__lt=10,
         )
 
 
@@ -169,6 +170,10 @@ class ApprovisionnementService:
         prix_vente = ligne.get("prix_vente")
         if prix_vente is not None and prix_vente < 0:
             return "Le prix de vente est invalide"
+        if bool(ligne.get("tva", False)) and prix_vente is not None:
+            return "Un produit soumis a la TVA ne peut pas avoir de prix de vente"
+        if not bool(ligne.get("tva", False)) and prix_vente is None:
+            return "Le prix de vente est obligatoire lorsque la TVA n'est pas appliquee"
 
         date_peremption = ligne.get("date_peremption")
         if date_peremption is None:
@@ -187,6 +192,7 @@ class ApprovisionnementService:
         date_reception,
         fournisseur="",
         reference_bon="",
+        montant_total_declare=0,
         lignes=None,
     ):
         """Enregistre une livraison complète (transactionnel).
@@ -201,6 +207,19 @@ class ApprovisionnementService:
         aucune donnée n'est persistée.
         """
         lignes = lignes or []
+        montant_calcule = sum(
+            ligne["prix_achat"] * int(ligne["quantite"])
+            for ligne in lignes
+        )
+
+        if montant_total_declare is None or montant_total_declare <= 0:
+            raise ValueError("Le montant total du bon de livraison est obligatoire.")
+
+        if montant_calcule != montant_total_declare:
+            raise ValueError(
+                "Le montant declare du bon de livraison ne correspond pas "
+                "au montant calcule a partir des produits."
+            )
 
         appro = Approvisionnement.objects.create(
             structure=structure,
@@ -209,6 +228,7 @@ class ApprovisionnementService:
             date_reception=date_reception,
             fournisseur=(fournisseur or "").strip(),
             reference_bon=(reference_bon or "").strip(),
+            montant_total_declare=montant_total_declare,
         )
 
         motif = f"Approvisionnement — {fournisseur or 'Inconnu'}"
@@ -224,6 +244,13 @@ class ApprovisionnementService:
             date_peremption = ligne["date_peremption"]
             tva = bool(ligne.get("tva", False))
             en_reserve = bool(ligne.get("en_reserve", False))
+
+            if tva and prix_vente is not None:
+                raise ValueError(
+                    "Un produit soumis a la TVA ne peut pas avoir de prix de vente."
+                )
+            if tva:
+                prix_vente = None
 
             medicament, created = Medicament.objects.get_or_create(
                 structure=structure,
@@ -254,6 +281,7 @@ class ApprovisionnementService:
                     "disponible": True,
                 },
             )
+            stock_avant = stock_item.quantite
             stock_item.quantite += quantite
             stock_item.disponible = True
             stock_item.save(update_fields=["quantite", "disponible"])
@@ -270,6 +298,7 @@ class ApprovisionnementService:
                 approvisionnement=appro,
                 medicament=medicament,
                 forme_pharmaceutique=forme,
+                stock_avant=stock_avant,
                 quantite=quantite,
                 prix_achat=prix_achat,
                 prix_vente=prix_vente,

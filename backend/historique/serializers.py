@@ -59,6 +59,8 @@ class EvenementHistoriqueSerializer(serializers.ModelSerializer):
         donnees = obj.donnees or {}
         if obj.type == "CAISSE_RETOUR":
             nb = donnees.get("nb_articles") or 0
+        elif obj.type == "STOCK_SUPPRIME":
+            nb = donnees.get("quantite") or 0
         elif obj.type == "INVENTAIRE_GENERE":
             nb = donnees.get("nb_produits") or 0
         else:

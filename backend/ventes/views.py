@@ -1,6 +1,7 @@
 from io import BytesIO
 
 from django.db.models import Q
+from django.utils.dateparse import parse_date
 from django.http import FileResponse
 from rest_framework import status
 from rest_framework.response import Response
@@ -103,6 +104,16 @@ def _filtre_recherche(queryset, recherche):
         | Q(nom_client__icontains=recherche)
         | Q(telephone_client__icontains=recherche)
     )
+
+
+def _filtre_date_paiement(queryset, date_paiement):
+    """Filtre les ventes payees sur la date effective de validation."""
+    if not date_paiement:
+        return queryset
+    date = parse_date(date_paiement)
+    if not date:
+        return queryset.none()
+    return queryset.filter(validee_le__date=date)
 
 
 # ---------------------------------------------------------------------------
@@ -265,6 +276,7 @@ class EnvoyerVenteCaisseView(APIView):
             vente = VenteService.envoyer_a_la_caisse(
                 vente,
                 adresse_ip=VenteService._adresse_ip(request),
+                nom_client=request.data.get("nom_client"),
             )
         except VenteErreur as e:
             return _erreur_metier(e)
@@ -326,8 +338,6 @@ class HistoriqueVentesView(APIView):
             )
         assert_gestionnaire_owns_structure(request.user, structure_id)
 
-        VenteService.expirer_ventes()
-
         ventes = (
             Vente.objects.filter(structure_id=structure_id)
             .select_related("prepare_par", "paiement__encaisse_par", "facture")
@@ -371,7 +381,6 @@ class VentesCaisseAttenteView(APIView):
 
     @caissier_ou_proprietaire_required
     def get(self, request):
-        VenteService.expirer_ventes()
         structure, error = _get_structure_caisse(request)
         if error:
             return error
@@ -419,7 +428,6 @@ class OuvrirVenteCaisseView(APIView):
 
     @caissier_required
     def post(self, request, pk):
-        VenteService.expirer_ventes()
         vente = _get_vente(pk)
         if not vente:
             return Response(
@@ -450,7 +458,6 @@ class VenteCaisseDetailView(APIView):
 
     @caissier_ou_proprietaire_required
     def get(self, request, pk):
-        VenteService.expirer_ventes()
         vente = _get_vente(pk)
         if not vente:
             return Response(
@@ -465,7 +472,6 @@ class ValiderPaiementView(APIView):
 
     @caissier_required
     def post(self, request, pk):
-        VenteService.expirer_ventes()
         vente = _get_vente(pk)
         if not vente:
             return Response(
@@ -483,6 +489,7 @@ class ValiderPaiementView(APIView):
                 caissier=request.user,
                 mode=serializer.validated_data["mode"],
                 adresse_ip=VenteService._adresse_ip(request),
+                nom_client=request.data.get("nom_client"),
             )
         except VenteErreur as e:
             return _erreur_metier(e)
@@ -501,7 +508,6 @@ class AnnulerVenteCaisseView(APIView):
 
     @caissier_required
     def post(self, request, pk):
-        VenteService.expirer_ventes()
         vente = _get_vente(pk)
         if not vente:
             return Response(
@@ -537,18 +543,20 @@ class PaiementsRealisesView(APIView):
 
     @caissier_ou_proprietaire_required
     def get(self, request):
-        VenteService.expirer_ventes()
         structure, error = _get_structure_caisse(request)
         if error:
             return error
 
         ventes = (
-            _filtre_recherche(
-                Vente.objects.filter(
-                    structure=structure,
-                    etat=EtatVente.PAYEE,
+            _filtre_date_paiement(
+                _filtre_recherche(
+                    Vente.objects.filter(
+                        structure=structure,
+                        etat=EtatVente.PAYEE,
+                    ),
+                    request.query_params.get("recherche", "").strip(),
                 ),
-                request.query_params.get("recherche", "").strip(),
+                request.query_params.get("date_paiement", "").strip(),
             )
             .select_related("prepare_par", "paiement__encaisse_par", "facture")
             .prefetch_related("lignes__medicament")

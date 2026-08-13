@@ -45,14 +45,18 @@ class Message(models.Model):
 
     contenu = models.TextField()
 
-    is_read = models.BooleanField(default=False)
+    is_read = models.BooleanField(default=False, db_index=True)
 
-    est_supprime = models.BooleanField(default=False)
+    est_supprime = models.BooleanField(default=False, db_index=True)
 
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
 
     class Meta:
         ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["conversation", "is_read"]),
+            models.Index(fields=["conversation", "est_supprime", "-created_at"]),
+        ]
 
     def __str__(self):
         return f"Message de {self.expediteur.nom} - {self.contenu[:30]}"

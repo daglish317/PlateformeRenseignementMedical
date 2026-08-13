@@ -28,12 +28,14 @@ export async function getVentesAttente(
 
 export async function getPaiementsRealises(
   recherche?: string,
-  structureId?: string
+  structureId?: string,
+  datePaiement?: string
 ): Promise<Vente[]> {
   const { data } = await api.get("/ventes/caisse/paiements/", {
     params: {
       recherche: recherche || undefined,
       structure_id: structureId || undefined,
+      date_paiement: datePaiement || undefined,
     },
   });
   return data;
@@ -80,10 +82,12 @@ export async function telechargerRecuPdf(venteId: string): Promise<void> {
 
 export async function validerPaiement(
   venteId: string,
-  mode: ModePaiementValue
+  mode: ModePaiementValue,
+  nomClient?: string
 ): Promise<{ message: string; vente: Vente }> {
   const { data } = await api.post(`/ventes/caisse/${venteId}/paiement/`, {
     mode,
+    nom_client: nomClient ?? "",
   });
   return data;
 }

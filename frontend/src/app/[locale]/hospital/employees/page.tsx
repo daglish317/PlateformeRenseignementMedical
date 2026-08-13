@@ -1,4 +1,3 @@
-"use client";
 
 import { TeamPage } from "@/features/shared/team/pages/TeamPage";
 

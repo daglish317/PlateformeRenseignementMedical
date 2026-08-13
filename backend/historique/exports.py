@@ -42,6 +42,8 @@ def _ligne_resume(evenement):
     numero = donnees.get("numero") or donnees.get("numero_retour") or "—"
     if evenement.type == "CAISSE_RETOUR":
         detail = f"Retour {numero} — vente {donnees.get('numero_vente', '—')} / facture {donnees.get('numero_facture', '—')} — {donnees.get('nb_articles', 0)} article(s)"
+    elif evenement.type == "STOCK_SUPPRIME":
+        detail = f"Suppression stock {numero} — {donnees.get('quantite', 0)} article(s)"
     elif evenement.type == "INVENTAIRE_GENERE":
         detail = f"Inventaire {numero} — {donnees.get('nb_produits', 0)} produit(s)"
     else:

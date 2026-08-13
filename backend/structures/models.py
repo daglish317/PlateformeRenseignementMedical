@@ -184,6 +184,7 @@ class EquipeStructure(models.Model):
         indexes = [
             models.Index(fields=["structure", "role"]),
             models.Index(fields=["utilisateur", "statut"]),
+            models.Index(fields=["utilisateur", "role", "statut"]),
         ]
 
     def activer(self):

@@ -1,4 +1,3 @@
-"use client";
 
 import OwnerCaissePage from "@/features/owner/pages/OwnerCaissePage";
 

@@ -1,7 +1,10 @@
 import csv
 import io
+from io import BytesIO
 
-from django.db.models import Exists, F, OuterRef
+from django.db.models import Exists, F, OuterRef, Subquery
+from django.http import FileResponse
+from django.utils import timezone
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -11,15 +14,20 @@ from .serializers import (
     ApprovisionnementSerializer,
     ApprovisionnementCreateSerializer,
     MedicamentSerializer,
+    ProduitPeremptionSerializer,
     StockSerializer,
     StockMovementSerializer,
 )
+from .exports import generer_approvisionnement_excel, generer_approvisionnement_pdf
 from .services import StockService
+from historique.models import TypeEvenementHistorique
+from historique.services import HistoriqueService
 
 from structures.models import Structure
 from structures.permissions import (
     assert_gestionnaire_owns_structure,
     assert_structure_autorise_stock_direct,
+    assert_proprietaire_owns_structure,
 )
 from utilisateurs.decorators import gestionnaire_required, responsable_structure_required
 
@@ -113,8 +121,18 @@ class DeleteStockView(APIView):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        assert_gestionnaire_owns_structure(request.user, item.structure_id)
+        assert_proprietaire_owns_structure(request.user, item.structure_id)
 
+        HistoriqueService.enregistrer(
+            structure=item.structure,
+            type_evenement=TypeEvenementHistorique.STOCK_SUPPRIME,
+            utilisateur=request.user,
+            donnees={
+                "nom": item.nom,
+                "quantite": item.quantite,
+                "type_item": item.type_item,
+            },
+        )
         StockService.supprimer_item(item=item)
 
         return Response(
@@ -165,6 +183,27 @@ class StockAlertesView(APIView):
         return Response(StockSerializer(items, many=True).data)
 
 
+class ProduitsPeremptionView(APIView):
+
+    @responsable_structure_required
+    def get(self, request, structure_id):
+
+        from datetime import timedelta
+        from .models import LigneApprovisionnement
+
+        assert_gestionnaire_owns_structure(request.user, structure_id)
+        limite = timezone.localdate() + timedelta(days=92)
+        lignes = (
+            LigneApprovisionnement.objects.filter(
+                approvisionnement__structure_id=structure_id,
+                date_peremption__lte=limite,
+            )
+            .select_related("approvisionnement", "medicament")
+            .order_by("date_peremption", "medicament__nom")
+        )
+        return Response(ProduitPeremptionSerializer(lignes, many=True).data)
+
+
 class MedicamentListView(APIView):
     """Recherche d'autocomplétion pour le formulaire d'approvisionnement."""
 
@@ -188,7 +227,6 @@ class MedicamentListView(APIView):
             stock_disponible = StockItem.objects.filter(
                 structure_id=structure_id,
                 nom=OuterRef("nom"),
-                type_item=StockItem.TYPE_MEDICAMENT,
                 quantite__gt=F("quantite_reservee"),
             )
             queryset = (
@@ -202,6 +240,18 @@ class MedicamentListView(APIView):
         search = (request.query_params.get("search") or "").strip()
         if search:
             queryset = queryset.filter(nom__icontains=search)
+
+        stock_item = StockItem.objects.filter(
+            structure_id=OuterRef("structure_id"),
+            nom=OuterRef("nom"),
+        )
+        queryset = queryset.annotate(
+            _stock_avant=Subquery(stock_item.values("quantite")[:1]),
+            _stock_physique=Subquery(stock_item.values("quantite")[:1]),
+            _stock_reservee=Subquery(
+                stock_item.values("quantite_reservee")[:1]
+            ),
+        )
 
         queryset = queryset.order_by("nom")[:20]
         return Response(MedicamentSerializer(queryset, many=True).data)
@@ -244,7 +294,10 @@ class ApprovisionnementListCreateView(APIView):
             context={"request": request, "structure": structure},
         )
         serializer.is_valid(raise_exception=True)
-        appro = serializer.save()
+        try:
+            appro = serializer.save()
+        except ValueError as e:
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response(
             ApprovisionnementSerializer(appro).data,
@@ -271,6 +324,63 @@ class ApprovisionnementDetailView(APIView):
 
         assert_gestionnaire_owns_structure(request.user, appro.structure_id)
         return Response(ApprovisionnementSerializer(appro).data)
+
+
+class ApprovisionnementPDFView(APIView):
+
+    @responsable_structure_required
+    def get(self, request, pk):
+        try:
+            appro = (
+                Approvisionnement.objects.select_related("structure", "cree_par")
+                .prefetch_related("lignes__medicament")
+                .get(id=pk)
+            )
+        except Approvisionnement.DoesNotExist:
+            return Response(
+                {"detail": "Approvisionnement introuvable"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        assert_gestionnaire_owns_structure(request.user, appro.structure_id)
+        pdf = BytesIO(generer_approvisionnement_pdf(appro))
+        nom = f"approvisionnement_{appro.numero}.pdf".replace(" ", "_")
+        return FileResponse(
+            pdf,
+            as_attachment=True,
+            filename=nom,
+            content_type="application/pdf",
+        )
+
+
+class ApprovisionnementExcelView(APIView):
+
+    @responsable_structure_required
+    def get(self, request, pk):
+        try:
+            appro = (
+                Approvisionnement.objects.select_related("structure", "cree_par")
+                .prefetch_related("lignes__medicament")
+                .get(id=pk)
+            )
+        except Approvisionnement.DoesNotExist:
+            return Response(
+                {"detail": "Approvisionnement introuvable"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        assert_gestionnaire_owns_structure(request.user, appro.structure_id)
+        excel = BytesIO(generer_approvisionnement_excel(appro))
+        nom = f"approvisionnement_{appro.numero}.xlsx".replace(" ", "_")
+        return FileResponse(
+            excel,
+            as_attachment=True,
+            filename=nom,
+            content_type=(
+                "application/vnd.openxmlformats-officedocument."
+                "spreadsheetml.sheet"
+            ),
+        )
 
 
 class EntreeStockView(APIView):

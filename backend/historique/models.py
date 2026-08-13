@@ -12,6 +12,7 @@ class TypeEvenementHistorique(models.TextChoices):
     """
 
     APPROVISIONNEMENT_CREE = "APPROVISIONNEMENT_CREE", "Approvisionnement enregistré"
+    STOCK_SUPPRIME = "STOCK_SUPPRIME", "Stock supprimé"
     INVENTAIRE_GENERE = "INVENTAIRE_GENERE", "Inventaire généré"
     CAISSE_RETOUR = "CAISSE_RETOUR", "Retour caisse"
 
@@ -36,6 +37,7 @@ class EvenementHistorique(models.Model):
     type = models.CharField(
         max_length=40,
         choices=TypeEvenementHistorique.choices,
+        db_index=True,
     )
 
     utilisateur = models.ForeignKey(
@@ -51,7 +53,7 @@ class EvenementHistorique(models.Model):
         help_text="Rôle de l'utilisateur au moment de l'action (trace).",
     )
 
-    cree_le = models.DateTimeField(auto_now_add=True)
+    cree_le = models.DateTimeField(auto_now_add=True, db_index=True)
 
     donnees = models.JSONField(
         default=dict,

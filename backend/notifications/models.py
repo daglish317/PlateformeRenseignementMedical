@@ -36,7 +36,7 @@ class Notification(models.Model):
 
     est_lue = models.BooleanField(default=False)
 
-    date_creation = models.DateTimeField(default=timezone.now)
+    date_creation = models.DateTimeField(default=timezone.now, db_index=True)
 
     utilisateur = models.ForeignKey(
         "utilisateurs.Utilisateur",

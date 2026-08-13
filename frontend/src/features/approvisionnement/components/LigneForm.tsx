@@ -1,4 +1,5 @@
 "use client";
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,9 +29,7 @@ export function LigneForm({
   onCancel,
 }: LigneFormProps) {
   const [nom, setNom] = useState(initial?.nom ?? "");
-  const [forme, setForme] = useState(
-    initial?.forme_pharmaceutique ?? "COMPRIME"
-  );
+  const [forme, setForme] = useState(initial?.forme_pharmaceutique ?? "COMPRIME");
   const [quantite, setQuantite] = useState(initial?.quantite ?? 1);
   const [prixAchat, setPrixAchat] = useState(
     initial?.prix_achat != null ? String(initial.prix_achat) : ""
@@ -38,33 +37,47 @@ export function LigneForm({
   const [prixVente, setPrixVente] = useState(
     initial?.prix_vente != null ? String(initial.prix_vente) : ""
   );
-  const [datePeremption, setDatePeremption] = useState(
-    initial?.date_peremption ?? ""
-  );
+  const [datePeremption, setDatePeremption] = useState(initial?.date_peremption ?? "");
   const [tva, setTva] = useState(initial?.tva ?? false);
   const [enReserve, setEnReserve] = useState(initial?.en_reserve ?? false);
+  const [stockAvant, setStockAvant] = useState(initial?.stock_avant ?? 0);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const handleSelectMedicament = (medicament: Medicament) => {
+    setNom(medicament.nom);
     setForme(medicament.forme_pharmaceutique);
     setTva(medicament.tva);
-    if (medicament.prix_vente != null) {
+    setEnReserve(medicament.en_reserve);
+    setStockAvant(medicament.stock_physique ?? medicament.stock_avant ?? 0);
+    if (medicament.tva) {
+      setPrixVente("");
+    } else if (medicament.prix_vente != null) {
       setPrixVente(String(medicament.prix_vente));
+    }
+  };
+
+  const handleTvaChange = (checked: boolean) => {
+    setTva(checked);
+    if (checked) {
+      setPrixVente("");
     }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const result = ligneSchema.safeParse({
+    const payload = {
       nom,
       forme_pharmaceutique: forme,
       quantite,
       prix_achat: prixAchat === "" ? undefined : Number(prixAchat),
-      prix_vente: prixVente === "" ? null : Number(prixVente),
+      prix_vente: tva || prixVente === "" ? null : Number(prixVente),
       date_peremption: datePeremption,
       tva,
       en_reserve: enReserve,
-    });
+      stock_avant: stockAvant,
+    };
+
+    const result = ligneSchema.safeParse(payload);
 
     if (!result.success) {
       const fieldErrors: Record<string, string> = {};
@@ -82,10 +95,11 @@ export function LigneForm({
       forme_pharmaceutique: forme,
       quantite,
       prix_achat: Number(prixAchat),
-      prix_vente: prixVente === "" ? null : Number(prixVente),
+      prix_vente: tva || prixVente === "" ? null : Number(prixVente),
       date_peremption: datePeremption,
       tva,
       en_reserve: enReserve,
+      stock_avant: stockAvant,
     });
   };
 
@@ -93,7 +107,7 @@ export function LigneForm({
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div className="md:col-span-2">
-          <Label>Médicament</Label>
+          <Label>Medicament</Label>
           <div className="mt-1">
             <MedicamentCombobox
               structureId={structureId}
@@ -102,9 +116,7 @@ export function LigneForm({
               onSelect={handleSelectMedicament}
             />
           </div>
-          {errors.nom && (
-            <p className="mt-1 text-xs text-destructive">{errors.nom}</p>
-          )}
+          {errors.nom && <p className="mt-1 text-xs text-destructive">{errors.nom}</p>}
         </div>
 
         <div>
@@ -124,14 +136,17 @@ export function LigneForm({
             </Select>
           </div>
           {errors.forme_pharmaceutique && (
-            <p className="mt-1 text-xs text-destructive">
-              {errors.forme_pharmaceutique}
-            </p>
+            <p className="mt-1 text-xs text-destructive">{errors.forme_pharmaceutique}</p>
           )}
         </div>
 
         <div>
-          <Label>Quantité</Label>
+          <Label>Quantite actuelle en stock</Label>
+          <Input type="number" value={stockAvant} readOnly disabled />
+        </div>
+
+        <div>
+          <Label>Quantite ajoutee par cette livraison</Label>
           <Input
             type="number"
             min={1}
@@ -144,7 +159,7 @@ export function LigneForm({
         </div>
 
         <div>
-          <Label>Prix d&apos;achat (obligatoire)</Label>
+          <Label>Prix d&apos;achat obligatoire</Label>
           <Input
             type="number"
             min={0}
@@ -171,7 +186,7 @@ export function LigneForm({
           />
           {tva && (
             <p className="mt-1 text-xs text-muted-foreground">
-              Prix de vente désactivé lorsque la TVA est appliquée.
+              Prix de vente ignore lorsque la TVA est appliquee.
             </p>
           )}
           {errors.prix_vente && (
@@ -180,7 +195,7 @@ export function LigneForm({
         </div>
 
         <div>
-          <Label>Date de péremption</Label>
+          <Label>Date de peremption</Label>
           <Input
             type="date"
             min={today}
@@ -188,9 +203,7 @@ export function LigneForm({
             onChange={(e) => setDatePeremption(e.target.value)}
           />
           {errors.date_peremption && (
-            <p className="mt-1 text-xs text-destructive">
-              {errors.date_peremption}
-            </p>
+            <p className="mt-1 text-xs text-destructive">{errors.date_peremption}</p>
           )}
         </div>
 
@@ -200,7 +213,7 @@ export function LigneForm({
               <input
                 type="checkbox"
                 checked={tva}
-                onChange={(e) => setTva(e.target.checked)}
+                onChange={(e) => handleTvaChange(e.target.checked)}
               />
               Appliquer la TVA
             </label>
@@ -210,7 +223,7 @@ export function LigneForm({
                 checked={enReserve}
                 onChange={(e) => setEnReserve(e.target.checked)}
               />
-              Mettre en réserve
+              Mettre en reserve
             </label>
           </div>
         </div>
@@ -221,7 +234,7 @@ export function LigneForm({
           Annuler
         </Button>
         <Button type="submit">
-          {initial ? "Modifier la ligne" : "Ajouter à la livraison"}
+          {initial ? "Modifier la ligne" : "Ajouter a la livraison"}
         </Button>
       </div>
     </form>

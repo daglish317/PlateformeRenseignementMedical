@@ -14,7 +14,7 @@ export function NotificationsPage() {
   const isAdmin = user?.role === "ADMINISTRATEUR";
 
   useEffect(() => {
-    markAllRead();
+    markAllRead("notifications");
   }, [markAllRead]);
 
   return (

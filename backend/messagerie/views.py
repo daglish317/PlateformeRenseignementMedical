@@ -2,6 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
+from django.db.models import Count, Q, OuterRef, Subquery
 
 from .models import Conversation, Message
 from .serializers import (
@@ -180,28 +181,35 @@ class ListConversationsView(APIView):
             utilisateur=request.user,
         )
 
+        dernier = Message.objects.filter(
+            conversation=OuterRef("pk"),
+            est_supprime=False,
+        ).order_by("-created_at", "-pk")
+
+        conversations = conversations.annotate(
+            _dernier_contenu=Subquery(dernier.values("contenu")[:1]),
+            _dernier_expediteur=Subquery(
+                dernier.values("expediteur__nom")[:1]
+            ),
+            _dernier_created=Subquery(dernier.values("created_at")[:1]),
+            _nb_non_lus=Count(
+                "messages",
+                filter=Q(messages__is_read=False)
+                & ~Q(messages__expediteur=request.user),
+            ),
+        )
+
         conversations_avec_dernier = []
         for conv in conversations:
-            dernier = Message.objects.filter(
-                conversation=conv,
-            ).exclude(
-                est_supprime=True
-            ).select_related("expediteur").first()
-
-            non_lus = Message.objects.filter(
-                conversation=conv,
-                is_read=False,
-            ).exclude(
-                expediteur=request.user
-            ).count()
-
-            conv_data = ConversationListItemSerializer(conv, context={"request": request}).data
-            conv_data["messages_non_lus"] = non_lus
-            if dernier:
+            conv_data = ConversationListItemSerializer(
+                conv, context={"request": request}
+            ).data
+            conv_data["messages_non_lus"] = conv._nb_non_lus
+            if conv._dernier_contenu is not None:
                 conv_data["dernier_message"] = {
-                    "contenu": dernier.contenu,
-                    "expediteur_nom": dernier.expediteur.nom,
-                    "created_at": dernier.created_at,
+                    "contenu": conv._dernier_contenu,
+                    "expediteur_nom": conv._dernier_expediteur,
+                    "created_at": conv._dernier_created,
                 }
             conversations_avec_dernier.append(conv_data)
 

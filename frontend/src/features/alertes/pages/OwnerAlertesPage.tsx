@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { useOwnerStructures } from "@/features/shared/owner-structures/hooks/useOwnerStructures";
 import { useAuthStore } from "@/features/auth/store/auth-store";
+import { useNotifications } from "@/providers/notification.provider";
 import {
   useAlertes,
   useMarquerLue,
@@ -32,6 +33,7 @@ export default function OwnerAlertesPage() {
   );
   const user = useAuthStore((state) => state.user);
   const role = user?.role ?? "PROPRIETAIRE";
+  const { markAllRead } = useNotifications();
 
   const [structureId, setStructureId] = useState("");
   const structureSelectionnee = structureId || pharmacies[0]?.id || "";
@@ -50,6 +52,10 @@ export default function OwnerAlertesPage() {
     const timer = setTimeout(() => setRechercheAppliquee(recherche.trim()), 400);
     return () => clearTimeout(timer);
   }, [recherche]);
+
+  useEffect(() => {
+    markAllRead("alertes");
+  }, [markAllRead]);
 
   useEffect(() => {
     const timer = setTimeout(

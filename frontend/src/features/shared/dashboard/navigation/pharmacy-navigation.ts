@@ -10,6 +10,7 @@ import {
   ShoppingCart,
   ClipboardList,
   History,
+  CalendarClock,
   type LucideIcon,
 } from "lucide-react";
 
@@ -61,6 +62,13 @@ export const pharmacyNavigation: PharmacyNavItem[] = [
     href: "/pharmacy/inventory",
     icon: ClipboardList,
     permission: "GESTIONNAIRE",
+  },
+  {
+    label: "Peremption",
+    href: "/pharmacy/peremption",
+    icon: CalendarClock,
+    permission: "GESTIONNAIRE",
+    navItem: "stock",
   },
   {
     label: "Historique",

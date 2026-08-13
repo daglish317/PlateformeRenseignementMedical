@@ -62,8 +62,13 @@ export async function deleteLigneVente(
   return data;
 }
 
-export async function envoyerVenteCaisse(venteId: string): Promise<Vente> {
-  const { data } = await api.post(`/ventes/${venteId}/envoyer-caisse/`);
+export async function envoyerVenteCaisse(
+  venteId: string,
+  nomClient?: string
+): Promise<Vente> {
+  const { data } = await api.post(`/ventes/${venteId}/envoyer-caisse/`, {
+    nom_client: nomClient ?? "",
+  });
   return data.data;
 }
 

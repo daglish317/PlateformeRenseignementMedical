@@ -140,7 +140,24 @@ class AlertesService:
             utilisateur_concerne,
         )
         alerte.save(update_fields=["texte_recherche"])
+        AlertesService._notifier_responsables(alerte)
         return alerte
+
+    @staticmethod
+    def _notifier_responsables(alerte):
+        """Alimente le compteur de navigation sans modifier l'alerte metier."""
+        from notifications.service import NotificationService
+        from structures.permissions import get_structure_responsables
+
+        for utilisateur in get_structure_responsables(alerte.structure):
+            NotificationService.envoyer(
+                utilisateur=utilisateur,
+                titre=alerte.titre,
+                message=alerte.description,
+                type="STRUCTURE",
+                structure=alerte.structure,
+                nav_item="alertes",
+            )
 
     @staticmethod
     def _resoudre(*, structure, type_alerte, medicament_nom=None):

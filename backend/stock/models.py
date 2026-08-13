@@ -101,6 +101,9 @@ class StockMovement(models.Model):
 
     class Meta:
         ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["item", "-created_at"]),
+        ]
 
 
 class Medicament(models.Model):
@@ -168,6 +171,13 @@ class Approvisionnement(models.Model):
 
     reference_bon = models.CharField(max_length=255, blank=True, default="")
 
+    montant_total_declare = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        default=0,
+        help_text="Montant total indique sur le bon de livraison.",
+    )
+
     cree_par = models.ForeignKey(
         "utilisateurs.Utilisateur",
         on_delete=models.PROTECT,
@@ -212,6 +222,8 @@ class LigneApprovisionnement(models.Model):
         max_length=50,
         choices=FormePharmaceutique.choices,
     )
+
+    stock_avant = models.PositiveIntegerField(default=0)
 
     quantite = models.PositiveIntegerField()
 

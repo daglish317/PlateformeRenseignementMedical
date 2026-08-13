@@ -72,9 +72,13 @@ class Vente(models.Model):
         related_name="ventes_preparees",
     )
 
-    cree_le = models.DateTimeField(auto_now_add=True)
+    cree_le = models.DateTimeField(auto_now_add=True, db_index=True)
     transmise_le = models.DateTimeField(null=True, blank=True)
-    validee_le = models.DateTimeField(null=True, blank=True)
+    validee_le = models.DateTimeField(
+        null=True,
+        blank=True,
+        db_index=True,
+    )
     annulee_le = models.DateTimeField(null=True, blank=True)
     annulee_par = models.ForeignKey(
         "utilisateurs.Utilisateur",
@@ -109,6 +113,9 @@ class Vente(models.Model):
                 fields=["structure", "numero"],
                 name="unique_vente_structure_numero",
             )
+        ]
+        indexes = [
+            models.Index(fields=["etat", "date_expiration"]),
         ]
         ordering = ["-cree_le"]
         verbose_name = "Vente"
@@ -274,7 +281,7 @@ class RetourCaisse(models.Model):
         related_name="retours_caisse",
     )
 
-    effectue_le = models.DateTimeField(auto_now_add=True)
+    effectue_le = models.DateTimeField(auto_now_add=True, db_index=True)
 
     montant_total = models.DecimalField(max_digits=14, decimal_places=2, default=0)
     nb_articles = models.PositiveIntegerField(default=0)
@@ -360,7 +367,7 @@ class OperationCaisse(models.Model):
 
     adresse_ip = models.GenericIPAddressField(null=True, blank=True)
 
-    cree_le = models.DateTimeField(auto_now_add=True)
+    cree_le = models.DateTimeField(auto_now_add=True, db_index=True)
 
     class Meta:
         ordering = ["-cree_le"]

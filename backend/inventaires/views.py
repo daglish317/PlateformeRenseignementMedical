@@ -1,6 +1,6 @@
 from io import BytesIO
 
-from django.db.models import Q
+from django.db.models import Count, Q
 from django.http import FileResponse
 from rest_framework import status
 from rest_framework.response import Response
@@ -80,7 +80,21 @@ class ListeInventairesView(APIView):
 
         inventaires = Inventaire.objects.filter(
             structure_id=structure_id,
-        ).select_related("structure", "cree_par")
+        ).select_related("structure", "cree_par").annotate(
+            _nb_total=Count("lignes__id"),
+            _nb_disponibles=Count(
+                "lignes__id",
+                filter=Q(lignes__statut=StatutInventaire.DISPONIBLE),
+            ),
+            _nb_stock_faible=Count(
+                "lignes__id",
+                filter=Q(lignes__statut=StatutInventaire.STOCK_FAIBLE),
+            ),
+            _nb_ruptures=Count(
+                "lignes__id",
+                filter=Q(lignes__statut=StatutInventaire.RUPTURE),
+            ),
+        )
         return Response(
             InventaireListeSerializer(inventaires, many=True).data
         )

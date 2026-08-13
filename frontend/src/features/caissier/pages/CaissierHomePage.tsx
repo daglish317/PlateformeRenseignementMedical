@@ -73,9 +73,11 @@ export function CaissierHomePage({
   const [statut, setStatut] = useState<string>("toutes");
   const [rechercheAttente, setRechercheAttente] = useState("");
   const [recherchePaiements, setRecherchePaiements] = useState("");
+  const [datePaiements, setDatePaiements] = useState("");
 
   const rechercheAttenteDebounce = useDebouncedValue(rechercheAttente);
   const recherchePaiementsDebounce = useDebouncedValue(recherchePaiements);
+  const datePaiementsDebounce = useDebouncedValue(datePaiements);
 
   const { data, isLoading, isError, refetch } = useVentesAttente({
     statut,
@@ -89,6 +91,7 @@ export function CaissierHomePage({
   } = usePaiementsRealises(
     recherchePaiementsDebounce,
     structureId,
+    datePaiementsDebounce,
     !readonly || Boolean(structureId)
   );
   const {
@@ -242,13 +245,21 @@ export function CaissierHomePage({
         <SectionCard
           title={`Paiements réalisés (${paiements?.length ?? 0})`}
           actions={
-            <div className="relative">
-              <Search className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+              <div className="relative">
+                <Search className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  className="h-9 pl-8 sm:w-72"
+                  placeholder="Numéro, facture, client, téléphone..."
+                  value={recherchePaiements}
+                  onChange={(e) => setRecherchePaiements(e.target.value)}
+                />
+              </div>
               <Input
-                className="h-9 pl-8 sm:w-72"
-                placeholder="Numéro, facture, client, téléphone..."
-                value={recherchePaiements}
-                onChange={(e) => setRecherchePaiements(e.target.value)}
+                className="h-9 sm:w-44"
+                type="date"
+                value={datePaiements}
+                onChange={(e) => setDatePaiements(e.target.value)}
               />
             </div>
           }
@@ -286,6 +297,9 @@ export function CaissierHomePage({
                   </p>
                   <p className="text-muted-foreground">
                     Encaissée par {vente.paiement?.encaisse_par_nom ?? "—"}
+                  </p>
+                  <p className="text-muted-foreground">
+                    Bénéficiaire : {vente.nom_client || "—"}
                   </p>
                   <p className="text-lg font-semibold">
                     {formatMontant(vente.montant_total)}

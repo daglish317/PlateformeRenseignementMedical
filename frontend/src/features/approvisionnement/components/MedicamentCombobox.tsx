@@ -55,6 +55,9 @@ export function MedicamentCombobox({
         prix_vente: null,
         tva: false,
         en_reserve: false,
+        stock_avant: 0,
+        stock_physique: 0,
+        stock_disponible: 0,
         date_creation: "",
       });
     }

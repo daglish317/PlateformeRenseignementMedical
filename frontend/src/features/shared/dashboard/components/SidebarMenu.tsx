@@ -1,8 +1,8 @@
 "use client";
 
-import { memo } from "react";
+import { memo, useEffect } from "react";
 import type { LucideIcon } from "lucide-react";
-import { usePathname } from "@/i18n/navigation";
+import { usePathname, useRouter } from "@/i18n/navigation";
 import { SidebarMenuItem } from "./SidebarMenuItem";
 
 interface SidebarMenuProps {
@@ -20,6 +20,13 @@ function isActiveRoute(pathname: string, href: string): boolean {
 
 function SidebarMenuComponent({ items, collapsed, onNavigate }: SidebarMenuProps) {
   const pathname = usePathname();
+  const router = useRouter();
+
+  useEffect(() => {
+    items.forEach((item) => {
+      router.prefetch(item.href);
+    });
+  }, [items, router]);
 
   return (
     <nav className="flex flex-col gap-1">

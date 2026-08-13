@@ -26,8 +26,8 @@ export default function StockPage() {
   const [filter, setFilter] = useState("all");
 
   const filteredItems = (items ?? []).filter((item) => {
-    if (filter === "available") return item.disponible && item.quantite > item.seuil_alerte;
-    if (filter === "low") return item.disponible && item.quantite <= item.seuil_alerte && item.quantite > 0;
+    if (filter === "available") return item.disponible && item.quantite >= 10;
+    if (filter === "low") return item.disponible && item.quantite > 0 && item.quantite < 10;
     if (filter === "out") return !item.disponible || item.quantite === 0;
     return true;
   });

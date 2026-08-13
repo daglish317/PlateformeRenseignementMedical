@@ -1,4 +1,3 @@
-"use client";
 import { PageTitle } from "@/features/shared/dashboard/components/PageTitle";
 
 export default function HospitalStatisticsPage() {

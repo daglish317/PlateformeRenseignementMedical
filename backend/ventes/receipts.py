@@ -83,6 +83,7 @@ def generer_reçu_pdf(vente):
         [
             ["Reçu n°", facture.numero],
             ["Vente n°", vente.numero],
+            ["Bénéficiaire", vente.nom_client or "Non renseigné"],
             ["Date", f"{vente.validee_le:%d/%m/%Y}" if vente.validee_le else ""],
             ["Heure", f"{vente.validee_le:%H:%M}" if vente.validee_le else ""],
         ],
