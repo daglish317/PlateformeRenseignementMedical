@@ -473,7 +473,7 @@ GESTIONNAIRE
 CAISSIER
 └── Modules autorisés
 
-Le Gestionnaire et le Caissier ne doivent jamais avoir accès à Messagerie.
+Le Gestionnaire et le Caissier ne doivent jamais avoir accès à Messagerie seul le proprietaire et ladministrateur santeprox ainsi que le gestionnaire hopital auront droit au module messagerie.
 
 17. Important : ne pas confondre rôle et permission
 

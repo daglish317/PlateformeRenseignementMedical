@@ -20,12 +20,14 @@ from .serializers import (
     ProprietaireStructureCreateSerializer,
     StructureMapSerializer,
     UpdateStructureMemberStatusSerializer,
+    MemberPermissionsUpdateSerializer,
 )
 
 from .services import StructureService, StructureGeoService
 from utilisateurs.decorators import (
     admin_required,
     gestionnaire_required,
+    operational_member_required,
     proprietaire_required,
     responsable_structure_required,
 )
@@ -33,6 +35,12 @@ from .permissions import (
     assert_gestionnaire_owns_structure,
     assert_proprietaire_owns_structure,
     get_user_structure,
+)
+from .permission_registry import serialize_permission_registry
+from .permission_service import (
+    get_member_permissions_map,
+    get_user_permissions_response,
+    replace_member_permissions,
 )
 from .models import (
     EquipeStructure,
@@ -453,12 +461,12 @@ class StructureMapView(APIView):
 
 class MyStructureView(APIView):
 
-    @responsable_structure_required
+    @operational_member_required
     def get(self, request):
         structure = get_user_structure(request.user)
         if not structure:
             return Response(
-                {"detail": "Aucune structure associÃ©e Ã  votre compte."},
+                {"detail": "Aucune structure associée à votre compte."},
                 status=status.HTTP_404_NOT_FOUND,
             )
         return Response(StructureDetailSerializer(structure).data)
@@ -657,3 +665,98 @@ class StructureTeamMemberStatusView(APIView):
             },
             status=status.HTTP_200_OK,
         )
+
+
+class PermissionRegistryView(APIView):
+
+    @proprietaire_required
+    def get(self, request):
+        return Response({
+            "modules": serialize_permission_registry(),
+        })
+
+
+class MyPermissionsView(APIView):
+
+    @operational_member_required
+    def get(self, request):
+        structure = get_user_structure(request.user)
+        if not structure:
+            return Response(
+                {"detail": "Aucune structure associée à votre compte."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        return Response(get_user_permissions_response(request.user, structure.id))
+
+
+class MemberPermissionsView(APIView):
+
+    @proprietaire_required
+    def get(self, request, member_id):
+        try:
+            membership = (
+                EquipeStructure.objects.select_related("structure", "utilisateur")
+                .get(id=member_id, structure__est_supprimee=False)
+            )
+        except EquipeStructure.DoesNotExist:
+            return Response(
+                {"detail": "Membre introuvable."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        assert_proprietaire_owns_structure(request.user, membership.structure_id)
+
+        if membership.role not in {
+            RoleEquipeStructure.GESTIONNAIRE,
+            RoleEquipeStructure.CAISSIER,
+        }:
+            return Response(
+                {"detail": "Les permissions ne s'appliquent qu'aux gestionnaires et caissiers."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        permissions = get_member_permissions_map(membership)
+        return Response({
+            "member": EquipeStructureSerializer(membership).data,
+            "structure_id": str(membership.structure_id),
+            "permissions": permissions,
+            "registry": serialize_permission_registry(),
+        })
+
+    @proprietaire_required
+    def put(self, request, member_id):
+        serializer = MemberPermissionsUpdateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        try:
+            membership = (
+                EquipeStructure.objects.select_related("structure", "utilisateur")
+                .get(id=member_id, structure__est_supprimee=False)
+            )
+        except EquipeStructure.DoesNotExist:
+            return Response(
+                {"detail": "Membre introuvable."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        assert_proprietaire_owns_structure(request.user, membership.structure_id)
+
+        if membership.role not in {
+            RoleEquipeStructure.GESTIONNAIRE,
+            RoleEquipeStructure.CAISSIER,
+        }:
+            return Response(
+                {"detail": "Les permissions ne s'appliquent qu'aux gestionnaires et caissiers."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        replace_member_permissions(
+            membership,
+            serializer.validated_data["permissions"],
+        )
+
+        return Response({
+            "message": "Permissions mises à jour.",
+            "member": EquipeStructureSerializer(membership).data,
+            "permissions": get_member_permissions_map(membership),
+        })

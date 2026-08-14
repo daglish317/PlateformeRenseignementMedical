@@ -25,11 +25,11 @@ from historique.services import HistoriqueService
 
 from structures.models import Structure
 from structures.permissions import (
-    assert_gestionnaire_owns_structure,
+    assert_operational_access,
     assert_structure_autorise_stock_direct,
-    assert_proprietaire_owns_structure,
 )
-from utilisateurs.decorators import gestionnaire_required, responsable_structure_required
+from structures.permission_registry import ActionPermission, ModuleOperationnel
+from utilisateurs.decorators import operational_member_required
 
 
 def _parse_csv(file):
@@ -69,12 +69,29 @@ def _parse_excel(file):
 class CreateStockView(APIView):
     """Creation directe d'un article de stock (interdite pour les pharmacies)."""
 
-    @responsable_structure_required
+    @operational_member_required
     def post(self, request):
 
         structure_id = request.data.get("structure_id")
+        if not structure_id:
+            return Response(
+                {"detail": "structure_id requis"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        assert_operational_access(
+            request.user,
+            structure_id,
+            ModuleOperationnel.STOCK,
+            ActionPermission.MODIFIER,
+        )
         assert_structure_autorise_stock_direct(request.user, structure_id)
-        structure = Structure.objects.get(id=structure_id)
+        try:
+            structure = Structure.objects.get(id=structure_id)
+        except (Structure.DoesNotExist, ValueError):
+            return Response(
+                {"detail": "Structure introuvable"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
 
         nom = request.data.get("nom")
         if not nom:
@@ -100,17 +117,19 @@ class CreateStockView(APIView):
 
 class ListStockStructureView(APIView):
 
-    @responsable_structure_required
+    @operational_member_required
     def get(self, request, structure_id):
 
-        assert_gestionnaire_owns_structure(request.user, structure_id)
-        items = StockItem.objects.filter(structure_id=structure_id)
+        assert_operational_access(
+            request.user, structure_id, ModuleOperationnel.STOCK, ActionPermission.CONSULTER
+        )
+        items = StockItem.objects.filter(structure_id=structure_id).order_by("nom")
         return Response(StockSerializer(items, many=True).data)
 
 
 class DeleteStockView(APIView):
 
-    @responsable_structure_required
+    @operational_member_required
     def delete(self, request, pk):
 
         try:
@@ -121,7 +140,9 @@ class DeleteStockView(APIView):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        assert_proprietaire_owns_structure(request.user, item.structure_id)
+        assert_operational_access(
+            request.user, item.structure_id, ModuleOperationnel.STOCK, ActionPermission.SUPPRIMER
+        )
 
         HistoriqueService.enregistrer(
             structure=item.structure,
@@ -143,12 +164,19 @@ class DeleteStockView(APIView):
 
 class RetirerStockView(APIView):
 
-    @responsable_structure_required
+    @operational_member_required
     def post(self, request, pk):
 
-        item = StockItem.objects.select_related("structure").get(id=pk)
-        assert_gestionnaire_owns_structure(request.user, item.structure_id)
-
+        try:
+            item = StockItem.objects.select_related("structure").get(id=pk)
+        except StockItem.DoesNotExist:
+            return Response(
+                {"detail": "Article introuvable"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        assert_operational_access(
+            request.user, item.structure_id, ModuleOperationnel.STOCK, ActionPermission.MODIFIER
+        )
         try:
             item = StockService.retirer_stock(
                 item=item,
@@ -156,42 +184,54 @@ class RetirerStockView(APIView):
                 motif=request.data.get("motif", ""),
             )
         except ValueError as e:
-            return Response({"detail": str(e)}, status=400)
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response(StockSerializer(item).data)
 
 
 class StockMovementsView(APIView):
 
-    @responsable_structure_required
+    @operational_member_required
     def get(self, request, pk):
 
-        item = StockItem.objects.select_related("structure").get(id=pk)
-        assert_gestionnaire_owns_structure(request.user, item.structure_id)
+        try:
+            item = StockItem.objects.select_related("structure").get(id=pk)
+        except StockItem.DoesNotExist:
+            return Response(
+                {"detail": "Article introuvable"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        assert_operational_access(
+            request.user, item.structure_id, ModuleOperationnel.STOCK, ActionPermission.CONSULTER
+        )
         mouvements = StockMovement.objects.filter(item=item)
         return Response(StockMovementSerializer(mouvements, many=True).data)
 
 
 class StockAlertesView(APIView):
 
-    @responsable_structure_required
+    @operational_member_required
     def get(self, request, structure_id):
 
-        assert_gestionnaire_owns_structure(request.user, structure_id)
+        assert_operational_access(
+            request.user, structure_id, ModuleOperationnel.STOCK, ActionPermission.CONSULTER
+        )
         structure = Structure.objects.get(id=structure_id)
-        items = StockService.items_en_alerte(structure)
+        items = StockService.items_en_alerte(structure).order_by("nom")
         return Response(StockSerializer(items, many=True).data)
 
 
 class ProduitsPeremptionView(APIView):
 
-    @responsable_structure_required
+    @operational_member_required
     def get(self, request, structure_id):
 
         from datetime import timedelta
         from .models import LigneApprovisionnement
 
-        assert_gestionnaire_owns_structure(request.user, structure_id)
+        assert_operational_access(
+            request.user, structure_id, ModuleOperationnel.PEREMPTION, ActionPermission.CONSULTER
+        )
         limite = timezone.localdate() + timedelta(days=92)
         lignes = (
             LigneApprovisionnement.objects.filter(
@@ -207,7 +247,7 @@ class ProduitsPeremptionView(APIView):
 class MedicamentListView(APIView):
     """Recherche d'autocomplétion pour le formulaire d'approvisionnement."""
 
-    @responsable_structure_required
+    @operational_member_required
     def get(self, request):
 
         structure_id = request.query_params.get("structure_id")
@@ -216,7 +256,9 @@ class MedicamentListView(APIView):
                 {"detail": "structure_id requis"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        assert_gestionnaire_owns_structure(request.user, structure_id)
+        assert_operational_access(
+            request.user, structure_id, ModuleOperationnel.APPROVISIONNEMENT, ActionPermission.RECHERCHER
+        )
 
         queryset = Medicament.objects.filter(structure_id=structure_id)
         vendable = (
@@ -259,7 +301,7 @@ class MedicamentListView(APIView):
 
 class ApprovisionnementListCreateView(APIView):
 
-    @responsable_structure_required
+    @operational_member_required
     def get(self, request):
 
         structure_id = request.query_params.get("structure_id")
@@ -268,7 +310,9 @@ class ApprovisionnementListCreateView(APIView):
                 {"detail": "structure_id requis"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        assert_gestionnaire_owns_structure(request.user, structure_id)
+        assert_operational_access(
+            request.user, structure_id, ModuleOperationnel.APPROVISIONNEMENT, ActionPermission.CONSULTER
+        )
 
         queryset = (
             Approvisionnement.objects.filter(structure_id=structure_id)
@@ -277,7 +321,7 @@ class ApprovisionnementListCreateView(APIView):
         )
         return Response(ApprovisionnementSerializer(queryset, many=True).data)
 
-    @gestionnaire_required
+    @operational_member_required
     def post(self, request):
 
         structure_id = request.data.get("structure_id")
@@ -286,7 +330,9 @@ class ApprovisionnementListCreateView(APIView):
                 {"detail": "structure_id requis"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        assert_gestionnaire_owns_structure(request.user, structure_id)
+        assert_operational_access(
+            request.user, structure_id, ModuleOperationnel.APPROVISIONNEMENT, ActionPermission.CREER
+        )
         structure = Structure.objects.get(id=structure_id)
 
         serializer = ApprovisionnementCreateSerializer(
@@ -307,7 +353,7 @@ class ApprovisionnementListCreateView(APIView):
 
 class ApprovisionnementDetailView(APIView):
 
-    @responsable_structure_required
+    @operational_member_required
     def get(self, request, pk):
 
         try:
@@ -322,13 +368,15 @@ class ApprovisionnementDetailView(APIView):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        assert_gestionnaire_owns_structure(request.user, appro.structure_id)
+        assert_operational_access(
+            request.user, appro.structure_id, ModuleOperationnel.APPROVISIONNEMENT, ActionPermission.CONSULTER
+        )
         return Response(ApprovisionnementSerializer(appro).data)
 
 
 class ApprovisionnementPDFView(APIView):
 
-    @responsable_structure_required
+    @operational_member_required
     def get(self, request, pk):
         try:
             appro = (
@@ -342,7 +390,9 @@ class ApprovisionnementPDFView(APIView):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        assert_gestionnaire_owns_structure(request.user, appro.structure_id)
+        assert_operational_access(
+            request.user, appro.structure_id, ModuleOperationnel.APPROVISIONNEMENT, ActionPermission.IMPRIMER
+        )
         pdf = BytesIO(generer_approvisionnement_pdf(appro))
         nom = f"approvisionnement_{appro.numero}.pdf".replace(" ", "_")
         return FileResponse(
@@ -355,7 +405,7 @@ class ApprovisionnementPDFView(APIView):
 
 class ApprovisionnementExcelView(APIView):
 
-    @responsable_structure_required
+    @operational_member_required
     def get(self, request, pk):
         try:
             appro = (
@@ -369,7 +419,9 @@ class ApprovisionnementExcelView(APIView):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        assert_gestionnaire_owns_structure(request.user, appro.structure_id)
+        assert_operational_access(
+            request.user, appro.structure_id, ModuleOperationnel.APPROVISIONNEMENT, ActionPermission.EXPORTER
+        )
         excel = BytesIO(generer_approvisionnement_excel(appro))
         nom = f"approvisionnement_{appro.numero}.xlsx".replace(" ", "_")
         return FileResponse(
@@ -386,28 +438,53 @@ class ApprovisionnementExcelView(APIView):
 class EntreeStockView(APIView):
     """Entree de stock directe (interdite pour les pharmacies)."""
 
-    @responsable_structure_required
+    @operational_member_required
     def post(self, request, pk):
 
-        item = StockItem.objects.select_related("structure").get(id=pk)
-        assert_structure_autorise_stock_direct(request.user, item.structure_id)
-
-        item = StockService.entree_stock(
-            item=item,
-            quantite=int(request.data.get("quantite", 0)),
-            motif=request.data.get("motif", ""),
+        try:
+            item = StockItem.objects.select_related("structure").get(id=pk)
+        except StockItem.DoesNotExist:
+            return Response(
+                {"detail": "Article introuvable"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        assert_operational_access(
+            request.user, item.structure_id, ModuleOperationnel.STOCK, ActionPermission.MODIFIER
         )
+        assert_structure_autorise_stock_direct(request.user, item.structure_id)
+        try:
+            item = StockService.entree_stock(
+                item=item,
+                quantite=int(request.data.get("quantite", 0)),
+                motif=request.data.get("motif", ""),
+            )
+        except ValueError as e:
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         return Response(StockSerializer(item).data)
 
 
 class ImportMedicamentView(APIView):
     """Import de medicaments via fichier (interdit pour les pharmacies)."""
 
-    @responsable_structure_required
+    @operational_member_required
     def post(self, request):
         structure_id = request.data.get("structure_id")
+        if not structure_id:
+            return Response(
+                {"detail": "structure_id requis"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        assert_operational_access(
+            request.user, structure_id, ModuleOperationnel.STOCK, ActionPermission.MODIFIER
+        )
         assert_structure_autorise_stock_direct(request.user, structure_id)
-        structure = Structure.objects.get(id=structure_id)
+        try:
+            structure = Structure.objects.get(id=structure_id)
+        except (Structure.DoesNotExist, ValueError):
+            return Response(
+                {"detail": "Structure introuvable"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
 
         file = request.FILES.get("file")
         if not file:
@@ -468,11 +545,25 @@ class ImportMedicamentView(APIView):
 class ImportStockView(APIView):
     """Import generique de stock via fichier (interdit pour les pharmacies)."""
 
-    @responsable_structure_required
+    @operational_member_required
     def post(self, request):
         structure_id = request.data.get("structure_id")
+        if not structure_id:
+            return Response(
+                {"detail": "structure_id requis"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        assert_operational_access(
+            request.user, structure_id, ModuleOperationnel.STOCK, ActionPermission.MODIFIER
+        )
         assert_structure_autorise_stock_direct(request.user, structure_id)
-        structure = Structure.objects.get(id=structure_id)
+        try:
+            structure = Structure.objects.get(id=structure_id)
+        except (Structure.DoesNotExist, ValueError):
+            return Response(
+                {"detail": "Structure introuvable"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
 
         file = request.FILES.get("file")
         if not file:

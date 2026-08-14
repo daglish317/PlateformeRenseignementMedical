@@ -1,5 +1,13 @@
+import type {
+  ActionPermission,
+  ModuleOperationnel,
+  PermissionRegistryResponse,
+} from "@/features/shared/dashboard/types/permissions";
+
 export type StructureMemberRole = "PROPRIETAIRE" | "GESTIONNAIRE" | "CAISSIER";
 export type StructureMemberStatus = "INVITE" | "ACTIF" | "SUSPENDU";
+
+export type TeamPermissionMap = Partial<Record<ModuleOperationnel, ActionPermission[]>>;
 
 export type StructureTeamMember = {
   id: string;
@@ -23,6 +31,18 @@ export type StructureTeamResponse = {
   results: StructureTeamMember[];
 };
 
+export type InviteStructureMemberResponse = {
+  message: string;
+  data: StructureTeamMember;
+};
+
+export type TeamPermissionsResponse = {
+  member: StructureTeamMember;
+  structure_id: string;
+  permissions: TeamPermissionMap;
+  registry: PermissionRegistryResponse["modules"];
+};
+
 export type InviteStructureMemberPayload = {
   structure_id: string;
   nom: string;
@@ -33,4 +53,8 @@ export type InviteStructureMemberPayload = {
 export type UpdateStructureMemberStatusPayload = {
   memberId: string;
   action: "ACTIVATE" | "DEACTIVATE";
+};
+
+export type UpdateTeamPermissionsPayload = {
+  permissions: TeamPermissionMap;
 };

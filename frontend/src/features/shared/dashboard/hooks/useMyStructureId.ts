@@ -6,8 +6,8 @@ import {
   useMyStructure,
 } from "@/features/shared/structure-profile/hooks/useMyStructure";
 
-export function useMyStructureId() {
-  const myStructure = useMyStructure();
+export function useMyStructureId(enabled = true) {
+  const myStructure = useMyStructure(enabled);
 
   return useQuery({
     queryKey: ["my-structure-id"],

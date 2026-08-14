@@ -3,9 +3,29 @@ from django.db import transaction
 from .models import Conversation, Message
 from core.events.dispatcher import EventDispatcher
 from core.events.registry import EventTypes
+from structures.models import EquipeStructure, RoleEquipeStructure, StatutEquipeStructure, Structure
 
 
 class MessagerieService:
+
+    @staticmethod
+    def peut_acceder_structure(*, user, structure):
+        if structure is None:
+            return False
+        if user.role == "ADMINISTRATEUR":
+            return True
+        if user.role not in {"PROPRIETAIRE", "GESTIONNAIRE"}:
+            return False
+        return EquipeStructure.objects.filter(
+            utilisateur=user,
+            structure=structure,
+            role__in={
+                RoleEquipeStructure.PROPRIETAIRE,
+                RoleEquipeStructure.GESTIONNAIRE,
+            },
+            statut=StatutEquipeStructure.ACTIF,
+            structure__est_supprimee=False,
+        ).exists()
 
     @staticmethod
     @transaction.atomic
@@ -59,16 +79,10 @@ class MessagerieService:
 
     @staticmethod
     def peut_acceder(*, user, conversation):
-        if user.role not in ("ADMINISTRATEUR", "GESTIONNAIRE"):
-            return False
-        structure = conversation.structure
-        if not structure:
-            return user.role == "ADMINISTRATEUR"
-        if user.role == "ADMINISTRATEUR":
-            return True
-        if user.role == "GESTIONNAIRE":
-            return structure.gestionnaire_id == user.id
-        return False
+        return MessagerieService.peut_acceder_structure(
+            user=user,
+            structure=conversation.structure,
+        )
 
     @staticmethod
     def lister_messages(conversation, page=1, page_size=50):
@@ -80,32 +94,35 @@ class MessagerieService:
 
     @staticmethod
     def conversations_utilisateur(*, utilisateur):
-        if utilisateur.role == "ADMINISTRATEUR":
-            from structures.models import Structure
-            active_structures = Structure.objects.filter(
-                statut="ACTIVE",
-                est_supprimee=False,
-            )
-            existing_ids = Conversation.objects.filter(
-                structure__in=active_structures,
-            ).values_list("structure_id", flat=True)
-            manquantes = active_structures.exclude(id__in=existing_ids)
-            if manquantes.exists():
-                Conversation.objects.bulk_create(
-                    [Conversation(structure=s) for s in manquantes]
-                )
-
-            conversations = Conversation.objects.filter(
-                structure__isnull=False,
-                structure__statut="ACTIVE",
-                structure__est_supprimee=False,
-            ).select_related("structure", "structure__gestionnaire")
-        elif utilisateur.role == "GESTIONNAIRE":
-            conversations = Conversation.objects.filter(
-                structure__gestionnaire=utilisateur,
-            ).select_related("structure", "structure__gestionnaire")
-        else:
+        if utilisateur.role not in {"PROPRIETAIRE", "GESTIONNAIRE", "ADMINISTRATEUR"}:
             return Conversation.objects.none()
+
+        if utilisateur.role == "ADMINISTRATEUR":
+            return Conversation.objects.select_related("structure", "structure__gestionnaire").order_by("-updated_at")
+
+        active_structures = Structure.objects.filter(
+            equipe__utilisateur=utilisateur,
+            equipe__role__in={
+                RoleEquipeStructure.PROPRIETAIRE,
+                RoleEquipeStructure.GESTIONNAIRE,
+            },
+            equipe__statut=StatutEquipeStructure.ACTIF,
+            statut="ACTIVE",
+            est_supprimee=False,
+        ).distinct()
+
+        existing_ids = Conversation.objects.filter(
+            structure__in=active_structures,
+        ).values_list("structure_id", flat=True)
+        manquantes = active_structures.exclude(id__in=existing_ids)
+        if manquantes.exists():
+            Conversation.objects.bulk_create(
+                [Conversation(structure=s) for s in manquantes]
+            )
+
+        conversations = Conversation.objects.filter(
+            structure__in=active_structures,
+        ).select_related("structure", "structure__gestionnaire")
 
         return conversations.order_by("-updated_at")
 

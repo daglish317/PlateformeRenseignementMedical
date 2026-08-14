@@ -7,6 +7,7 @@ import {
   History,
   LayoutDashboard,
   Settings,
+  MessagesSquare,
 } from "lucide-react";
 import type { DashboardNavItem } from "../types";
 
@@ -52,6 +53,12 @@ export const ownerNavigation: DashboardNavItem[] = [
     label: "Alertes",
     href: "/owner/alertes",
     icon: Bell,
+    permission: "PROPRIETAIRE",
+  },
+  {
+    label: "Messagerie",
+    href: "/owner/chat",
+    icon: MessagesSquare,
     permission: "PROPRIETAIRE",
   },
   {

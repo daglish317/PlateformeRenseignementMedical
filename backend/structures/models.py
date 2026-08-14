@@ -196,6 +196,37 @@ class EquipeStructure(models.Model):
         return f"{self.utilisateur} - {self.structure} ({self.role})"
 
 
+class MembrePermission(models.Model):
+    """Permission granulaire : structure + membre + module + action."""
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+
+    equipe = models.ForeignKey(
+        EquipeStructure,
+        on_delete=models.CASCADE,
+        related_name="permissions",
+    )
+
+    module = models.CharField(max_length=40, db_index=True)
+    action = models.CharField(max_length=40, db_index=True)
+
+    class Meta:
+        verbose_name = "Permission membre"
+        verbose_name_plural = "Permissions membres"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["equipe", "module", "action"],
+                name="unique_membre_module_action",
+            )
+        ]
+        indexes = [
+            models.Index(fields=["equipe", "module"]),
+        ]
+
+    def __str__(self):
+        return f"{self.equipe} - {self.module}.{self.action}"
+
+
 class TypeService(models.TextChoices):
     MALADIE = "MALADIE", "Maladie"
     ANALYSE = "ANALYSE", "Analyse"

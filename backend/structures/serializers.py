@@ -393,3 +393,15 @@ class ProprietaireStructureCreateSerializer(serializers.Serializer):
 
     def validate_telephone(self, value):
         return value.strip()
+
+
+class MemberPermissionsUpdateSerializer(serializers.Serializer):
+    permissions = serializers.DictField(
+        child=serializers.ListField(child=serializers.CharField()),
+    )
+
+    def validate_permissions(self, value):
+        from structures.permission_service import validate_permissions_payload
+
+        return validate_permissions_payload(value)
+

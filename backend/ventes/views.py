@@ -9,17 +9,14 @@ from rest_framework.views import APIView
 
 from structures.models import Structure
 from structures.permissions import (
-    assert_caissier_works_in_structure,
-    assert_gestionnaire_owns_structure,
+    assert_operational_access,
     assert_proprietaire_owns_structure,
     get_user_structure,
 )
+from structures.permission_registry import ActionPermission, ModuleOperationnel
 from utilisateurs.decorators import (
-    caissier_ou_proprietaire_required,
-    caissier_required,
-    gestionnaire_required,
+    operational_member_required,
     proprietaire_required,
-    responsable_structure_required,
 )
 
 from .models import EtatVente, Facture, OperationCaisse, RetourCaisse, Vente
@@ -61,11 +58,12 @@ def _erreur_metier(e):
 
 
 def _assert_consultation_caisse(user, structure_id):
-    """Autorise le caissier (actif) et le proprietaire (lecture seule)."""
-    if user.role == "CAISSIER":
-        assert_caissier_works_in_structure(user, structure_id)
-    else:
-        assert_proprietaire_owns_structure(user, structure_id)
+    assert_operational_access(
+        user,
+        structure_id,
+        ModuleOperationnel.CAISSE,
+        ActionPermission.CONSULTER,
+    )
 
 
 def _get_structure_caisse(request):
@@ -90,7 +88,6 @@ def _get_structure_caisse(request):
             {"detail": "Aucune structure associÃ©e Ã  votre compte."},
             status=status.HTTP_404_NOT_FOUND,
         )
-    assert_caissier_works_in_structure(request.user, structure.id)
     return structure, None
 
 
@@ -124,7 +121,7 @@ def _filtre_date_paiement(queryset, date_paiement):
 class CreerVenteView(APIView):
     """Crée automatiquement une nouvelle vente à l'ouverture du module."""
 
-    @gestionnaire_required
+    @operational_member_required
     def post(self, request):
         structure_id = request.data.get("structure_id")
         if not structure_id:
@@ -132,7 +129,12 @@ class CreerVenteView(APIView):
                 {"detail": "structure_id requis."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        assert_gestionnaire_owns_structure(request.user, structure_id)
+        assert_operational_access(
+            request.user,
+            structure_id,
+            ModuleOperationnel.VENTE,
+            ActionPermission.CREER,
+        )
         structure = Structure.objects.get(id=structure_id)
 
         vente = VenteService.creer_vente(
@@ -149,7 +151,7 @@ class CreerVenteView(APIView):
 class VentePreparationView(APIView):
     """Retourne la vente en préparation du gestionnaire (si elle existe)."""
 
-    @gestionnaire_required
+    @operational_member_required
     def get(self, request):
         structure_id = request.query_params.get("structure_id")
         if not structure_id:
@@ -157,7 +159,12 @@ class VentePreparationView(APIView):
                 {"detail": "structure_id requis."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        assert_gestionnaire_owns_structure(request.user, structure_id)
+        assert_operational_access(
+            request.user,
+            structure_id,
+            ModuleOperationnel.VENTE,
+            ActionPermission.CONSULTER,
+        )
 
         vente = (
             Vente.objects.select_related("prepare_par")
@@ -179,7 +186,7 @@ class VentePreparationView(APIView):
 
 class AjouterLigneVenteView(APIView):
 
-    @gestionnaire_required
+    @operational_member_required
     def post(self, request, pk):
         vente = _get_vente(pk)
         if not vente:
@@ -187,7 +194,12 @@ class AjouterLigneVenteView(APIView):
                 {"detail": "Vente introuvable."},
                 status=status.HTTP_404_NOT_FOUND,
             )
-        assert_gestionnaire_owns_structure(request.user, vente.structure_id)
+        assert_operational_access(
+            request.user,
+            vente.structure_id,
+            ModuleOperationnel.VENTE,
+            ActionPermission.MODIFIER,
+        )
 
         serializer = LigneVenteInputSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -207,7 +219,7 @@ class AjouterLigneVenteView(APIView):
 
 class ModifierLigneVenteView(APIView):
 
-    @gestionnaire_required
+    @operational_member_required
     def patch(self, request, pk, ligne_id):
         vente = _get_vente(pk)
         if not vente:
@@ -215,7 +227,12 @@ class ModifierLigneVenteView(APIView):
                 {"detail": "Vente introuvable."},
                 status=status.HTTP_404_NOT_FOUND,
             )
-        assert_gestionnaire_owns_structure(request.user, vente.structure_id)
+        assert_operational_access(
+            request.user,
+            vente.structure_id,
+            ModuleOperationnel.VENTE,
+            ActionPermission.MODIFIER,
+        )
 
         serializer = LigneVenteInputSerializer(
             data=request.data,
@@ -241,7 +258,7 @@ class ModifierLigneVenteView(APIView):
 
 class SupprimerLigneVenteView(APIView):
 
-    @gestionnaire_required
+    @operational_member_required
     def delete(self, request, pk, ligne_id):
         vente = _get_vente(pk)
         if not vente:
@@ -249,7 +266,12 @@ class SupprimerLigneVenteView(APIView):
                 {"detail": "Vente introuvable."},
                 status=status.HTTP_404_NOT_FOUND,
             )
-        assert_gestionnaire_owns_structure(request.user, vente.structure_id)
+        assert_operational_access(
+            request.user,
+            vente.structure_id,
+            ModuleOperationnel.VENTE,
+            ActionPermission.MODIFIER,
+        )
 
         try:
             vente = VenteService.supprimer_ligne(vente=vente, ligne_id=ligne_id)
@@ -262,7 +284,7 @@ class SupprimerLigneVenteView(APIView):
 
 class EnvoyerVenteCaisseView(APIView):
 
-    @gestionnaire_required
+    @operational_member_required
     def post(self, request, pk):
         vente = _get_vente(pk)
         if not vente:
@@ -270,7 +292,12 @@ class EnvoyerVenteCaisseView(APIView):
                 {"detail": "Vente introuvable."},
                 status=status.HTTP_404_NOT_FOUND,
             )
-        assert_gestionnaire_owns_structure(request.user, vente.structure_id)
+        assert_operational_access(
+            request.user,
+            vente.structure_id,
+            ModuleOperationnel.VENTE,
+            ActionPermission.MODIFIER,
+        )
 
         try:
             vente = VenteService.envoyer_a_la_caisse(
@@ -293,7 +320,7 @@ class EnvoyerVenteCaisseView(APIView):
 class AnnulerVenteView(APIView):
     """Annulation d'une vente encore en préparation par le gestionnaire."""
 
-    @gestionnaire_required
+    @operational_member_required
     def post(self, request, pk):
         vente = _get_vente(pk)
         if not vente:
@@ -301,7 +328,12 @@ class AnnulerVenteView(APIView):
                 {"detail": "Vente introuvable."},
                 status=status.HTTP_404_NOT_FOUND,
             )
-        assert_gestionnaire_owns_structure(request.user, vente.structure_id)
+        assert_operational_access(
+            request.user,
+            vente.structure_id,
+            ModuleOperationnel.VENTE,
+            ActionPermission.ANNULER,
+        )
 
         serializer = AnnulationSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -328,7 +360,7 @@ class AnnulerVenteView(APIView):
 class HistoriqueVentesView(APIView):
     """Historique complet des ventes d'une structure (traçabilité)."""
 
-    @responsable_structure_required
+    @operational_member_required
     def get(self, request):
         structure_id = request.query_params.get("structure_id")
         if not structure_id:
@@ -336,7 +368,12 @@ class HistoriqueVentesView(APIView):
                 {"detail": "structure_id requis."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        assert_gestionnaire_owns_structure(request.user, structure_id)
+        assert_operational_access(
+            request.user,
+            structure_id,
+            ModuleOperationnel.HISTORIQUE,
+            ActionPermission.CONSULTER,
+        )
 
         ventes = (
             Vente.objects.filter(structure_id=structure_id)
@@ -379,11 +416,18 @@ class VentesCaisseAttenteView(APIView):
     Consultation autorisée au caissier et au propriétaire.
     """
 
-    @caissier_ou_proprietaire_required
+    @operational_member_required
     def get(self, request):
         structure, error = _get_structure_caisse(request)
         if error:
             return error
+
+        assert_operational_access(
+            request.user,
+            structure.id,
+            ModuleOperationnel.CAISSE,
+            ActionPermission.CONSULTER,
+        )
 
         statut = request.query_params.get("statut", "toutes")
         etats_par_statut = {
@@ -426,7 +470,7 @@ class VentesCaisseAttenteView(APIView):
 class OuvrirVenteCaisseView(APIView):
     """Le caissier ouvre une vente : elle passe à l'état « En cours »."""
 
-    @caissier_required
+    @operational_member_required
     def post(self, request, pk):
         vente = _get_vente(pk)
         if not vente:
@@ -434,7 +478,12 @@ class OuvrirVenteCaisseView(APIView):
                 {"detail": "Vente introuvable."},
                 status=status.HTTP_404_NOT_FOUND,
             )
-        assert_caissier_works_in_structure(request.user, vente.structure_id)
+        assert_operational_access(
+            request.user,
+            vente.structure_id,
+            ModuleOperationnel.CAISSE,
+            ActionPermission.MODIFIER,
+        )
 
         try:
             vente = VenteService.ouvrir_vente_caisse(
@@ -456,7 +505,7 @@ class OuvrirVenteCaisseView(APIView):
 
 class VenteCaisseDetailView(APIView):
 
-    @caissier_ou_proprietaire_required
+    @operational_member_required
     def get(self, request, pk):
         vente = _get_vente(pk)
         if not vente:
@@ -470,7 +519,7 @@ class VenteCaisseDetailView(APIView):
 
 class ValiderPaiementView(APIView):
 
-    @caissier_required
+    @operational_member_required
     def post(self, request, pk):
         vente = _get_vente(pk)
         if not vente:
@@ -478,7 +527,12 @@ class ValiderPaiementView(APIView):
                 {"detail": "Vente introuvable."},
                 status=status.HTTP_404_NOT_FOUND,
             )
-        assert_caissier_works_in_structure(request.user, vente.structure_id)
+        assert_operational_access(
+            request.user,
+            vente.structure_id,
+            ModuleOperationnel.CAISSE,
+            ActionPermission.VALIDER_PAIEMENT,
+        )
 
         serializer = PaiementCreateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -506,7 +560,7 @@ class ValiderPaiementView(APIView):
 
 class AnnulerVenteCaisseView(APIView):
 
-    @caissier_required
+    @operational_member_required
     def post(self, request, pk):
         vente = _get_vente(pk)
         if not vente:
@@ -514,7 +568,12 @@ class AnnulerVenteCaisseView(APIView):
                 {"detail": "Vente introuvable."},
                 status=status.HTTP_404_NOT_FOUND,
             )
-        assert_caissier_works_in_structure(request.user, vente.structure_id)
+        assert_operational_access(
+            request.user,
+            vente.structure_id,
+            ModuleOperationnel.CAISSE,
+            ActionPermission.REFUSER_PAIEMENT,
+        )
 
         serializer = AnnulationSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -541,11 +600,18 @@ class AnnulerVenteCaisseView(APIView):
 class PaiementsRealisesView(APIView):
     """Historique des ventes encaissées (consultation, reçu, réimpression)."""
 
-    @caissier_ou_proprietaire_required
+    @operational_member_required
     def get(self, request):
         structure, error = _get_structure_caisse(request)
         if error:
             return error
+
+        assert_operational_access(
+            request.user,
+            structure.id,
+            ModuleOperationnel.CAISSE,
+            ActionPermission.CONSULTER,
+        )
 
         ventes = (
             _filtre_date_paiement(
@@ -568,11 +634,18 @@ class PaiementsRealisesView(APIView):
 class RetoursCaisseView(APIView):
     """Liste et création des retours en caisse."""
 
-    @caissier_ou_proprietaire_required
+    @operational_member_required
     def get(self, request):
         structure, error = _get_structure_caisse(request)
         if error:
             return error
+
+        assert_operational_access(
+            request.user,
+            structure.id,
+            ModuleOperationnel.CAISSE,
+            ActionPermission.CONSULTER,
+        )
 
         retours = (
             RetourCaisse.objects.filter(structure=structure)
@@ -582,7 +655,7 @@ class RetoursCaisseView(APIView):
         )
         return Response(RetourCaisseSerializer(retours, many=True).data)
 
-    @caissier_required
+    @operational_member_required
     def post(self, request):
         structure = get_user_structure(request.user)
         if not structure:
@@ -590,7 +663,12 @@ class RetoursCaisseView(APIView):
                 {"detail": "Aucune structure associée à votre compte."},
                 status=status.HTTP_404_NOT_FOUND,
             )
-        assert_caissier_works_in_structure(request.user, structure.id)
+        assert_operational_access(
+            request.user,
+            structure.id,
+            ModuleOperationnel.CAISSE,
+            ActionPermission.RETOUR_CAISSE,
+        )
 
         serializer = RetourCreateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -602,7 +680,12 @@ class RetoursCaisseView(APIView):
                 {"detail": "Vente introuvable."},
                 status=status.HTTP_404_NOT_FOUND,
             )
-        assert_caissier_works_in_structure(request.user, vente.structure_id)
+        assert_operational_access(
+            request.user,
+            vente.structure_id,
+            ModuleOperationnel.CAISSE,
+            ActionPermission.RETOUR_CAISSE,
+        )
 
         try:
             retour = VenteService.effectuer_retour(
@@ -633,11 +716,18 @@ class RetoursCaisseView(APIView):
 class OperationCaisseHistoriqueView(APIView):
     """Journal complet des opérations réalisées (traçabilité)."""
 
-    @caissier_ou_proprietaire_required
+    @operational_member_required
     def get(self, request):
         structure, error = _get_structure_caisse(request)
         if error:
             return error
+
+        assert_operational_access(
+            request.user,
+            structure.id,
+            ModuleOperationnel.CAISSE,
+            ActionPermission.CONSULTER,
+        )
 
         operations = (
             OperationCaisse.objects.filter(structure=structure)
@@ -649,7 +739,7 @@ class OperationCaisseHistoriqueView(APIView):
 
 class FactureDetailView(APIView):
 
-    @caissier_ou_proprietaire_required
+    @operational_member_required
     def get(self, request, pk):
         vente = _get_vente(pk)
         if not vente:
@@ -673,7 +763,7 @@ class FactureDetailView(APIView):
 class ImprimerFactureView(APIView):
     """Enregistre une impression/réimpression de la facture."""
 
-    @caissier_required
+    @operational_member_required
     def post(self, request, pk):
         vente = _get_vente(pk)
         if not vente:
@@ -681,7 +771,12 @@ class ImprimerFactureView(APIView):
                 {"detail": "Vente introuvable."},
                 status=status.HTTP_404_NOT_FOUND,
             )
-        assert_caissier_works_in_structure(request.user, vente.structure_id)
+        assert_operational_access(
+            request.user,
+            vente.structure_id,
+            ModuleOperationnel.CAISSE,
+            ActionPermission.IMPRIMER_RECU,
+        )
 
         try:
             facture = vente.facture
@@ -712,7 +807,7 @@ class ImprimerFactureView(APIView):
 class ReceptionPDFView(APIView):
     """Télécharge le reçu PDF d'une vente payée."""
 
-    @caissier_ou_proprietaire_required
+    @operational_member_required
     def get(self, request, pk):
         vente = _get_vente(pk)
         if not vente:

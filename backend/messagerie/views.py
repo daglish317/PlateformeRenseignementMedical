@@ -6,24 +6,28 @@ from django.db.models import Count, Q, OuterRef, Subquery
 
 from .models import Conversation, Message
 from .serializers import (
-    ConversationSerializer,
     ConversationDetailSerializer,
     ConversationListItemSerializer,
     MessageSerializer,
-    CompteurNonLusSerializer,
 )
 from .services import MessagerieService
 from structures.models import Structure
+
+
+MESSAGERIE_ROLES_AUTORISES = {"PROPRIETAIRE", "GESTIONNAIRE", "ADMINISTRATEUR"}
+
+
+def a_acces_messagerie(user):
+    return getattr(user, "role", None) in MESSAGERIE_ROLES_AUTORISES
 
 
 class ConversationView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, structure_id):
-
-        if request.user.role not in ("ADMINISTRATEUR", "GESTIONNAIRE"):
+        if not a_acces_messagerie(request.user):
             return Response(
-                {"detail": "Accès réservé aux gestionnaires et administrateurs"},
+                {"detail": "Acces reserve au proprietaire, gestionnaire ou administrateur"},
                 status=status.HTTP_403_FORBIDDEN,
             )
 
@@ -35,10 +39,16 @@ class ConversationView(APIView):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
+        if not MessagerieService.peut_acceder_structure(
+            user=request.user,
+            structure=structure,
+        ):
+            return Response({"detail": "Acces refuse"}, status=status.HTTP_403_FORBIDDEN)
+
         conversation = MessagerieService.get_or_create_conversation(structure=structure)
 
         if not MessagerieService.peut_acceder(user=request.user, conversation=conversation):
-            return Response({"detail": "Accès refusé"}, status=status.HTTP_403_FORBIDDEN)
+            return Response({"detail": "Acces refuse"}, status=status.HTTP_403_FORBIDDEN)
 
         MessagerieService.marquer_conversation_lue(
             conversation=conversation,
@@ -63,10 +73,9 @@ class SendMessageView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, conversation_id):
-
-        if request.user.role not in ("ADMINISTRATEUR", "GESTIONNAIRE"):
+        if not a_acces_messagerie(request.user):
             return Response(
-                {"detail": "Accès réservé aux gestionnaires et administrateurs"},
+                {"detail": "Acces reserve au proprietaire, gestionnaire ou administrateur"},
                 status=status.HTTP_403_FORBIDDEN,
             )
 
@@ -81,7 +90,7 @@ class SendMessageView(APIView):
             )
 
         if not MessagerieService.peut_acceder(user=request.user, conversation=conversation):
-            return Response({"detail": "Accès refusé"}, status=status.HTTP_403_FORBIDDEN)
+            return Response({"detail": "Acces refuse"}, status=status.HTTP_403_FORBIDDEN)
 
         contenu = request.data.get("contenu")
         if not contenu or not contenu.strip():
@@ -103,10 +112,9 @@ class MarkMessageReadView(APIView):
     permission_classes = [IsAuthenticated]
 
     def patch(self, request, pk):
-
-        if request.user.role not in ("ADMINISTRATEUR", "GESTIONNAIRE"):
+        if not a_acces_messagerie(request.user):
             return Response(
-                {"detail": "Accès réservé aux gestionnaires et administrateurs"},
+                {"detail": "Acces reserve au proprietaire, gestionnaire ou administrateur"},
                 status=status.HTTP_403_FORBIDDEN,
             )
 
@@ -123,7 +131,7 @@ class MarkMessageReadView(APIView):
         if not MessagerieService.peut_acceder(
             user=request.user, conversation=message.conversation
         ):
-            return Response({"detail": "Accès refusé"}, status=status.HTTP_403_FORBIDDEN)
+            return Response({"detail": "Acces refuse"}, status=status.HTTP_403_FORBIDDEN)
 
         MessagerieService.marquer_lu(message=message)
         return Response({"message": "lu"})
@@ -133,10 +141,9 @@ class DeleteMessageView(APIView):
     permission_classes = [IsAuthenticated]
 
     def delete(self, request, pk):
-
-        if request.user.role not in ("ADMINISTRATEUR", "GESTIONNAIRE"):
+        if not a_acces_messagerie(request.user):
             return Response(
-                {"detail": "Accès réservé aux gestionnaires et administrateurs"},
+                {"detail": "Acces reserve au proprietaire, gestionnaire ou administrateur"},
                 status=status.HTTP_403_FORBIDDEN,
             )
 
@@ -153,7 +160,7 @@ class DeleteMessageView(APIView):
         if not MessagerieService.peut_acceder(
             user=request.user, conversation=message.conversation
         ):
-            return Response({"detail": "Accès refusé"}, status=status.HTTP_403_FORBIDDEN)
+            return Response({"detail": "Acces refuse"}, status=status.HTTP_403_FORBIDDEN)
 
         try:
             MessagerieService.supprimer_message(
@@ -163,17 +170,16 @@ class DeleteMessageView(APIView):
         except ValueError as e:
             return Response({"detail": str(e)}, status=status.HTTP_403_FORBIDDEN)
 
-        return Response({"message": "Message supprimé"}, status=status.HTTP_200_OK)
+        return Response({"message": "Message supprime"}, status=status.HTTP_200_OK)
 
 
 class ListConversationsView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-
-        if request.user.role not in ("ADMINISTRATEUR", "GESTIONNAIRE"):
+        if not a_acces_messagerie(request.user):
             return Response(
-                {"detail": "Accès réservé aux gestionnaires et administrateurs"},
+                {"detail": "Acces reserve au proprietaire, gestionnaire ou administrateur"},
                 status=status.HTTP_403_FORBIDDEN,
             )
 
@@ -220,10 +226,9 @@ class UnreadCountView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-
-        if request.user.role not in ("ADMINISTRATEUR", "GESTIONNAIRE"):
+        if not a_acces_messagerie(request.user):
             return Response(
-                {"detail": "Accès réservé aux gestionnaires et administrateurs"},
+                {"detail": "Acces reserve au proprietaire, gestionnaire ou administrateur"},
                 status=status.HTTP_403_FORBIDDEN,
             )
 

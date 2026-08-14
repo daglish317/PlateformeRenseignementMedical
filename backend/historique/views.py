@@ -19,14 +19,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from structures.models import Structure
-from structures.permissions import (
-    assert_gestionnaire_owns_structure,
-    assert_proprietaire_owns_structure,
-)
-from utilisateurs.decorators import (
-    proprietaire_required,
-    responsable_structure_required,
-)
+from structures.permissions import assert_operational_access
+from structures.permission_registry import ActionPermission, ModuleOperationnel
+from utilisateurs.decorators import operational_member_required
 
 from .exports import generer_historique_excel, generer_historique_pdf
 from .models import EvenementHistorique, TypeEvenementHistorique
@@ -115,7 +110,7 @@ def _appliquer_filtres(queryset, params):
 class ResumeHistoriqueView(APIView):
     """Zone 1 — Résumé : indicateurs rapides de l'activité."""
 
-    @responsable_structure_required
+    @operational_member_required
     def get(self, request):
         structure_id = request.query_params.get("structure_id")
         if not structure_id:
@@ -124,7 +119,12 @@ class ResumeHistoriqueView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        assert_gestionnaire_owns_structure(request.user, structure_id)
+        assert_operational_access(
+            request.user,
+            structure_id,
+            ModuleOperationnel.HISTORIQUE,
+            ActionPermission.CONSULTER,
+        )
 
         aujourdhui = timezone.localdate()
         evenements = EvenementHistorique.objects.filter(structure_id=structure_id)
@@ -149,7 +149,7 @@ class ResumeHistoriqueView(APIView):
 class ListeHistoriqueView(APIView):
     """Zone 4 — Liste chronologique des événements (du plus récent au plus ancien)."""
 
-    @responsable_structure_required
+    @operational_member_required
     def get(self, request):
         structure_id = request.query_params.get("structure_id")
         if not structure_id:
@@ -158,7 +158,12 @@ class ListeHistoriqueView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        assert_gestionnaire_owns_structure(request.user, structure_id)
+        assert_operational_access(
+            request.user,
+            structure_id,
+            ModuleOperationnel.HISTORIQUE,
+            ActionPermission.CONSULTER,
+        )
 
         queryset = _evenements_structure(structure_id)
         queryset, erreur, _ = _appliquer_filtres(queryset, request.query_params)
@@ -176,7 +181,7 @@ class ListeHistoriqueView(APIView):
 class DetailEvenementHistoriqueView(APIView):
     """Zone fiche — Consultation des détails complets d'un événement."""
 
-    @responsable_structure_required
+    @operational_member_required
     def get(self, request, pk):
         try:
             evenement = EvenementHistorique.objects.select_related(
@@ -189,7 +194,12 @@ class DetailEvenementHistoriqueView(APIView):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        assert_gestionnaire_owns_structure(request.user, evenement.structure_id)
+        assert_operational_access(
+            request.user,
+            evenement.structure_id,
+            ModuleOperationnel.HISTORIQUE,
+            ActionPermission.CONSULTER,
+        )
 
         return Response(EvenementHistoriqueSerializer(evenement).data)
 
@@ -197,7 +207,7 @@ class DetailEvenementHistoriqueView(APIView):
 class HistoriquePDFView(APIView):
     """Export PDF de l'historique (réservé au propriétaire)."""
 
-    @proprietaire_required
+    @operational_member_required
     def get(self, request):
         structure_id = request.query_params.get("structure_id")
         if not structure_id:
@@ -206,7 +216,12 @@ class HistoriquePDFView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        assert_proprietaire_owns_structure(request.user, structure_id)
+        assert_operational_access(
+            request.user,
+            structure_id,
+            ModuleOperationnel.HISTORIQUE,
+            ActionPermission.EXPORTER,
+        )
         structure = Structure.objects.get(id=structure_id)
 
         queryset, erreur, libelle = _appliquer_filtres(
@@ -232,7 +247,7 @@ class HistoriquePDFView(APIView):
 class HistoriqueExcelView(APIView):
     """Export Excel de l'historique (réservé au propriétaire)."""
 
-    @proprietaire_required
+    @operational_member_required
     def get(self, request):
         structure_id = request.query_params.get("structure_id")
         if not structure_id:
@@ -241,7 +256,12 @@ class HistoriqueExcelView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        assert_proprietaire_owns_structure(request.user, structure_id)
+        assert_operational_access(
+            request.user,
+            structure_id,
+            ModuleOperationnel.HISTORIQUE,
+            ActionPermission.EXPORTER,
+        )
         structure = Structure.objects.get(id=structure_id)
 
         queryset, erreur, libelle = _appliquer_filtres(

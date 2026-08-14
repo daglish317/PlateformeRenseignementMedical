@@ -4,109 +4,112 @@ import {
   Package,
   Truck,
   Clock,
-  MessagesSquare,
   Bell,
   Settings,
   ShoppingCart,
   ClipboardList,
   History,
   CalendarClock,
-  type LucideIcon,
+  Pill,
 } from "lucide-react";
+import type { DashboardNavItem } from "../types";
 
-export type PharmacyNavItem = {
-  label: string;
-  href: string;
-  icon: LucideIcon;
-  permission: "GESTIONNAIRE";
-  navItem?: string;
-};
-
-export const pharmacyNavigation: PharmacyNavItem[] = [
+export const pharmacyNavigation: DashboardNavItem[] = [
   {
     label: "Dashboard",
     href: "/pharmacy",
     icon: LayoutDashboard,
-    permission: "GESTIONNAIRE",
   },
   {
     label: "Profil",
     href: "/pharmacy/profile",
     icon: Building2,
-    permission: "GESTIONNAIRE",
+    module: "PROFIL",
+    action: "CONSULTER",
     navItem: "profil",
   },
   {
     label: "Stock",
     href: "/pharmacy/stock",
     icon: Package,
-    permission: "GESTIONNAIRE",
+    module: "STOCK",
+    action: "CONSULTER",
+    navItem: "stock",
+  },
+  {
+    label: "Medicaments",
+    href: "/pharmacy/medications",
+    icon: Pill,
+    module: "STOCK",
+    action: "CONSULTER",
     navItem: "stock",
   },
   {
     label: "Vente",
     href: "/pharmacy/sale",
     icon: ShoppingCart,
-    permission: "GESTIONNAIRE",
+    module: "VENTE",
+    action: "CONSULTER",
     navItem: "vente",
   },
   {
     label: "Approvisionnement",
     href: "/pharmacy/supply",
     icon: Truck,
-    permission: "GESTIONNAIRE",
+    module: "APPROVISIONNEMENT",
+    action: "CONSULTER",
     navItem: "stock",
   },
   {
     label: "Inventaire",
     href: "/pharmacy/inventory",
     icon: ClipboardList,
-    permission: "GESTIONNAIRE",
+    module: "INVENTAIRE",
+    action: "CONSULTER",
   },
   {
     label: "Peremption",
     href: "/pharmacy/peremption",
     icon: CalendarClock,
-    permission: "GESTIONNAIRE",
+    module: "PEREMPTION",
+    action: "CONSULTER",
     navItem: "stock",
   },
   {
     label: "Historique",
     href: "/pharmacy/history",
     icon: History,
-    permission: "GESTIONNAIRE",
+    module: "HISTORIQUE",
+    action: "CONSULTER",
   },
   {
     label: "Alertes",
     href: "/pharmacy/alertes",
     icon: Bell,
-    permission: "GESTIONNAIRE",
+    module: "ALERTES",
+    action: "CONSULTER",
   },
   {
     label: "Horaires",
     href: "/pharmacy/schedules",
     icon: Clock,
-    permission: "GESTIONNAIRE",
+    module: "HORAIRES",
+    action: "CONSULTER",
     navItem: "horaires",
-  },
-  {
-    label: "Messages",
-    href: "/pharmacy/chat",
-    icon: MessagesSquare,
-    permission: "GESTIONNAIRE",
-    navItem: "messages",
   },
   {
     label: "Notifications",
     href: "/pharmacy/notifications",
     icon: Bell,
-    permission: "GESTIONNAIRE",
+    module: "NOTIFICATIONS",
+    action: "CONSULTER",
     navItem: "notifications",
   },
   {
-    label: "Paramètres",
+    label: "Parametres",
     href: "/pharmacy/settings",
     icon: Settings,
-    permission: "GESTIONNAIRE",
+    module: "PARAMETRES",
+    action: "CONSULTER",
   },
 ];

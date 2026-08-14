@@ -7,11 +7,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from structures.models import Structure
-from structures.permissions import assert_gestionnaire_owns_structure
-from utilisateurs.decorators import (
-    gestionnaire_required,
-    responsable_structure_required,
-)
+from structures.permissions import assert_operational_access
+from structures.permission_registry import ActionPermission, ModuleOperationnel
+from utilisateurs.decorators import operational_member_required
 
 from .exports import generer_inventaire_excel, generer_inventaire_pdf
 from .models import Inventaire, StatutInventaire
@@ -39,7 +37,7 @@ def _get_inventaire(pk):
 class GenererInventaireView(APIView):
     """Génère un inventaire (réservé au gestionnaire de la structure)."""
 
-    @gestionnaire_required
+    @operational_member_required
     def post(self, request):
         structure_id = request.data.get("structure_id")
         if not structure_id:
@@ -48,7 +46,12 @@ class GenererInventaireView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        assert_gestionnaire_owns_structure(request.user, structure_id)
+        assert_operational_access(
+            request.user,
+            structure_id,
+            ModuleOperationnel.INVENTAIRE,
+            ActionPermission.CREER,
+        )
         structure = Structure.objects.get(id=structure_id)
 
         inventaire = InventaireService.generer(
@@ -67,7 +70,7 @@ class ListeInventairesView(APIView):
     Accessible au gestionnaire (production) et au propriétaire (supervision).
     """
 
-    @responsable_structure_required
+    @operational_member_required
     def get(self, request):
         structure_id = request.query_params.get("structure_id")
         if not structure_id:
@@ -76,7 +79,12 @@ class ListeInventairesView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        assert_gestionnaire_owns_structure(request.user, structure_id)
+        assert_operational_access(
+            request.user,
+            structure_id,
+            ModuleOperationnel.INVENTAIRE,
+            ActionPermission.CONSULTER,
+        )
 
         inventaires = Inventaire.objects.filter(
             structure_id=structure_id,
@@ -103,7 +111,7 @@ class ListeInventairesView(APIView):
 class DetailInventaireView(APIView):
     """Consultation d'un inventaire avec recherche et filtres."""
 
-    @responsable_structure_required
+    @operational_member_required
     def get(self, request, pk):
         inventaire = _get_inventaire(pk)
         if not inventaire:
@@ -112,7 +120,12 @@ class DetailInventaireView(APIView):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        assert_gestionnaire_owns_structure(request.user, inventaire.structure_id)
+        assert_operational_access(
+            request.user,
+            inventaire.structure_id,
+            ModuleOperationnel.INVENTAIRE,
+            ActionPermission.CONSULTER,
+        )
 
         lignes = inventaire.lignes.all()
 
@@ -142,7 +155,7 @@ class DetailInventaireView(APIView):
 class InventairePDFView(APIView):
     """Télécharge l'export PDF d'un inventaire."""
 
-    @responsable_structure_required
+    @operational_member_required
     def get(self, request, pk):
         inventaire = _get_inventaire(pk)
         if not inventaire:
@@ -151,7 +164,12 @@ class InventairePDFView(APIView):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        assert_gestionnaire_owns_structure(request.user, inventaire.structure_id)
+        assert_operational_access(
+            request.user,
+            inventaire.structure_id,
+            ModuleOperationnel.INVENTAIRE,
+            ActionPermission.EXPORTER,
+        )
 
         pdf = BytesIO(generer_inventaire_pdf(inventaire))
         nom = f"inventaire_{inventaire.numero}.pdf"
@@ -166,7 +184,7 @@ class InventairePDFView(APIView):
 class InventaireExcelView(APIView):
     """Télécharge l'export Excel d'un inventaire."""
 
-    @responsable_structure_required
+    @operational_member_required
     def get(self, request, pk):
         inventaire = _get_inventaire(pk)
         if not inventaire:
@@ -175,7 +193,12 @@ class InventaireExcelView(APIView):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        assert_gestionnaire_owns_structure(request.user, inventaire.structure_id)
+        assert_operational_access(
+            request.user,
+            inventaire.structure_id,
+            ModuleOperationnel.INVENTAIRE,
+            ActionPermission.EXPORTER,
+        )
 
         excel = BytesIO(generer_inventaire_excel(inventaire))
         nom = f"inventaire_{inventaire.numero}.xlsx"

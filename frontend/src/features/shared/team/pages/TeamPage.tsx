@@ -13,6 +13,7 @@ import { PageTitle } from "@/features/shared/dashboard/components/PageTitle";
 import { SectionCard } from "@/features/shared/dashboard/components/SectionCard";
 import { useCreateOwnerStructure } from "@/features/shared/owner-structures/hooks/useCreateOwnerStructure";
 import { useOwnerStructures } from "@/features/shared/owner-structures/hooks/useOwnerStructures";
+import { MemberPermissionsEditor } from "../components/MemberPermissionsEditor";
 import { useInviteStructureMember } from "../hooks/useInviteStructureMember";
 import { useStructureTeam } from "../hooks/useStructureTeam";
 import { useUpdateStructureMemberStatus } from "../hooks/useUpdateStructureMemberStatus";
@@ -40,6 +41,7 @@ export function TeamPage() {
   const updateMemberStatus = useUpdateStructureMemberStatus();
 
   const [selectedStructureId, setSelectedStructureId] = useState("");
+  const [selectedMemberId, setSelectedMemberId] = useState("");
   const effectiveStructureId =
     selectedStructureId || ownerStructures.data?.results[0]?.id || "";
   const team = useStructureTeam(effectiveStructureId);
@@ -52,6 +54,29 @@ export function TeamPage() {
   const [nom, setNom] = useState("");
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<"GESTIONNAIRE" | "CAISSIER">("GESTIONNAIRE");
+
+  const editableMembers = useMemo(
+    () =>
+      (team.data?.results ?? []).filter(
+        (member) => member.role === "GESTIONNAIRE" || member.role === "CAISSIER"
+      ),
+    [team.data?.results]
+  );
+
+  const resolvedSelectedMemberId = useMemo(() => {
+    if (editableMembers.length === 0) {
+      return "";
+    }
+
+    if (editableMembers.some((member) => member.id === selectedMemberId)) {
+      return selectedMemberId;
+    }
+
+    return editableMembers[0].id;
+  }, [editableMembers, selectedMemberId]);
+
+  const selectedMember =
+    editableMembers.find((member) => member.id === resolvedSelectedMemberId) ?? null;
 
   const canCreateStructure = useMemo(
     () => isOwner && structureNom.trim().length >= 3 && !createStructure.isPending,
@@ -83,6 +108,7 @@ export function TeamPage() {
       {
         onSuccess: ({ data }) => {
           setSelectedStructureId(data.id);
+          setSelectedMemberId("");
           setStructureNom("");
           setStructureType("PHARMACIE");
           setStructureAdresse("");
@@ -104,10 +130,13 @@ export function TeamPage() {
         role,
       },
       {
-        onSuccess: () => {
+        onSuccess: (data) => {
           setNom("");
           setEmail("");
           setRole("GESTIONNAIRE");
+          if (data.data?.id) {
+            setSelectedMemberId(data.data.id);
+          }
           team.refetch();
         },
       }
@@ -367,6 +396,44 @@ export function TeamPage() {
           </div>
         )}
       </SectionCard>
+
+      {isOwner && (
+        <SectionCard
+          title="Permissions du membre"
+          actions={
+            effectiveStructureId && editableMembers.length > 0 ? (
+              <div className="w-full max-w-sm">
+                <Label htmlFor="member-permissions-select" className="sr-only">
+                  Membre
+                </Label>
+                <Select
+                  id="member-permissions-select"
+                  value={resolvedSelectedMemberId}
+                  onChange={(event) => setSelectedMemberId(event.target.value)}
+                >
+                  {editableMembers.map((member) => (
+                    <option key={member.id} value={member.id}>
+                      {member.nom} - {roleLabels[member.role]}
+                    </option>
+                  ))}
+                </Select>
+              </div>
+            ) : null
+          }
+        >
+          {!effectiveStructureId ? (
+            <p className="text-sm text-muted-foreground">
+              Selectionnez une structure pour charger ses permissions.
+            </p>
+          ) : editableMembers.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              Aucun membre operationnel n&apos;est encore rattache a cette structure.
+            </p>
+          ) : (
+            <MemberPermissionsEditor member={selectedMember} />
+          )}
+        </SectionCard>
+      )}
     </PageContainer>
   );
 }

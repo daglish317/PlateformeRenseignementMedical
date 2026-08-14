@@ -7,22 +7,14 @@ import {
   Package,
   Users,
   Clock,
-  MessagesSquare,
   Bell,
   BarChart3,
+  MessagesSquare,
   Settings,
-  type LucideIcon,
 } from "lucide-react";
+import type { DashboardNavItem } from "../types";
 
-export type HospitalNavItem = {
-  label: string;
-  href: string;
-  icon: LucideIcon;
-  permission: "GESTIONNAIRE";
-  navItem?: string;
-};
-
-export const hospitalNavigation: HospitalNavItem[] = [
+export const hospitalNavigation: DashboardNavItem[] = [
   {
     label: "Dashboard",
     href: "/hospital",
@@ -34,6 +26,8 @@ export const hospitalNavigation: HospitalNavItem[] = [
     href: "/hospital/profile",
     icon: Building2,
     permission: "GESTIONNAIRE",
+    module: "PROFIL",
+    action: "CONSULTER",
     navItem: "profil",
   },
   {
@@ -62,6 +56,8 @@ export const hospitalNavigation: HospitalNavItem[] = [
     href: "/hospital/stock",
     icon: Package,
     permission: "GESTIONNAIRE",
+    module: "STOCK",
+    action: "CONSULTER",
     navItem: "stock",
   },
   {
@@ -76,21 +72,25 @@ export const hospitalNavigation: HospitalNavItem[] = [
     href: "/hospital/schedules",
     icon: Clock,
     permission: "GESTIONNAIRE",
+    module: "HORAIRES",
+    action: "CONSULTER",
     navItem: "horaires",
-  },
-  {
-    label: "Messages",
-    href: "/hospital/chat",
-    icon: MessagesSquare,
-    permission: "GESTIONNAIRE",
-    navItem: "messages",
   },
   {
     label: "Notifications",
     href: "/hospital/notifications",
     icon: Bell,
     permission: "GESTIONNAIRE",
+    module: "NOTIFICATIONS",
+    action: "CONSULTER",
     navItem: "notifications",
+  },
+  {
+    label: "Messagerie",
+    href: "/hospital/chat",
+    icon: MessagesSquare,
+    permission: "GESTIONNAIRE",
+    navItem: "messages",
   },
   {
     label: "Statistiques",
@@ -103,5 +103,7 @@ export const hospitalNavigation: HospitalNavItem[] = [
     href: "/hospital/settings",
     icon: Settings,
     permission: "GESTIONNAIRE",
+    module: "PARAMETRES",
+    action: "CONSULTER",
   },
 ];

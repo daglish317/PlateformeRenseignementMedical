@@ -135,6 +135,28 @@ def caissier_ou_proprietaire_required(view_func):
     return _wrapped_view
 
 
+def operational_member_required(view_func):
+    """Membre operationnel (gestionnaire ou caissier) authentifie."""
+
+    @wraps(view_func)
+    def _wrapped_view(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return Response(
+                {"detail": "Non authentifie"},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+
+        if request.user.role not in {"GESTIONNAIRE", "CAISSIER", "PROPRIETAIRE"}:
+            return Response(
+                {"detail": "Acces refuse (membre operationnel uniquement)"},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        return view_func(self, request, *args, **kwargs)
+
+    return _wrapped_view
+
+
 def patient_required(view_func):
     @wraps(view_func)
     def _wrapped_view(self, request, *args, **kwargs):

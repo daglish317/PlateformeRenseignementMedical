@@ -1,27 +1,28 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "@/i18n/navigation";
+import { usePathname, useRouter } from "@/i18n/navigation";
 
 import { useAuthStore } from "@/features/auth/store/auth-store";
 import { getRedirectPath } from "@/features/auth/utils/redirect";
-import type { RoleUtilisateur } from "@/features/auth/types/user";
 import { useMyStructure } from "@/features/shared/structure-profile/hooks/useMyStructure";
 import type { DashboardType } from "../types";
+import { useMyPermissions } from "../hooks/useMyPermissions";
+import { getDashboardRouteRequirement } from "../constants/route-permissions";
+import { hasModuleAction } from "../utils/permissions";
+import type { RoleUtilisateur } from "@/features/auth/types/user";
 
 const TYPE_TO_ROUTE: Record<string, string> = {
   HOPITAL: "hospital",
   PHARMACIE: "pharmacy",
 };
 
-const STRUCTURE_TYPES: DashboardType[] = ["HOPITAL", "PHARMACIE"];
-
 function isAllowedRole(role: RoleUtilisateur, type: DashboardType): boolean {
   switch (type) {
     case "HOPITAL":
       return role === "PROPRIETAIRE" || role === "GESTIONNAIRE";
     case "PHARMACIE":
-      return role === "GESTIONNAIRE";
+      return role === "GESTIONNAIRE" || role === "CAISSIER";
     case "OWNER":
       return role === "PROPRIETAIRE";
     case "CAISSIER":
@@ -39,15 +40,34 @@ export function DashboardRoute({ children, type }: DashboardRouteProps) {
   const hydrated = useAuthStore((state) => state.hydrated);
   const user = useAuthStore((state) => state.user);
   const router = useRouter();
+  const pathname = usePathname();
 
-  const requiresStructure = STRUCTURE_TYPES.includes(type);
+  const requiresStructure = type !== "OWNER";
   const canCheckStructure =
     hydrated &&
     authenticated &&
     Boolean(user) &&
     requiresStructure;
 
-  const { data: structure, isLoading, isError } = useMyStructure(canCheckStructure);
+  const {
+    data: structure,
+    isLoading: structureLoading,
+    isError: structureError,
+  } = useMyStructure(canCheckStructure);
+  const {
+    data: permissions,
+    isLoading: permissionsLoading,
+    isError: permissionsError,
+  } = useMyPermissions(structure?.id, canCheckStructure && Boolean(structure?.id));
+  const routeRequirement = getDashboardRouteRequirement(type, pathname);
+  const hasRoutePermission =
+    !routeRequirement?.blocked &&
+    (!routeRequirement?.module ||
+      hasModuleAction(
+        permissions?.modules,
+        routeRequirement.module,
+        routeRequirement.action ?? "CONSULTER"
+      ));
 
   useEffect(() => {
     if (!hydrated) return;
@@ -64,12 +84,26 @@ export function DashboardRoute({ children, type }: DashboardRouteProps) {
 
     if (!requiresStructure) return;
 
-    if (isError) {
+    if (structureError || permissionsError) {
       router.replace("/gestionnaire/setup");
       return;
     }
 
+    if (structureLoading || permissionsLoading) {
+      return;
+    }
+
     if (!structure) return;
+
+    if (routeRequirement?.blocked) {
+      router.replace(`/${type.toLowerCase()}`);
+      return;
+    }
+
+    if (routeRequirement && !hasRoutePermission) {
+      router.replace(`/${type.toLowerCase()}`);
+      return;
+    }
 
     const structureType = structure.type.toUpperCase();
 
@@ -77,7 +111,22 @@ export function DashboardRoute({ children, type }: DashboardRouteProps) {
       const route = TYPE_TO_ROUTE[structureType] || "hospital";
       router.replace(`/${route}`);
     }
-  }, [authenticated, hydrated, isError, router, structure, type, user, requiresStructure]);
+  }, [
+    authenticated,
+    hydrated,
+    hasRoutePermission,
+    pathname,
+    permissionsError,
+    permissionsLoading,
+    requiresStructure,
+    routeRequirement,
+    router,
+    structure,
+    structureLoading,
+    structureError,
+    type,
+    user,
+  ]);
 
   const blocked =
     !hydrated ||
@@ -85,10 +134,14 @@ export function DashboardRoute({ children, type }: DashboardRouteProps) {
     !user ||
     !isAllowedRole(user.role, type) ||
     (requiresStructure &&
-      (isLoading ||
-        isError ||
+      (structureLoading ||
+        permissionsLoading ||
+        structureError ||
+        permissionsError ||
         !structure ||
-        structure.type.toUpperCase() !== type));
+        structure.type.toUpperCase() !== type ||
+        Boolean(routeRequirement?.blocked) ||
+        (routeRequirement && !hasRoutePermission)));
 
   if (blocked) {
     return (

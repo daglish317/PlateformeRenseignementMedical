@@ -7,6 +7,14 @@ from structures.models import (
     Structure,
     TypeStructure,
 )
+from structures.permission_service import (
+    assert_action_permission,
+    assert_module_access,
+    assert_operational_member,
+    get_active_membership,
+    user_has_action,
+    user_has_module_access,
+)
 
 
 STRUCTURE_ADMIN_ROLES = {
@@ -33,9 +41,27 @@ def assert_user_has_structure_role(user, structure_id, allowed_roles):
 
 
 def assert_gestionnaire_owns_structure(user, structure_id):
-    if user.role not in {"PROPRIETAIRE", "GESTIONNAIRE"}:
-        raise PermissionDenied("Acces reserve aux responsables de structure.")
-    assert_user_has_structure_role(user, structure_id, STRUCTURE_ADMIN_ROLES)
+    """Verifie l'appartenance a la structure (proprietaire ou gestionnaire actif)."""
+    if user.role == "ADMINISTRATEUR":
+        return
+    if user.role == "PROPRIETAIRE":
+        assert_user_has_structure_role(user, structure_id, {RoleEquipeStructure.PROPRIETAIRE})
+        return
+    if user.role == "GESTIONNAIRE":
+        assert_user_has_structure_role(user, structure_id, {RoleEquipeStructure.GESTIONNAIRE})
+        return
+    raise PermissionDenied("Acces reserve aux responsables de structure.")
+
+
+def assert_operational_access(user, structure_id, module=None, action=None):
+    """Verifie l'acces operationnel base sur les permissions granulaires."""
+    if module and action:
+        assert_action_permission(user, structure_id, module, action)
+        return
+    if module:
+        assert_module_access(user, structure_id, module)
+        return
+    assert_operational_member(user, structure_id)
 
 
 def assert_structure_autorise_stock_direct(user, structure_id):
@@ -44,7 +70,6 @@ def assert_structure_autorise_stock_direct(user, structure_id):
     Seul un approvisionnement valide permet d'augmenter le stock d'une
     pharmacie. Les hopitaux conservent leur gestion de stock directe.
     """
-    assert_gestionnaire_owns_structure(user, structure_id)
     if Structure.objects.filter(
         id=structure_id,
         type=TypeStructure.PHARMACIE,
@@ -62,6 +87,9 @@ def assert_proprietaire_owns_structure(user, structure_id):
 
 
 def assert_caissier_works_in_structure(user, structure_id):
+    if user.role == "PROPRIETAIRE":
+        assert_proprietaire_owns_structure(user, structure_id)
+        return
     if user.role != "CAISSIER":
         raise PermissionDenied("Acces reserve aux caissiers.")
     assert_user_has_structure_role(user, structure_id, {RoleEquipeStructure.CAISSIER})

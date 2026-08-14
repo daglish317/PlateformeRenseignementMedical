@@ -24,12 +24,11 @@ from rest_framework.views import APIView
 
 from structures.models import Structure
 from structures.permissions import (
-    assert_gestionnaire_owns_structure,
-    assert_proprietaire_owns_structure,
+    assert_operational_access,
 )
+from structures.permission_registry import ActionPermission, ModuleOperationnel
 from utilisateurs.decorators import (
-    proprietaire_required,
-    responsable_structure_required,
+    operational_member_required,
 )
 
 from .exports import generer_alertes_excel, generer_alertes_pdf
@@ -103,7 +102,7 @@ def _libelle_filtre(params):
 class ResumeAlertesView(APIView):
     """Zone 1 — Résumé : total, critiques, non lues et résolues."""
 
-    @responsable_structure_required
+    @operational_member_required
     def get(self, request):
         structure_id = request.query_params.get("structure_id")
         if not structure_id:
@@ -112,7 +111,12 @@ class ResumeAlertesView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        assert_gestionnaire_owns_structure(request.user, structure_id)
+        assert_operational_access(
+            request.user,
+            structure_id,
+            ModuleOperationnel.ALERTES,
+            ActionPermission.CONSULTER,
+        )
 
         visible = _alertes_structure(structure_id, request.user)
         resume = {
@@ -132,7 +136,7 @@ class ResumeAlertesView(APIView):
 class ListeAlertesView(APIView):
     """Zone 4 — Liste des alertes (du plus récent au plus ancien)."""
 
-    @responsable_structure_required
+    @operational_member_required
     def get(self, request):
         structure_id = request.query_params.get("structure_id")
         if not structure_id:
@@ -141,7 +145,12 @@ class ListeAlertesView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        assert_gestionnaire_owns_structure(request.user, structure_id)
+        assert_operational_access(
+            request.user,
+            structure_id,
+            ModuleOperationnel.ALERTES,
+            ActionPermission.CONSULTER,
+        )
 
         queryset = _appliquer_filtres(
             _alertes_structure(structure_id, request.user),
@@ -161,7 +170,7 @@ class ListeAlertesView(APIView):
 class DetailAlerteView(APIView):
     """Zone 9 — Consultation complète d'une alerte (aucune modification)."""
 
-    @responsable_structure_required
+    @operational_member_required
     def get(self, request, pk):
         try:
             alerte = Alerte.objects.select_related(
@@ -174,7 +183,12 @@ class DetailAlerteView(APIView):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        assert_gestionnaire_owns_structure(request.user, alerte.structure_id)
+        assert_operational_access(
+            request.user,
+            alerte.structure_id,
+            ModuleOperationnel.ALERTES,
+            ActionPermission.CONSULTER,
+        )
 
         if (
             request.user.role == "GESTIONNAIRE"
@@ -196,7 +210,7 @@ class DetailAlerteView(APIView):
 class MarquerLueAlerteView(APIView):
     """Zone 10 — Marquage d'une alerte comme lue (propre à l'utilisateur)."""
 
-    @responsable_structure_required
+    @operational_member_required
     def post(self, request, pk):
         try:
             alerte = Alerte.objects.get(id=pk)
@@ -206,7 +220,12 @@ class MarquerLueAlerteView(APIView):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        assert_gestionnaire_owns_structure(request.user, alerte.structure_id)
+        assert_operational_access(
+            request.user,
+            alerte.structure_id,
+            ModuleOperationnel.ALERTES,
+            ActionPermission.MODIFIER,
+        )
 
         if (
             request.user.role == "GESTIONNAIRE"
@@ -231,7 +250,7 @@ class MarquerLueAlerteView(APIView):
 class AlertesPDFView(APIView):
     """Export PDF des alertes (réservé au propriétaire)."""
 
-    @proprietaire_required
+    @operational_member_required
     def get(self, request):
         structure_id = request.query_params.get("structure_id")
         if not structure_id:
@@ -240,7 +259,12 @@ class AlertesPDFView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        assert_proprietaire_owns_structure(request.user, structure_id)
+        assert_operational_access(
+            request.user,
+            structure_id,
+            ModuleOperationnel.ALERTES,
+            ActionPermission.EXPORTER,
+        )
         structure = Structure.objects.get(id=structure_id)
 
         queryset = _appliquer_filtres(
@@ -268,7 +292,7 @@ class AlertesPDFView(APIView):
 class AlertesExcelView(APIView):
     """Export Excel des alertes (réservé au propriétaire)."""
 
-    @proprietaire_required
+    @operational_member_required
     def get(self, request):
         structure_id = request.query_params.get("structure_id")
         if not structure_id:
@@ -277,7 +301,12 @@ class AlertesExcelView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        assert_proprietaire_owns_structure(request.user, structure_id)
+        assert_operational_access(
+            request.user,
+            structure_id,
+            ModuleOperationnel.ALERTES,
+            ActionPermission.EXPORTER,
+        )
         structure = Structure.objects.get(id=structure_id)
 
         queryset = _appliquer_filtres(

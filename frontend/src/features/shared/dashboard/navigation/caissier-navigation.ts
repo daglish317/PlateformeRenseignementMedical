@@ -13,6 +13,8 @@ export const caissierNavigation: DashboardNavItem[] = [
     href: "/caissier/profile",
     icon: Building2,
     permission: "CAISSIER",
+    module: "PROFIL",
+    action: "CONSULTER",
     navItem: "profil",
   },
   {
@@ -20,5 +22,7 @@ export const caissierNavigation: DashboardNavItem[] = [
     href: "/caissier/settings",
     icon: Settings,
     permission: "CAISSIER",
+    module: "PARAMETRES",
+    action: "CONSULTER",
   },
 ];
