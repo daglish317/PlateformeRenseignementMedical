@@ -13,12 +13,12 @@ export default function Header({
       className="
         sticky
         top-0
-        z-[10000]
+        z-50
         w-full
         border-b
         border-border
-        bg-background/85
-        backdrop-blur-xl
+        bg-background/90
+        backdrop-blur-md
         shadow-sm
       "
     >

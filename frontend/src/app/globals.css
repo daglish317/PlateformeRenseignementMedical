@@ -167,6 +167,37 @@ html, body {
 }
 
 /* ───────── Thème Pharmacie (vert) ───────── */
+/* Dashboard identity */
+.dashboard-shell {
+  --dashboard-content-bg: oklch(0.955 0.015 240);
+  --dashboard-sidebar-start: oklch(0.98 0.012 240);
+  --dashboard-sidebar-end: var(--card);
+  --dashboard-header-start: oklch(1 0 0 / 0.96);
+  --dashboard-header-end: oklch(0.965 0.012 240 / 0.96);
+  --dashboard-brand-panel: oklch(0.94 0.035 230);
+  --dashboard-accent-soft: oklch(0.92 0.06 230);
+}
+
+.dashboard-content {
+  background:
+    linear-gradient(180deg, var(--dashboard-content-bg) 0%, var(--background) 58%);
+}
+
+.sidebar-bg {
+  background:
+    linear-gradient(180deg, var(--dashboard-sidebar-start) 0%, var(--dashboard-sidebar-end) 100%);
+}
+
+.header-bg {
+  background:
+    linear-gradient(90deg, var(--dashboard-header-start) 0%, var(--dashboard-header-end) 100%);
+}
+
+.dashboard-sidebar-brand {
+  background:
+    linear-gradient(135deg, var(--dashboard-brand-panel) 0%, transparent 72%);
+}
+
 .theme-pharmacy {
   --primary: oklch(0.50 0.18 145);
   --primary-foreground: oklch(0.99 0 0);
@@ -188,17 +219,59 @@ html, body {
 
   --sidebar-accent: oklch(0.88 0.06 155);
   --sidebar-accent-foreground: oklch(0.20 0.03 260);
+
+  --dashboard-content-bg: oklch(0.955 0.025 150);
+  --dashboard-sidebar-start: oklch(0.94 0.045 150);
+  --dashboard-sidebar-end: var(--card);
+  --dashboard-header-start: oklch(0.965 0.035 150 / 0.96);
+  --dashboard-header-end: oklch(1 0 0 / 0.96);
+  --dashboard-brand-panel: oklch(0.91 0.07 150);
+  --dashboard-accent-soft: oklch(0.90 0.08 155);
 }
 
 .theme-pharmacy .sidebar-bg {
-  background: linear-gradient(180deg, oklch(0.88 0.05 145 / 0.3) 0%, var(--sidebar) 100%) !important;
+  background:
+    linear-gradient(180deg, var(--dashboard-sidebar-start) 0%, var(--dashboard-sidebar-end) 100%);
 }
 
 .theme-pharmacy .header-bg {
-  background: linear-gradient(90deg, oklch(0.88 0.05 145 / 0.25) 0%, var(--background) 100%) !important;
+  background:
+    linear-gradient(90deg, var(--dashboard-header-start) 0%, var(--dashboard-header-end) 100%);
 }
 
-.theme-pharmacy.dark {
+.theme-hospital {
+  --primary: oklch(0.54 0.19 240);
+  --primary-foreground: oklch(0.99 0 0);
+
+  --secondary: oklch(0.92 0.045 220);
+  --secondary-foreground: oklch(0.25 0.055 235);
+
+  --accent: oklch(0.91 0.055 205);
+  --accent-foreground: oklch(0.20 0.05 230);
+
+  --ring: oklch(0.54 0.19 240);
+
+  --chart-1: oklch(0.54 0.19 240);
+  --chart-2: oklch(0.62 0.14 205);
+  --chart-3: oklch(0.60 0.13 255);
+
+  --sidebar-primary: oklch(0.54 0.19 240);
+  --sidebar-primary-foreground: oklch(0.99 0 0);
+
+  --sidebar-accent: oklch(0.88 0.055 220);
+  --sidebar-accent-foreground: oklch(0.20 0.03 260);
+
+  --dashboard-content-bg: oklch(0.955 0.023 220);
+  --dashboard-sidebar-start: oklch(0.94 0.042 220);
+  --dashboard-sidebar-end: var(--card);
+  --dashboard-header-start: oklch(0.965 0.032 220 / 0.96);
+  --dashboard-header-end: oklch(1 0 0 / 0.96);
+  --dashboard-brand-panel: oklch(0.91 0.065 220);
+  --dashboard-accent-soft: oklch(0.90 0.07 215);
+}
+
+.theme-pharmacy.dark,
+.dark .theme-pharmacy {
   --primary: oklch(0.65 0.18 145);
   --primary-foreground: oklch(0.15 0.03 260);
 
@@ -219,14 +292,66 @@ html, body {
 
   --sidebar-accent: oklch(0.25 0.05 160);
   --sidebar-accent-foreground: oklch(0.97 0.01 250);
+
+  --dashboard-content-bg: oklch(0.19 0.025 150);
+  --dashboard-sidebar-start: oklch(0.25 0.045 150);
+  --dashboard-sidebar-end: var(--sidebar);
+  --dashboard-header-start: oklch(0.24 0.04 150 / 0.95);
+  --dashboard-header-end: oklch(0.205 0.02 250 / 0.95);
+  --dashboard-brand-panel: oklch(0.29 0.055 150);
+  --dashboard-accent-soft: oklch(0.28 0.06 155);
 }
 
 .theme-pharmacy.dark .sidebar-bg {
-  background: linear-gradient(180deg, oklch(0.35 0.06 145 / 0.4) 0%, var(--sidebar) 100%) !important;
+  background:
+    linear-gradient(180deg, var(--dashboard-sidebar-start) 0%, var(--dashboard-sidebar-end) 100%);
 }
 
 .theme-pharmacy.dark .header-bg {
-  background: linear-gradient(90deg, oklch(0.35 0.06 145 / 0.3) 0%, var(--background) 100%) !important;
+  background:
+    linear-gradient(90deg, var(--dashboard-header-start) 0%, var(--dashboard-header-end) 100%);
+}
+
+.dark .theme-pharmacy .sidebar-bg {
+  background:
+    linear-gradient(180deg, var(--dashboard-sidebar-start) 0%, var(--dashboard-sidebar-end) 100%);
+}
+
+.dark .theme-pharmacy .header-bg {
+  background:
+    linear-gradient(90deg, var(--dashboard-header-start) 0%, var(--dashboard-header-end) 100%);
+}
+
+.theme-hospital.dark,
+.dark .theme-hospital {
+  --primary: oklch(0.70 0.16 240);
+  --primary-foreground: oklch(0.15 0.03 260);
+
+  --secondary: oklch(0.25 0.045 220);
+  --secondary-foreground: oklch(0.95 0.02 230);
+
+  --accent: oklch(0.28 0.06 215);
+  --accent-foreground: oklch(0.95 0.02 230);
+
+  --ring: oklch(0.70 0.16 240);
+
+  --chart-1: oklch(0.70 0.16 240);
+  --chart-2: oklch(0.65 0.14 205);
+  --chart-3: oklch(0.62 0.14 255);
+
+  --sidebar-primary: oklch(0.70 0.16 240);
+  --sidebar-primary-foreground: oklch(0.15 0.03 260);
+
+  --sidebar-accent: oklch(0.25 0.045 220);
+  --sidebar-accent-foreground: oklch(0.97 0.01 250);
+
+  --dashboard-content-bg: oklch(0.19 0.025 225);
+  --dashboard-sidebar-start: oklch(0.25 0.045 225);
+  --dashboard-sidebar-end: var(--sidebar);
+  --dashboard-header-start: oklch(0.24 0.04 225 / 0.95);
+  --dashboard-header-end: oklch(0.205 0.02 250 / 0.95);
+  --dashboard-brand-panel: oklch(0.29 0.055 225);
+  --dashboard-accent-soft: oklch(0.28 0.06 220);
 }
 
 .dark {

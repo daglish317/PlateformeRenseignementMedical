@@ -1,6 +1,7 @@
 "use client";
 
 import { RefreshCw } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PageContainer } from "../../dashboard/components/PageContainer";
@@ -43,16 +44,9 @@ export function DashboardHomePage({ type }: DashboardHomePageProps) {
       <div className="mb-6">
         <PageTitle
           title="Tableau de bord"
-          subtitle={
-            type === "HOPITAL" ? "Gestion de votre hôpital" : "Gestion de votre pharmacie"
-          }
+          subtitle={type === "HOPITAL" ? "Gestion de votre hôpital" : "Gestion de votre pharmacie"}
           actions={
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => refetch()}
-              disabled={isFetching}
-            >
+            <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isFetching}>
               <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} />
               Actualiser
             </Button>
@@ -63,7 +57,7 @@ export function DashboardHomePage({ type }: DashboardHomePageProps) {
       {isLoading ? (
         <DashboardSkeleton />
       ) : error ? (
-        <div className="flex flex-col items-center justify-center gap-4 rounded-xl border bg-card py-16 text-center">
+        <div className="flex flex-col items-center justify-center gap-4 rounded-xl border bg-card py-16 text-center shadow-sm">
           <p className="text-sm text-muted-foreground">
             Une erreur est survenue lors du chargement des données.
           </p>
@@ -75,9 +69,7 @@ export function DashboardHomePage({ type }: DashboardHomePageProps) {
       ) : data ? (
         <div className="space-y-6">
           <WelcomeCard
-            structureName={data.structure.nom}
-            structureType={data.structure.type}
-            statut={data.structure.statut}
+            structure={data.structure}
           />
 
           <StatisticsCards stats={data.stats} type={type} />

@@ -6,6 +6,7 @@ export default function HeaderLogo() {
     <Logo
       variant="auto"
       priority
+      className="shrink-0"
     />
   );
 }

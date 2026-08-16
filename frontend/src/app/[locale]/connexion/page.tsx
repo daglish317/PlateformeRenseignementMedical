@@ -2,7 +2,6 @@
 
 import { useTranslations } from "next-intl";
 
-import PublicLayout from "@/components/layout/PublicLayout";
 import { AuthLayout } from "@/features/auth/components/AuthLayout";
 import { AuthCard } from "@/features/auth/components/AuthCard";
 import { LoginForm } from "@/features/auth/components/LoginForm";
@@ -18,26 +17,24 @@ export default function LoginPage() {
 
   return (
     <GuestRoute>
-      <PublicLayout showSearch={false} showFooter={true}>
-        <AuthLayout>
-          <AuthCard title={t("loginTitle")}>
-            <div className="space-y-6">
-              <LoginForm onSuccess={redirectAfterAuth} />
+      <AuthLayout>
+        <AuthCard title={t("loginTitle")} mode="login">
+          <div className="space-y-6">
+            <LoginForm onSuccess={redirectAfterAuth} />
 
-              <Divider />
+            <Divider />
 
-              <GoogleButton onSuccess={redirectAfterAuth} />
+            <GoogleButton onSuccess={redirectAfterAuth} />
 
-              <p className="text-center text-sm text-muted-foreground">
-                {t("noAccount")}{" "}
-                <Link href="/inscription" className="text-primary hover:underline">
-                  {t("signUp")}
-                </Link>
-              </p>
-            </div>
-          </AuthCard>
-        </AuthLayout>
-      </PublicLayout>
+            <p className="text-center text-sm text-muted-foreground">
+              {t("noAccount")}{" "}
+              <Link href="/inscription" className="font-medium text-primary hover:underline">
+                {t("signUp")}
+              </Link>
+            </p>
+          </div>
+        </AuthCard>
+      </AuthLayout>
     </GuestRoute>
   );
 }

@@ -1,9 +1,10 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
+import { Loader2, ShieldCheck } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,7 +28,12 @@ interface LoginFormProps {
 
 export function LoginForm({ onSuccess }: LoginFormProps) {
   const t = useTranslations("auth");
+  const locale = useLocale();
   const { mutate: login, isPending } = useLogin();
+  const secureNote =
+    locale === "fr"
+      ? "Accès protégé par rôle et permissions de structure."
+      : "Access protected by role and structure permissions.";
 
   const form = useForm<LoginCredentials>({
     resolver: zodResolver(createLoginSchema(t)),
@@ -51,7 +57,7 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
         <FormField
           control={form.control}
           name="email"
@@ -59,7 +65,13 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
             <FormItem>
               <FormLabel>{t("email")}</FormLabel>
               <FormControl>
-                <Input type="email" placeholder={t("emailPlaceholder")} {...field} />
+                <Input
+                  type="email"
+                  placeholder={t("emailPlaceholder")}
+                  autoComplete="email"
+                  className="h-11"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -73,16 +85,27 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
             <FormItem>
               <FormLabel>{t("password")}</FormLabel>
               <FormControl>
-                <PasswordInput placeholder={t("passwordPlaceholder")} {...field} />
+                <PasswordInput
+                  placeholder={t("passwordPlaceholder")}
+                  autoComplete="current-password"
+                  className="h-11"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
 
-        <Button type="submit" className="w-full" disabled={isPending}>
+        <Button type="submit" className="h-11 w-full shadow-sm" disabled={isPending}>
+          {isPending && <Loader2 className="size-4 animate-spin" />}
           {isPending ? t("signingIn") : t("signIn")}
         </Button>
+
+        <p className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
+          <ShieldCheck className="size-3.5 text-primary" />
+          {secureNote}
+        </p>
       </form>
     </Form>
   );

@@ -2,9 +2,9 @@
 
 export function DashboardFooter() {
   return (
-    <footer className="shrink-0 border-t py-4">
+    <footer className="shrink-0 border-t border-border bg-background/95 py-3">
       <p className="text-center text-xs text-muted-foreground">
-        SantéProx • v1.0.0 • © 2025
+        SantéProx · plateforme de gestion médicale · © 2026
       </p>
     </footer>
   );

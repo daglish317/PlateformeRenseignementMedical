@@ -13,9 +13,9 @@ function TypeBadge({ type }: { type: "HOPITAL" | "PHARMACIE" }) {
   return (
     <span className="inline-flex items-center gap-1 text-xs font-medium">
       {type === "HOPITAL" ? (
-        <Hospital className="h-3.5 w-3.5 text-red-600" />
+        <Hospital className="h-3.5 w-3.5 text-blue-600" />
       ) : (
-        <Pill className="h-3.5 w-3.5 text-green-600" />
+        <Pill className="h-3.5 w-3.5 text-emerald-600" />
       )}
       {type === "HOPITAL" ? "Hôpital" : "Pharmacie"}
     </span>

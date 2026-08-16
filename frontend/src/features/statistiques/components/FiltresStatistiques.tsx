@@ -1,7 +1,8 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState } from "react";
 import { CalendarDays, Search, SlidersHorizontal } from "lucide-react";
+
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
@@ -24,10 +25,7 @@ interface FiltresStatistiquesProps {
   onChange: (patch: Partial<EtatParametres>) => void;
 }
 
-export function FiltresStatistiques({
-  etat,
-  onChange,
-}: FiltresStatistiquesProps) {
+export function FiltresStatistiques({ etat, onChange }: FiltresStatistiquesProps) {
   const [produitSaisi, setProduitSaisi] = useState(etat.produit);
   const [venteSaisie, setVenteSaisie] = useState(etat.vente);
   const [approSaisi, setApproSaisi] = useState(etat.approvisionnement);
@@ -62,7 +60,7 @@ export function FiltresStatistiques({
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       <div className="space-y-2">
-        <Label htmlFor="periode-statistiques">PÃ©riode</Label>
+        <Label htmlFor="periode-statistiques">Période</Label>
         <Select
           id="periode-statistiques"
           value={etat.periode}
@@ -72,7 +70,7 @@ export function FiltresStatistiques({
             })
           }
         >
-          <option value="">Toute la pÃ©riode</option>
+          <option value="">Toute la période</option>
           {PERIODES_RAPIDES_LABELS.map(([valeur, libelle]) => (
             <option key={valeur} value={valeur}>
               {libelle}
@@ -121,7 +119,7 @@ export function FiltresStatistiques({
         </Label>
         <Input
           id="filtre-produit"
-          placeholder="Nom du mÃ©dicament..."
+          placeholder="Nom du médicament..."
           value={produitSaisi}
           onChange={(e) => setProduitSaisi(e.target.value)}
         />
@@ -135,8 +133,8 @@ export function FiltresStatistiques({
           onChange={(e) => onChange({ type: e.target.value })}
         >
           <option value="">Tous</option>
-          <option value="MEDICAMENT">MÃ©dicament</option>
-          <option value="EQUIPEMENT">Ã‰quipement</option>
+          <option value="MEDICAMENT">Médicament</option>
+          <option value="EQUIPEMENT">Équipement</option>
           <option value="CONSOMMABLE">Consommable</option>
         </Select>
       </div>
@@ -145,7 +143,7 @@ export function FiltresStatistiques({
         <Label htmlFor="filtre-vente">Vente</Label>
         <Input
           id="filtre-vente"
-          placeholder="Numero de vente..."
+          placeholder="Numéro de vente..."
           value={venteSaisie}
           onChange={(e) => setVenteSaisie(e.target.value)}
         />
@@ -155,7 +153,7 @@ export function FiltresStatistiques({
         <Label htmlFor="filtre-approvisionnement">Approvisionnement</Label>
         <Input
           id="filtre-approvisionnement"
-          placeholder="Numero d'approvisionnement..."
+          placeholder="Numéro d'approvisionnement..."
           value={approSaisi}
           onChange={(e) => setApproSaisi(e.target.value)}
         />
@@ -174,11 +172,11 @@ export function FiltresStatistiques({
           onChange={(e) => onChange({ caisse: e.target.value })}
         >
           <option value="">Tous</option>
-          <option value="ESPECES">EspÃ¨ces</option>
+          <option value="ESPECES">Espèces</option>
           <option value="CARTE">Carte bancaire</option>
           <option value="MOBILE_MONEY">Mobile money</option>
           <option value="VIREMENT">Virement</option>
-          <option value="CHEQUE">ChÃ¨que</option>
+          <option value="CHEQUE">Chèque</option>
         </Select>
       </div>
     </div>

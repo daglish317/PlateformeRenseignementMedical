@@ -1,8 +1,16 @@
-﻿"use client";
+"use client";
 
 import { FormEvent, useMemo, useState } from "react";
-import { Building2, Loader2, Power, PowerOff, UserPlus } from "lucide-react";
+import {
+  Building2,
+  Loader2,
+  Power,
+  PowerOff,
+  ShieldCheck,
+  UserPlus,
+} from "lucide-react";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,11 +27,27 @@ import { useStructureTeam } from "../hooks/useStructureTeam";
 import { useUpdateStructureMemberStatus } from "../hooks/useUpdateStructureMemberStatus";
 import type { StructureMemberStatus } from "../types/team";
 
-const statusLabels: Record<StructureMemberStatus, string> = {
-  INVITE: "Invite",
-  ACTIF: "Actif",
-  SUSPENDU: "Suspendu",
+type InvitedRole = "GESTIONNAIRE" | "CAISSIER";
+
+const ROLE_LABELS: Record<string, string> = {
+  PROPRIETAIRE: "Propriétaire",
+  GESTIONNAIRE: "Gestionnaire",
+  CAISSIER: "Caissier",
 };
+
+const STATUS_LABELS: Record<
+  StructureMemberStatus,
+  { label: string; variant: "success" | "warning" | "destructive" | "outline" }
+> = {
+  INVITE: { label: "Invité", variant: "warning" },
+  ACTIF: { label: "Actif", variant: "success" },
+  SUSPENDU: { label: "Suspendu", variant: "destructive" },
+};
+
+function formatRole(role?: string | null) {
+  if (!role) return "-";
+  return ROLE_LABELS[role] ?? role;
+}
 
 export function TeamPage() {
   const user = useAuthStore((state) => state.user);
@@ -47,7 +71,7 @@ export function TeamPage() {
 
   const [nom, setNom] = useState("");
   const [email, setEmail] = useState("");
-  const [role, setRole] = useState("");
+  const [role, setRole] = useState<InvitedRole>("GESTIONNAIRE");
 
   const editableMembers = useMemo(
     () =>
@@ -120,13 +144,13 @@ export function TeamPage() {
         structure_id: effectiveStructureId,
         nom: nom.trim(),
         email: email.trim(),
-        role: role.trim() || undefined,
+        role,
       },
       {
         onSuccess: (data) => {
           setNom("");
           setEmail("");
-          setRole("");
+          setRole("GESTIONNAIRE");
           if (data.data?.id) {
             setSelectedMemberId(data.data.id);
           }
@@ -153,63 +177,67 @@ export function TeamPage() {
   return (
     <PageContainer className="space-y-6">
       <PageTitle
-        title="Mon equipe"
-        subtitle="Creez vos structures puis assignez leurs gestionnaires et caissiers"
+        title="Mon équipe"
+        subtitle="Créez une structure, pré-enregistrez ses collaborateurs, puis activez leurs modules"
       />
 
       {!isOwner && (
         <SectionCard>
           <p className="text-sm text-muted-foreground">
-            Seul le proprietaire peut creer les structures et inviter les collaborateurs.
+            Seul le propriétaire peut créer les structures et inviter les collaborateurs.
           </p>
         </SectionCard>
       )}
 
       {isOwner && (
-        <>
-          <SectionCard title="Creer une structure">
-            <form onSubmit={handleCreateStructure} className="grid gap-4 md:grid-cols-[1fr_180px_1fr_180px_auto] md:items-end">
-              <div className="space-y-2">
-                <Label htmlFor="structure-name">Nom</Label>
-                <Input
-                  id="structure-name"
-                  value={structureNom}
-                  onChange={(event) => setStructureNom(event.target.value)}
-                  placeholder="Pharmacie Centrale"
-                  disabled={createStructure.isPending}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="structure-type">Type</Label>
-                <Select
-                  id="structure-type"
-                  value={structureType}
-                  onChange={(event) => setStructureType(event.target.value as "HOPITAL" | "PHARMACIE")}
-                  disabled={createStructure.isPending}
-                >
-                  <option value="PHARMACIE">Pharmacie</option>
-                  <option value="HOPITAL">Hopital</option>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="structure-address">Adresse</Label>
-                <Input
-                  id="structure-address"
-                  value={structureAdresse}
-                  onChange={(event) => setStructureAdresse(event.target.value)}
-                  placeholder="Adresse"
-                  disabled={createStructure.isPending}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="structure-phone">Telephone</Label>
-                <Input
-                  id="structure-phone"
-                  value={structureTelephone}
-                  onChange={(event) => setStructureTelephone(event.target.value)}
-                  placeholder="Telephone"
-                  disabled={createStructure.isPending}
-                />
+        <div className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
+          <SectionCard title="Créer une structure">
+            <form onSubmit={handleCreateStructure} className="space-y-4">
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="structure-name">Nom</Label>
+                  <Input
+                    id="structure-name"
+                    value={structureNom}
+                    onChange={(event) => setStructureNom(event.target.value)}
+                    placeholder="Pharmacie Centrale"
+                    disabled={createStructure.isPending}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="structure-type">Type</Label>
+                  <Select
+                    id="structure-type"
+                    value={structureType}
+                    onChange={(event) =>
+                      setStructureType(event.target.value as "HOPITAL" | "PHARMACIE")
+                    }
+                    disabled={createStructure.isPending}
+                  >
+                    <option value="PHARMACIE">Pharmacie</option>
+                    <option value="HOPITAL">Hôpital</option>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="structure-address">Adresse</Label>
+                  <Input
+                    id="structure-address"
+                    value={structureAdresse}
+                    onChange={(event) => setStructureAdresse(event.target.value)}
+                    placeholder="Adresse"
+                    disabled={createStructure.isPending}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="structure-phone">Téléphone</Label>
+                  <Input
+                    id="structure-phone"
+                    value={structureTelephone}
+                    onChange={(event) => setStructureTelephone(event.target.value)}
+                    placeholder="Téléphone"
+                    disabled={createStructure.isPending}
+                  />
+                </div>
               </div>
               <Button type="submit" disabled={!canCreateStructure}>
                 {createStructure.isPending ? (
@@ -217,92 +245,115 @@ export function TeamPage() {
                 ) : (
                   <Building2 className="size-4" />
                 )}
-                Creer
+                Créer la structure
               </Button>
             </form>
           </SectionCard>
 
-          <SectionCard title="Structure selectionnee">
-            {ownerStructures.isLoading && (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Loader2 className="size-4 animate-spin" />
-                Chargement des structures...
-              </div>
-            )}
-            {!ownerStructures.isLoading && ownerStructures.data?.results.length === 0 && (
-              <p className="text-sm text-muted-foreground">
-                Creez d&apos;abord une structure pour pouvoir inviter son equipe.
-              </p>
-            )}
-            {ownerStructures.data && ownerStructures.data.results.length > 0 && (
-              <div className="max-w-md space-y-2">
-                <Label htmlFor="selected-structure">Structure</Label>
-                <Select
-                  id="selected-structure"
-                  value={effectiveStructureId}
-                  onChange={(event) => setSelectedStructureId(event.target.value)}
-                >
-                  {ownerStructures.data.results.map((structure) => (
-                    <option key={structure.id} value={structure.id}>
-                      {structure.nom} - {structure.type}
-                    </option>
-                  ))}
-                </Select>
-              </div>
-            )}
-          </SectionCard>
-
-          <SectionCard title="Pre-enregistrer un collaborateur">
-            <form onSubmit={handleInvite} className="grid gap-4 md:grid-cols-[1fr_1fr_1fr_auto] md:items-end">
-              <div className="space-y-2">
-                <Label htmlFor="team-name">Nom complet</Label>
-                <Input
-                  id="team-name"
-                  value={nom}
-                  onChange={(event) => setNom(event.target.value)}
-                  placeholder="Jean Dupont"
-                  disabled={inviteMember.isPending || !effectiveStructureId}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="team-email">Adresse email</Label>
-                <Input
-                  id="team-email"
-                  type="email"
-                  value={email}
-                  onChange={(event) => setEmail(event.target.value)}
-                  placeholder="jean@exemple.com"
-                  disabled={inviteMember.isPending || !effectiveStructureId}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="team-role">Role (optionnel)</Label>
-                <Input
-                  id="team-role"
-                  value={role}
-                  onChange={(event) => setRole(event.target.value)}
-                  placeholder="Ex: Caissier, Gestionnaire, Assistant..."
-                  disabled={inviteMember.isPending || !effectiveStructureId}
-                />
-              </div>
-              <Button type="submit" disabled={!canInvite}>
-                {inviteMember.isPending ? (
+          <div className="space-y-6">
+            <SectionCard title="Structure active">
+              {ownerStructures.isLoading && (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Loader2 className="size-4 animate-spin" />
-                ) : (
-                  <UserPlus className="size-4" />
-                )}
-                Pre-enregistrer
-              </Button>
-            </form>
-            <p className="mt-2 text-xs text-muted-foreground">
-              Aucun email ne sera envoyÃ©. Le collaborateur crÃ©era lui-mÃªme son
-              compte sur la page d&apos;inscription avec cette adresse email.
-            </p>
-          </SectionCard>
-        </>
+                  Chargement des structures...
+                </div>
+              )}
+              {!ownerStructures.isLoading && ownerStructures.data?.results.length === 0 && (
+                <p className="text-sm text-muted-foreground">
+                  Créez d'abord une structure pour pouvoir inviter son équipe.
+                </p>
+              )}
+              {ownerStructures.data && ownerStructures.data.results.length > 0 && (
+                <div className="grid gap-4 md:grid-cols-[1fr_auto] md:items-end">
+                  <div className="space-y-2">
+                    <Label htmlFor="selected-structure">Structure</Label>
+                    <Select
+                      id="selected-structure"
+                      value={effectiveStructureId}
+                      onChange={(event) => {
+                        setSelectedStructureId(event.target.value);
+                        setSelectedMemberId("");
+                      }}
+                    >
+                      {ownerStructures.data.results.map((structure) => (
+                        <option key={structure.id} value={structure.id}>
+                          {structure.nom} - {structure.type === "PHARMACIE" ? "Pharmacie" : "Hôpital"}
+                        </option>
+                      ))}
+                    </Select>
+                  </div>
+                  <Badge variant="secondary" className="w-fit">
+                    {team.data?.results.length ?? 0} membre(s)
+                  </Badge>
+                </div>
+              )}
+            </SectionCard>
+
+            <SectionCard title="Pré-enregistrer un collaborateur">
+              <form onSubmit={handleInvite} className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="team-name">Nom complet</Label>
+                  <Input
+                    id="team-name"
+                    value={nom}
+                    onChange={(event) => setNom(event.target.value)}
+                    placeholder="Jean Dupont"
+                    disabled={inviteMember.isPending || !effectiveStructureId}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="team-email">Adresse email</Label>
+                  <Input
+                    id="team-email"
+                    type="email"
+                    value={email}
+                    onChange={(event) => setEmail(event.target.value)}
+                    placeholder="jean@exemple.com"
+                    disabled={inviteMember.isPending || !effectiveStructureId}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="team-role">Rôle</Label>
+                  <Select
+                    id="team-role"
+                    value={role}
+                    onChange={(event) => setRole(event.target.value as InvitedRole)}
+                    disabled={inviteMember.isPending || !effectiveStructureId}
+                  >
+                    <option value="GESTIONNAIRE">Gestionnaire</option>
+                    <option value="CAISSIER">Caissier</option>
+                  </Select>
+                </div>
+                <div className="flex items-end">
+                  <Button type="submit" className="w-full" disabled={!canInvite}>
+                    {inviteMember.isPending ? (
+                      <Loader2 className="size-4 animate-spin" />
+                    ) : (
+                      <UserPlus className="size-4" />
+                    )}
+                    Pré-enregistrer
+                  </Button>
+                </div>
+              </form>
+              <p className="mt-3 text-xs leading-5 text-muted-foreground">
+                Aucun email ne sera envoyé. Le collaborateur créera lui-même son compte
+                avec cette adresse, puis le système le redirigera vers son espace.
+              </p>
+            </SectionCard>
+          </div>
+        </div>
       )}
 
-      <SectionCard title="Membres de la structure">
+      <SectionCard
+        title="Membres de la structure"
+        actions={
+          effectiveStructureId ? (
+            <Badge variant="outline">
+              {team.data?.results.length ?? 0} collaborateur(s)
+            </Badge>
+          ) : null
+        }
+      >
         {team.isLoading && effectiveStructureId && (
           <div className="flex items-center gap-2 p-4 text-sm text-muted-foreground">
             <Loader2 className="size-4 animate-spin" />
@@ -312,56 +363,53 @@ export function TeamPage() {
 
         {team.isError && (
           <p className="p-4 text-sm text-destructive">
-            Impossible de charger l&apos;equipe.
+            Impossible de charger l'équipe.
           </p>
         )}
 
         {!effectiveStructureId && (
           <p className="p-4 text-sm text-muted-foreground">
-            Selectionnez une structure pour afficher ses membres.
+            Sélectionnez une structure pour afficher ses membres.
           </p>
         )}
 
         {!team.isLoading && !team.isError && effectiveStructureId && team.data?.results.length === 0 && (
           <p className="p-4 text-sm text-muted-foreground">
-            Aucun membre rattache a cette structure.
+            Aucun membre rattaché à cette structure.
           </p>
         )}
 
         {!team.isLoading && !team.isError && team.data && team.data.results.length > 0 && (
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto rounded-lg border">
             <table className="w-full text-sm">
-              <thead>
+              <thead className="bg-muted/60">
                 <tr className="border-b text-left text-muted-foreground">
-                  <th className="py-3 pr-4 font-medium">Nom</th>
-                  <th className="py-3 pr-4 font-medium">Email</th>
-                  <th className="py-3 pr-4 font-medium">Role</th>
-                  <th className="py-3 pr-4 font-medium">Statut</th>
-                  <th className="py-3 pr-4 text-right font-medium">Actions</th>
+                  <th className="px-4 py-3 font-medium">Nom</th>
+                  <th className="px-4 py-3 font-medium">Email</th>
+                  <th className="px-4 py-3 font-medium">Rôle</th>
+                  <th className="px-4 py-3 font-medium">Statut</th>
+                  <th className="px-4 py-3 text-right font-medium">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {team.data.results.map((member) => {
-                  const canManageMember =
-                    isOwner &&
-                    member.role !== "PROPRIETAIRE";
+                  const canManageMember = isOwner && member.role !== "PROPRIETAIRE";
                   const action =
                     member.statut === "SUSPENDU" ? "ACTIVATE" : "DEACTIVATE";
                   const isCurrentMemberUpdating =
                     updateMemberStatus.isPending &&
                     updateMemberStatus.variables?.memberId === member.id;
+                  const status = STATUS_LABELS[member.statut];
 
                   return (
-                    <tr key={member.id} className="border-b last:border-0">
-                      <td className="py-3 pr-4 font-medium">{member.nom}</td>
-                      <td className="py-3 pr-4 text-muted-foreground">{member.email}</td>
-                      <td className="py-3 pr-4">
-                        {member.role === "PROPRIETAIRE" 
-                          ? "Proprietaire" 
-                          : member.role || "-"}
+                    <tr key={member.id} className="border-b bg-background last:border-0 hover:bg-muted/30">
+                      <td className="px-4 py-3 font-medium">{member.nom}</td>
+                      <td className="px-4 py-3 text-muted-foreground">{member.email}</td>
+                      <td className="px-4 py-3">{formatRole(member.role)}</td>
+                      <td className="px-4 py-3">
+                        <Badge variant={status.variant}>{status.label}</Badge>
                       </td>
-                      <td className="py-3 pr-4">{statusLabels[member.statut]}</td>
-                      <td className="py-3 pr-4 text-right">
+                      <td className="px-4 py-3 text-right">
                         {canManageMember ? (
                           <Button
                             type="button"
@@ -377,7 +425,7 @@ export function TeamPage() {
                             ) : (
                               <Power className="size-4" />
                             )}
-                            {action === "DEACTIVATE" ? "Desactiver" : "Activer"}
+                            {action === "DEACTIVATE" ? "Désactiver" : "Activer"}
                           </Button>
                         ) : (
                           <span className="text-xs text-muted-foreground">-</span>
@@ -393,11 +441,19 @@ export function TeamPage() {
       </SectionCard>
 
       {isOwner && (
-        <SectionCard
-          title="Permissions du membre"
-          actions={
-            effectiveStructureId && editableMembers.length > 0 ? (
-              <div className="w-full max-w-sm">
+        <div className="space-y-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="size-5 text-primary" />
+                <h2 className="text-lg font-semibold tracking-tight">Permissions du membre</h2>
+              </div>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Activez uniquement les modules que ce collaborateur doit voir.
+              </p>
+            </div>
+            {effectiveStructureId && editableMembers.length > 0 ? (
+              <div className="w-full max-w-sm shrink-0">
                 <Label htmlFor="member-permissions-select" className="sr-only">
                   Membre
                 </Label>
@@ -408,26 +464,31 @@ export function TeamPage() {
                 >
                   {editableMembers.map((member) => (
                     <option key={member.id} value={member.id}>
-                      {member.nom}{member.role ? ` - ${member.role}` : ""}
+                      {member.nom}
+                      {member.role ? ` - ${formatRole(member.role)}` : ""}
                     </option>
                   ))}
                 </Select>
               </div>
-            ) : null
-          }
-        >
+            ) : null}
+          </div>
+
           {!effectiveStructureId ? (
-            <p className="text-sm text-muted-foreground">
-              Selectionnez une structure pour charger ses permissions.
-            </p>
+            <SectionCard>
+              <p className="text-sm text-muted-foreground">
+                Sélectionnez une structure pour charger ses permissions.
+              </p>
+            </SectionCard>
           ) : editableMembers.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              Aucun membre operationnel n&apos;est encore rattache a cette structure.
-            </p>
+            <SectionCard>
+              <p className="text-sm text-muted-foreground">
+                Aucun membre opérationnel n'est encore rattaché à cette structure.
+              </p>
+            </SectionCard>
           ) : (
             <MemberPermissionsEditor member={selectedMember} />
           )}
-        </SectionCard>
+        </div>
       )}
     </PageContainer>
   );

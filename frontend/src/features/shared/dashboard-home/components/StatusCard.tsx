@@ -3,6 +3,7 @@
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Clock, CheckCircle, AlertCircle, XCircle } from "lucide-react";
+
 import { Badge } from "@/components/ui/badge";
 import { SectionCard } from "../../dashboard/components/SectionCard";
 import type { StructureInfo } from "../types/dashboard-home";
@@ -28,32 +29,43 @@ export function StatusCard({ structure }: StatusCardProps) {
   const config = statutConfig[structure.statut];
   const Icon = config.icon;
   const dateToUse = structure.date_validation ?? structure.date_creation;
+  const isHospital = structure.type === "HOPITAL";
 
   return (
     <SectionCard title="Statut de la structure">
       <div className="space-y-4">
-        <div className="flex items-center gap-3">
-          <div
-            className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${
-              structure.statut === "ACTIVE"
-                ? "bg-emerald-100 dark:bg-emerald-900/30"
-                : structure.statut === "REFUSEE"
-                  ? "bg-red-100 dark:bg-red-900/30"
-                  : "bg-amber-100 dark:bg-amber-900/30"
-            }`}
-          >
-            <Icon
-              className={`h-5 w-5 ${
+        <div className="rounded-lg border border-border/70 bg-background p-4">
+          <div className="flex items-start gap-3">
+            <div
+              className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${
                 structure.statut === "ACTIVE"
-                  ? "text-emerald-600 dark:text-emerald-300"
+                  ? "bg-emerald-100 dark:bg-emerald-900/30"
                   : structure.statut === "REFUSEE"
-                    ? "text-red-600 dark:text-red-300"
-                    : "text-amber-600 dark:text-amber-300"
+                    ? "bg-red-100 dark:bg-red-900/30"
+                    : "bg-amber-100 dark:bg-amber-900/30"
               }`}
-            />
-          </div>
-          <div>
-            <Badge variant={config.variant}>{config.label}</Badge>
+            >
+              <Icon
+                className={`h-5 w-5 ${
+                  structure.statut === "ACTIVE"
+                    ? "text-emerald-600 dark:text-emerald-300"
+                    : structure.statut === "REFUSEE"
+                      ? "text-red-600 dark:text-red-300"
+                      : "text-amber-600 dark:text-amber-300"
+                }`}
+              />
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge variant={config.variant}>{config.label}</Badge>
+                <Badge variant="outline">{isHospital ? "Hôpital" : "Pharmacie"}</Badge>
+              </div>
+              <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                {isHospital
+                  ? "Les services hospitaliers dépendent du statut et des modules actifs."
+                  : "Les modules visibles et les opérations disponibles dépendent des droits activés."}
+              </p>
+            </div>
           </div>
         </div>
 
@@ -67,12 +79,26 @@ export function StatusCard({ structure }: StatusCardProps) {
           </div>
         )}
 
-        <div className="text-sm text-muted-foreground">
-          Dernière mise à jour il y a{" "}
-          {formatDistanceToNow(new Date(dateToUse), {
-            addSuffix: false,
-            locale: fr,
-          })}
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div className="rounded-lg border bg-background p-3">
+            <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+              Type de structure
+            </p>
+            <p className="mt-1 text-sm font-medium">
+              {isHospital ? "Structure hospitalière" : "Pharmacie"}
+            </p>
+          </div>
+          <div className="rounded-lg border bg-background p-3">
+            <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+              Dernière mise à jour
+            </p>
+            <p className="mt-1 text-sm font-medium">
+              {formatDistanceToNow(new Date(dateToUse), {
+                addSuffix: false,
+                locale: fr,
+              })}
+            </p>
+          </div>
         </div>
       </div>
     </SectionCard>

@@ -9,7 +9,7 @@ interface DashboardContentProps {
 
 export function DashboardContent({ children, className }: DashboardContentProps) {
   return (
-    <main className={cn("flex-1 overflow-y-auto p-4 md:p-6", className)}>
+    <main className={cn("dashboard-content flex-1 overflow-y-auto p-4 md:p-6", className)}>
       {children}
     </main>
   );

@@ -27,8 +27,8 @@ const cardsConfig: CardConfig[] = [
   { key: "utilisateurs_inscrits", label: "Utilisateurs inscrits", icon: Users, color: "text-cyan-600" },
   { key: "gestionnaires", label: "Gestionnaires", icon: UserCog, color: "text-purple-600" },
   { key: "structures", label: "Structures", icon: Building2, color: "text-blue-600" },
-  { key: "hopitaux", label: "Hôpitaux", icon: Hospital, color: "text-red-600" },
-  { key: "pharmacies", label: "Pharmacies", icon: Pill, color: "text-green-600" },
+  { key: "hopitaux", label: "Hôpitaux", icon: Hospital, color: "text-blue-600" },
+  { key: "pharmacies", label: "Pharmacies", icon: Pill, color: "text-emerald-600" },
   { key: "feedbacks", label: "Feedbacks", icon: MessageSquare, color: "text-orange-600" },
   { key: "messages", label: "Messages", icon: MessagesSquare, color: "text-indigo-600" },
 ];

@@ -13,7 +13,7 @@ type StructureMarkerProps = {
 };
 
 const HOPITAL_COLOR = "#2563eb";
-const PHARMACIE_COLOR = "#dc2626";
+const PHARMACIE_COLOR = "#059669";
 
 const PIN_WIDTH = 34;
 const PIN_HEIGHT = 44;

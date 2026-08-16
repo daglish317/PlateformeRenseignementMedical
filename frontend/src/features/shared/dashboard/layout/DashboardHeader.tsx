@@ -1,6 +1,7 @@
 "use client";
 
-import { Menu, PanelLeftClose, PanelLeft, Bell, LogOut, User } from "lucide-react";
+import { Bell, LogOut, Menu, PanelLeft, PanelLeftClose, User } from "lucide-react";
+
 import { Link, useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -33,6 +34,8 @@ export function DashboardHeader({ type, className }: DashboardHeaderProps) {
   const { unreadCount } = useNotifications();
 
   const showNotificationsLink = type === "HOPITAL" || type === "PHARMACIE";
+  const dashboardLabel =
+    type === "PHARMACIE" ? "Pharmacie" : type === "HOPITAL" ? "Hôpital" : "Propriétaire";
 
   const initials = user
     ? `${user.nom?.charAt(0) ?? ""}${user.email?.charAt(0) ?? ""}`.toUpperCase()
@@ -45,10 +48,13 @@ export function DashboardHeader({ type, className }: DashboardHeaderProps) {
 
   return (
     <header
-      className={cn("flex shrink-0 items-center gap-3 border-b bg-background px-4", className)}
+      className={cn(
+        "flex shrink-0 items-center gap-3 border-b border-border/70 px-4 shadow-sm backdrop-blur",
+        className
+      )}
       style={{ height: DASHBOARD_HEADER.height }}
     >
-      <Button variant="ghost" size="icon" onClick={toggle}>
+      <Button variant="ghost" size="icon" onClick={toggle} aria-label="Basculer le menu">
         {isMobile ? (
           <Menu className="h-5 w-5" />
         ) : collapsed ? (
@@ -62,11 +68,17 @@ export function DashboardHeader({ type, className }: DashboardHeaderProps) {
         <DashboardBreadcrumb />
       </div>
 
+      <div className="hidden items-center gap-2 rounded-full border bg-background/80 px-3 py-1.5 text-xs font-medium text-muted-foreground lg:flex">
+        <span className="h-2 w-2 rounded-full bg-primary" />
+        {dashboardLabel}
+      </div>
+
       <div className="flex items-center gap-1">
         {showNotificationsLink && (
           <Link
             href={`/${type.toLowerCase()}/notifications`}
-            className="relative inline-flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
+            className="relative inline-flex h-10 w-10 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
+            aria-label="Notifications"
           >
             <Bell className="h-5 w-5" />
             {unreadCount > 0 && (
@@ -78,8 +90,9 @@ export function DashboardHeader({ type, className }: DashboardHeaderProps) {
         )}
 
         <button
+          type="button"
           onClick={handleLogout}
-          className="inline-flex h-9 items-center gap-1.5 rounded-md px-2.5 text-sm font-medium text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+          className="inline-flex h-10 items-center gap-1.5 rounded-md px-2.5 text-sm font-medium text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
           title="Déconnexion"
         >
           <LogOut className="h-4 w-4" />

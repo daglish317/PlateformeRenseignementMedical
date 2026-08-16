@@ -1,5 +1,7 @@
-﻿"use client";
+"use client";
+
 import { Search } from "lucide-react";
+
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
@@ -37,29 +39,29 @@ export function HistoriqueFiltres({
         <Input
           value={recherche}
           onChange={(e) => onRecherche(e.target.value)}
-          placeholder="Rechercher un Ã©vÃ©nement, un mÃ©dicament, un numÃ©ro..."
+          placeholder="Rechercher un événement, un médicament, un numéro..."
           className="pl-9"
         />
       </div>
 
       <div className="grid gap-3 sm:grid-cols-3">
         <div className="space-y-2">
-          <Label htmlFor="periode-historique">PÃ©riode</Label>
+          <Label htmlFor="periode-historique">Période</Label>
           <Select
             id="periode-historique"
             value={periode}
             onChange={(e) => onPeriode(e.target.value as PeriodeHistorique)}
           >
-            <option value="">Toutes les pÃ©riodes</option>
+            <option value="">Toutes les périodes</option>
             <option value="aujourdhui">Aujourd&apos;hui</option>
             <option value="semaine">Cette semaine</option>
             <option value="mois">Ce mois</option>
-            <option value="personnalisee">PÃ©riode personnalisÃ©e</option>
+            <option value="personnalisee">Période personnalisée</option>
           </Select>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="type-historique">Type d&apos;Ã©vÃ©nement</Label>
+          <Label htmlFor="type-historique">Type d&apos;événement</Label>
           <Select
             id="type-historique"
             value={type}
@@ -67,9 +69,9 @@ export function HistoriqueFiltres({
           >
             <option value="">Tous les types</option>
             <option value="APPROVISIONNEMENT_CREE">
-              Approvisionnement enregistrÃ©
+              Approvisionnement enregistré
             </option>
-            <option value="INVENTAIRE_GENERE">Inventaire gÃ©nÃ©rÃ©</option>
+            <option value="INVENTAIRE_GENERE">Inventaire généré</option>
             <option value="CAISSE_RETOUR">Retour caisse</option>
           </Select>
         </div>

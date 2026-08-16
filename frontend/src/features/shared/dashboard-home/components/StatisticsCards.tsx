@@ -10,6 +10,7 @@ import {
   AlertTriangle,
   XCircle,
 } from "lucide-react";
+
 import type { StructureType } from "../types/dashboard-home";
 
 interface StatItem {
@@ -29,13 +30,13 @@ const hospitalStats = (s: Record<string, number | undefined>): StatItem[] => [
     label: "Services",
     value: s.services_count ?? 0,
     icon: Stethoscope,
-    color: "text-blue-600 bg-blue-100 dark:bg-blue-900/30 dark:text-blue-300",
+    color: "bg-primary/10 text-primary",
   },
   {
     label: "Analyses",
     value: s.analyses_count ?? 0,
     icon: FlaskConical,
-    color: "text-purple-600 bg-purple-100 dark:bg-purple-900/30 dark:text-purple-300",
+    color: "bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300",
   },
   {
     label: "Plateaux techniques",
@@ -47,7 +48,7 @@ const hospitalStats = (s: Record<string, number | undefined>): StatItem[] => [
     label: "Prises en charge",
     value: s.care_services_count ?? 0,
     icon: HeartPulse,
-    color: "text-rose-600 bg-rose-100 dark:bg-rose-900/30 dark:text-rose-300",
+    color: "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300",
   },
 ];
 
@@ -56,7 +57,7 @@ const pharmacyStats = (s: Record<string, number | undefined>): StatItem[] => [
     label: "Articles en stock",
     value: s.stock_items_count ?? 0,
     icon: Package,
-    color: "text-blue-600 bg-blue-100 dark:bg-blue-900/30 dark:text-blue-300",
+    color: "bg-primary/10 text-primary",
   },
   {
     label: "Disponibles",
@@ -88,16 +89,21 @@ export function StatisticsCards({ stats, type }: StatisticsCardsProps) {
         return (
           <div
             key={item.label}
-            className="flex items-center gap-4 rounded-xl border bg-card p-4"
+            className="flex min-h-[112px] flex-col justify-between rounded-lg border border-border/70 bg-card p-4 shadow-sm transition-shadow hover:shadow-md"
           >
-            <div
-              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${item.color}`}
-            >
-              <Icon className="h-5 w-5" />
+            <div className="flex items-center justify-between gap-3">
+              <div
+                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${item.color}`}
+              >
+                <Icon className="h-5 w-5" />
+              </div>
+              <span className="rounded-full bg-muted px-2 py-1 text-[11px] font-medium text-muted-foreground">
+                Temps réel
+              </span>
             </div>
-            <div>
-              <p className="text-2xl font-bold">{item.value}</p>
-              <p className="text-sm text-muted-foreground">{item.label}</p>
+            <div className="min-w-0 pt-4">
+              <p className="text-2xl font-bold leading-none">{item.value}</p>
+              <p className="mt-1 text-sm text-muted-foreground">{item.label}</p>
             </div>
           </div>
         );

@@ -115,9 +115,9 @@ export function ManagersTable({ page, pageSize }: ManagersTableProps) {
                   {manager.structure ? (
                     <div className="flex items-center gap-1.5">
                       {manager.structure.type === "HOPITAL" ? (
-                        <Hospital className="h-4 w-4 text-red-500" />
+                        <Hospital className="h-4 w-4 text-blue-600" />
                       ) : (
-                        <Pill className="h-4 w-4 text-green-500" />
+                        <Pill className="h-4 w-4 text-emerald-600" />
                       )}
                       <span className="text-sm">
                         {manager.structure.type === "HOPITAL" ? "Hôpital" : "Pharmacie"}

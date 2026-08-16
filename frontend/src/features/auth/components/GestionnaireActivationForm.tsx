@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { authService } from "@/features/auth/api/auth.service";
 import { useAuthStore } from "@/features/auth/store/auth-store";
 import { getAuthErrorMessage } from "@/features/auth/utils/auth-errors";
+import { PasswordInput } from "./PasswordInput";
 
 interface GestionnaireActivationFormProps {
   onSuccess?: () => void;
@@ -42,11 +43,9 @@ export function GestionnaireActivationForm({
     try {
       const result = await authService.checkGestionnaire(email);
       if (result.is_invited && result.requires_otp) {
-        // Propriétaire (invité par l'admin) : flux email + OTP conservé.
         setViaOtp(true);
         setStep("otp");
       } else if (result.is_invited) {
-        // Gestionnaire / caissier : création de compte directe, sans OTP.
         setViaOtp(false);
         setStep("password");
       } else {
@@ -150,9 +149,7 @@ export function GestionnaireActivationForm({
     <div className="space-y-4">
       {step === "email" && (
         <form onSubmit={handleCheckEmail} className="space-y-4">
-          <p className="text-sm text-muted-foreground">
-            {t("manager.emailHelp")}
-          </p>
+          <p className="text-sm text-muted-foreground">{t("manager.emailHelp")}</p>
           <div className="space-y-2">
             <Label htmlFor="gest-email">{t("email")}</Label>
             <Input
@@ -255,11 +252,11 @@ export function GestionnaireActivationForm({
           </div>
           <div className="space-y-2">
             <Label htmlFor="gest-password">{t("password")}</Label>
-            <Input
+            <PasswordInput
               id="gest-password"
-              type="password"
               placeholder={t("manager.passwordMinPlaceholder")}
               value={password}
+              autoComplete="new-password"
               onChange={(e) => {
                 setPassword(e.target.value);
                 setError(null);
@@ -269,11 +266,11 @@ export function GestionnaireActivationForm({
           </div>
           <div className="space-y-2">
             <Label htmlFor="gest-confirm">{t("confirmPassword")}</Label>
-            <Input
+            <PasswordInput
               id="gest-confirm"
-              type="password"
               placeholder={t("manager.confirmPasswordPlaceholder")}
               value={confirmPassword}
+              autoComplete="new-password"
               onChange={(e) => {
                 setConfirmPassword(e.target.value);
                 setError(null);

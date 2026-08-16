@@ -16,9 +16,9 @@ interface PendingStructuresProps {
 
 function StructureTypeIcon({ type }: { type: DashboardStructure["type"] }) {
   if (type === "HOPITAL") {
-    return <Hospital className="h-4 w-4 text-red-500" />;
+    return <Hospital className="h-4 w-4 text-blue-600" />;
   }
-  return <Pill className="h-4 w-4 text-green-500" />;
+  return <Pill className="h-4 w-4 text-emerald-600" />;
 }
 
 export function PendingStructures({ structures }: PendingStructuresProps) {

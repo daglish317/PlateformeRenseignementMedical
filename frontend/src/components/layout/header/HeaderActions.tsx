@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import LanguageSwitcher from "@/components/layout/LanguageSwitcher";
 import ThemeToggle from "@/components/layout/ThemeToggle";
@@ -16,24 +16,23 @@ export default function HeaderActions() {
     return (
       <div className="flex items-center gap-2 shrink-0">
         <Link href="/favoris">
-          <Button variant="ghost" size="icon" className="rounded-full text-muted-foreground hover:text-foreground">
+          <Button variant="ghost" size="icon" className="rounded-full text-muted-foreground hover:text-foreground" aria-label="Favoris">
             <Heart className="h-5 w-5" />
           </Button>
         </Link>
 
         <Link href="/profil">
-          <Button variant="ghost" size="icon" className="rounded-full text-muted-foreground hover:text-foreground">
+          <Button variant="ghost" size="icon" className="rounded-full text-muted-foreground hover:text-foreground" aria-label="Profil">
             <User className="h-5 w-5" />
           </Button>
         </Link>
 
         <LanguageSwitcher />
-
         <ThemeToggle />
 
         <Button variant="ghost" size="sm" onClick={() => logout()} disabled={isPending}>
-          <LogOut className="h-4 w-4 mr-2" />
-          Déconnexion
+          <LogOut className="mr-2 h-4 w-4" />
+          Deconnexion
         </Button>
       </div>
     );
@@ -42,13 +41,12 @@ export default function HeaderActions() {
   return (
     <div className="flex items-center gap-2 shrink-0">
       <Link href="/favoris">
-        <Button variant="ghost" size="icon" className="rounded-full text-muted-foreground hover:text-foreground">
+        <Button variant="ghost" size="icon" className="rounded-full text-muted-foreground hover:text-foreground" aria-label="Favoris">
           <Heart className="h-5 w-5" />
         </Button>
       </Link>
 
       <LanguageSwitcher />
-
       <ThemeToggle />
 
       <Link href="/connexion">
@@ -59,7 +57,7 @@ export default function HeaderActions() {
 
       <Link href="/inscription">
         <Button size="sm">
-          S&apos;inscrire
+          S'inscrire
         </Button>
       </Link>
     </div>

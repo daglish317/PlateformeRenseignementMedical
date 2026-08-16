@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 import { Plus, Stethoscope, FlaskConical, HeartPulse, Package } from "lucide-react";
+
 import { Link } from "@/i18n/navigation";
 import { SectionCard } from "../../dashboard/components/SectionCard";
 import { useMyPermissions } from "@/features/shared/dashboard/hooks/useMyPermissions";
@@ -15,6 +16,7 @@ interface QuickActionsProps {
 
 interface ActionItem {
   label: string;
+  description: string;
   href: string;
   icon: React.ComponentType<{ className?: string }>;
   module?: "STOCK" | "APPROVISIONNEMENT" | "VENTE";
@@ -24,16 +26,19 @@ interface ActionItem {
 const hospitalActions: ActionItem[] = [
   {
     label: "Ajouter un service",
+    description: "Créer un nouveau service clinique ou administratif.",
     href: "/hospital/services",
     icon: Stethoscope,
   },
   {
     label: "Ajouter une analyse",
+    description: "Déclarer un examen, une prestation ou un acte.",
     href: "/hospital/analyses",
     icon: FlaskConical,
   },
   {
     label: "Ajouter une prise en charge",
+    description: "Enregistrer un parcours de prise en charge.",
     href: "/hospital/care-services",
     icon: HeartPulse,
   },
@@ -42,6 +47,7 @@ const hospitalActions: ActionItem[] = [
 const pharmacyActions: ActionItem[] = [
   {
     label: "Ajouter un médicament",
+    description: "Créer une fiche produit et l’ajouter au stock.",
     href: "/pharmacy/stock",
     icon: Package,
     module: "STOCK",
@@ -49,6 +55,7 @@ const pharmacyActions: ActionItem[] = [
   },
   {
     label: "Mettre à jour un stock",
+    description: "Corriger les quantités ou un seuil d’alerte.",
     href: "/pharmacy/stock",
     icon: Plus,
     module: "STOCK",
@@ -56,6 +63,7 @@ const pharmacyActions: ActionItem[] = [
   },
   {
     label: "Créer un approvisionnement",
+    description: "Recevoir un lot et mettre à jour les entrées.",
     href: "/pharmacy/supply",
     icon: Plus,
     module: "APPROVISIONNEMENT",
@@ -93,10 +101,10 @@ export function QuickActions({ type }: QuickActionsProps) {
     <SectionCard title="Actions rapides">
       {visibleActions.length === 0 ? (
         <div className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
-          Aucune action rapide n&apos;est disponible avec les modules activés.
+          Aucune action rapide n’est disponible avec les modules activés.
         </div>
       ) : (
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
           {visibleActions.map((action) => {
             const Icon = action.icon;
             return (
@@ -104,12 +112,20 @@ export function QuickActions({ type }: QuickActionsProps) {
                 key={action.label}
                 href={action.href}
                 prefetch={false}
-                className="flex items-center gap-3 rounded-lg border p-3 text-sm font-medium transition-colors hover:bg-muted"
+                className="group flex h-full flex-col gap-4 rounded-lg border border-border/70 bg-background p-4 transition-all hover:-translate-y-0.5 hover:border-primary/30 hover:bg-muted/40 hover:shadow-sm"
               >
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-                  <Icon className="h-4 w-4 text-primary" />
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10">
+                    <Icon className="h-5 w-5 text-primary" />
+                  </div>
+                  <span className="rounded-full border bg-background px-2 py-1 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+                    Ouvrir
+                  </span>
                 </div>
-                {action.label}
+                <div className="space-y-1">
+                  <p className="text-sm font-semibold text-foreground">{action.label}</p>
+                  <p className="text-xs leading-5 text-muted-foreground">{action.description}</p>
+                </div>
               </Link>
             );
           })}

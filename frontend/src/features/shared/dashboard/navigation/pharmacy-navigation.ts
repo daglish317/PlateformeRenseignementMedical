@@ -15,25 +15,15 @@ import {
   Receipt,
   BarChart3,
 } from "lucide-react";
+
 import type { DashboardNavItem } from "../types";
 
-/**
- * Navigation pour le dashboard équipe pharmacie (GESTIONNAIRE + CAISSIER)
- * Les modules visibles dépendent des permissions attribuées par le propriétaire
- * 
- * IMPORTANT:
- * - Profil et Paramètres sont toujours visibles (non conditionnés par permissions)
- * - Messagerie n'est PAS incluse (exclusivement propriétaire)
- * - Tous les autres modules sont filtrés selon les permissions utilisateur
- */
 export const pharmacyNavigation: DashboardNavItem[] = [
   {
-    label: "Dashboard",
+    label: "Vue d'ensemble",
     href: "/pharmacy",
     icon: LayoutDashboard,
   },
-  
-  // MODULES CONDITIONNELS - Dépendent des permissions
   {
     label: "Stock",
     href: "/pharmacy/stock",
@@ -132,8 +122,6 @@ export const pharmacyNavigation: DashboardNavItem[] = [
     action: "CONSULTER",
     navItem: "notifications",
   },
-  
-  // MODULES OBLIGATOIRES - Toujours visibles (pas de module/action)
   {
     label: "Profil",
     href: "/pharmacy/profile",

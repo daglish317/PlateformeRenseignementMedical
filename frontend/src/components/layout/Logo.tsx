@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Image from "next/image";
 import { useTheme } from "next-themes";
@@ -25,9 +25,7 @@ export default function Logo({
   className,
 }: LogoProps) {
   const { resolvedTheme } = useTheme();
-
   const mounted = useMounted();
-
   const isDark = mounted && resolvedTheme === "dark";
 
   const horizontalLogo = isDark
@@ -48,13 +46,9 @@ export default function Logo({
     case "vertical":
       logo = verticalLogo;
       break;
-
     case "icon":
       logo = iconLogo;
       break;
-
-    case "horizontal":
-    case "auto":
     default:
       logo = horizontalLogo;
       break;
@@ -77,43 +71,32 @@ export default function Logo({
 
   if (variant === "auto") {
     return (
-      <Link
-        href="/"
-        aria-label="Retour à l'accueil de SantéProx"
-        className={cn("inline-flex items-center shrink-0", className)}
-      >
-        {/* Desktop - Visible et élégant */}
+      <Link href="/" aria-label="Retour a l'accueil de SanteProx" className={cn("inline-flex items-center shrink-0", className)}>
         <Image
           src={horizontalLogo}
-          alt="Logo SantéProx"
+          alt="Logo SanteProx"
           width={100}
           height={35}
           priority={priority}
-          className="hidden max-w-[190px] max-h-[130px] h-auto w-auto md:block"
+          className="hidden h-auto w-auto max-w-[190px] max-h-[130px] md:block"
         />
-
-        {/* Mobile - Visible sans être imposant */}
         <Image
           src={iconLogo}
-          alt="Logo SantéProx"
+          alt="Logo SanteProx"
           width={40}
           height={40}
           priority={priority}
-          className="block max-w-[50px] max-h-[50px] h-auto w-auto md:hidden"
+          className="block h-auto w-auto max-w-[50px] max-h-[50px] md:hidden"
         />
       </Link>
     );
   }
 
   return (
-    <Link
-      href="/"
-      aria-label="Retour à l'accueil de SantéProx"
-      className={cn("inline-flex items-center shrink-0", className)}
-    >
+    <Link href="/" aria-label="Retour a l'accueil de SanteProx" className={cn("inline-flex items-center shrink-0", className)}>
       <Image
         src={logo}
-        alt="Logo SantéProx"
+        alt="Logo SanteProx"
         width={dimensions[variant].width}
         height={dimensions[variant].height}
         priority={priority}

@@ -52,7 +52,7 @@ export function DashboardCharts({ charts }: DashboardChartsProps) {
         <SimpleBarChart
           title="Validations"
           data={charts.validations}
-          color="bg-green-500"
+          color="bg-emerald-500"
         />
         <SimpleBarChart
           title="Recherches effectuées"
@@ -63,7 +63,7 @@ export function DashboardCharts({ charts }: DashboardChartsProps) {
           <h3 className="text-sm font-medium">Répartition Hôpital / Pharmacie</h3>
           <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <div className="h-3 w-3 rounded-full bg-red-500" />
+              <div className="h-3 w-3 rounded-full bg-blue-600" />
               <span className="text-sm flex-1">Hôpitaux</span>
               <span className="text-sm font-medium">
                 {charts.repartition_types.hopital}
@@ -71,7 +71,7 @@ export function DashboardCharts({ charts }: DashboardChartsProps) {
               </span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="h-3 w-3 rounded-full bg-green-500" />
+              <div className="h-3 w-3 rounded-full bg-emerald-600" />
               <span className="text-sm flex-1">Pharmacies</span>
               <span className="text-sm font-medium">
                 {charts.repartition_types.pharmacie}
@@ -80,11 +80,11 @@ export function DashboardCharts({ charts }: DashboardChartsProps) {
             </div>
             <div className="mt-2 flex h-3 overflow-hidden rounded-full">
               <div
-                className="bg-red-500"
+                className="bg-blue-600"
                 style={{ width: total > 0 ? `${(charts.repartition_types.hopital / total) * 100}%` : "50%" }}
               />
               <div
-                className="bg-green-500"
+                className="bg-emerald-600"
                 style={{ width: total > 0 ? `${(charts.repartition_types.pharmacie / total) * 100}%` : "50%" }}
               />
             </div>

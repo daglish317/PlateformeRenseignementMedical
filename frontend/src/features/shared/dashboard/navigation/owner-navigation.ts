@@ -20,23 +20,22 @@ import {
   Microscope,
   HeartPulse,
 } from "lucide-react";
+
 import type { DashboardNavItem } from "../types";
 
 export const ownerNavigation: DashboardNavItem[] = [
   {
-    label: "Dashboard",
+    label: "Vue d'ensemble",
     href: "/owner",
     icon: LayoutDashboard,
     permission: "PROPRIETAIRE",
   },
   {
-    label: "Structures & Équipe",
+    label: "Structures & équipe",
     href: "/owner/team",
     icon: Users,
     permission: "PROPRIETAIRE",
   },
-  
-  // MODULES PHARMACIE
   {
     label: "Stock",
     href: "/owner/stock",
@@ -86,7 +85,7 @@ export const ownerNavigation: DashboardNavItem[] = [
     structureType: "PHARMACIE",
   },
   {
-    label: "Inventaire",
+    label: "Inventaires",
     href: "/owner/inventaires",
     icon: ClipboardList,
     permission: "PROPRIETAIRE",
@@ -141,10 +140,8 @@ export const ownerNavigation: DashboardNavItem[] = [
     module: "NOTIFICATIONS",
     structureType: "PHARMACIE",
   },
-  
-  // MODULES HOPITAL
   {
-    label: "Services Médicaux",
+    label: "Services médicaux",
     href: "/owner/services-medicaux",
     icon: Stethoscope,
     permission: "PROPRIETAIRE",
@@ -152,7 +149,7 @@ export const ownerNavigation: DashboardNavItem[] = [
     structureType: "HOPITAL",
   },
   {
-    label: "Plateaux Techniques",
+    label: "Plateaux techniques",
     href: "/owner/plateaux-techniques",
     icon: Microscope,
     permission: "PROPRIETAIRE",
@@ -160,23 +157,19 @@ export const ownerNavigation: DashboardNavItem[] = [
     structureType: "HOPITAL",
   },
   {
-    label: "Prises en Charge",
+    label: "Prises en charge",
     href: "/owner/prises-en-charge",
     icon: HeartPulse,
     permission: "PROPRIETAIRE",
     module: "PRISES_EN_CHARGE",
     structureType: "HOPITAL",
   },
-  
-  // MODULE EXCLUSIF PROPRIETAIRE (tous types)
   {
     label: "Messagerie",
     href: "/owner/chat",
     icon: MessagesSquare,
     permission: "PROPRIETAIRE",
   },
-  
-  // MODULES TOUJOURS ACCESSIBLES (tous types)
   {
     label: "Profil",
     href: "/owner/profile",

@@ -1,13 +1,15 @@
-﻿"use client";
+"use client";
+
 import { useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { BarChart3, Building2, FileSpreadsheet, FileText } from "lucide-react";
-import { PageTitle } from "@/features/shared/dashboard/components/PageTitle";
-import { SectionCard } from "@/features/shared/dashboard/components/SectionCard";
-import { PageContainer } from "@/features/shared/dashboard/components/PageContainer";
+
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
+import { PageTitle } from "@/features/shared/dashboard/components/PageTitle";
+import { SectionCard } from "@/features/shared/dashboard/components/SectionCard";
+import { PageContainer } from "@/features/shared/dashboard/components/PageContainer";
 import { useOwnerStructures } from "@/features/shared/owner-structures/hooks/useOwnerStructures";
 import {
   EtatParametres,
@@ -18,8 +20,6 @@ import { useTelechargerStatistiques } from "@/features/statistiques/hooks/useSta
 import { OngletStatistiques, StatistiquesParams } from "@/features/statistiques/types/statistiques";
 import { StatistiquesSkeleton } from "@/features/statistiques/components/StatistiquesSkeleton";
 
-// Chargement paresseux des sections : recharts et les données ne sont
-// téléchargés que lorsque l'onglet correspondant est ouvert.
 const SectionVueGenerale = dynamic(
   () =>
     import("@/features/statistiques/components/SectionVueGenerale").then(
@@ -29,16 +29,12 @@ const SectionVueGenerale = dynamic(
 );
 const SectionVentes = dynamic(
   () =>
-    import("@/features/statistiques/components/SectionVentes").then(
-      (m) => m.SectionVentes
-    ),
+    import("@/features/statistiques/components/SectionVentes").then((m) => m.SectionVentes),
   { loading: () => <StatistiquesSkeleton /> }
 );
 const SectionProduits = dynamic(
   () =>
-    import("@/features/statistiques/components/SectionProduits").then(
-      (m) => m.SectionProduits
-    ),
+    import("@/features/statistiques/components/SectionProduits").then((m) => m.SectionProduits),
   { loading: () => <StatistiquesSkeleton /> }
 );
 const SectionApprovisionnements = dynamic(
@@ -50,23 +46,17 @@ const SectionApprovisionnements = dynamic(
 );
 const SectionStock = dynamic(
   () =>
-    import("@/features/statistiques/components/SectionStock").then(
-      (m) => m.SectionStock
-    ),
+    import("@/features/statistiques/components/SectionStock").then((m) => m.SectionStock),
   { loading: () => <StatistiquesSkeleton /> }
 );
 const SectionCaisse = dynamic(
   () =>
-    import("@/features/statistiques/components/SectionCaisse").then(
-      (m) => m.SectionCaisse
-    ),
+    import("@/features/statistiques/components/SectionCaisse").then((m) => m.SectionCaisse),
   { loading: () => <StatistiquesSkeleton /> }
 );
 const SectionFinancier = dynamic(
   () =>
-    import("@/features/statistiques/components/SectionFinancier").then(
-      (m) => m.SectionFinancier
-    ),
+    import("@/features/statistiques/components/SectionFinancier").then((m) => m.SectionFinancier),
   { loading: () => <StatistiquesSkeleton /> }
 );
 const SectionComparaison = dynamic(
@@ -78,9 +68,7 @@ const SectionComparaison = dynamic(
 );
 const SectionDetails = dynamic(
   () =>
-    import("@/features/statistiques/components/SectionDetails").then(
-      (m) => m.SectionDetails
-    ),
+    import("@/features/statistiques/components/SectionDetails").then((m) => m.SectionDetails),
   { loading: () => <StatistiquesSkeleton /> }
 );
 
@@ -124,14 +112,8 @@ export default function OwnerStatistiquesPage() {
 
   const params = construireParams(etat);
 
-  const telechargerPdf = useTelechargerStatistiques(
-    "pdf",
-    "statistiques.pdf"
-  );
-  const telechargerExcel = useTelechargerStatistiques(
-    "excel",
-    "statistiques.xlsx"
-  );
+  const telechargerPdf = useTelechargerStatistiques("pdf", "statistiques.pdf");
+  const telechargerExcel = useTelechargerStatistiques("excel", "statistiques.xlsx");
 
   const handlePdf = () => {
     if (!structureSelectionnee) return;
@@ -150,7 +132,7 @@ export default function OwnerStatistiquesPage() {
     <PageContainer>
       <PageTitle
         title="Statistiques"
-        subtitle="Outil de pilotage du propriÃ©taire : activitÃ©, stock, caisse et finances"
+        subtitle="Outil de pilotage du propriétaire : activité, stock, caisse et finances"
         actions={
           <div className="flex items-center gap-2">
             <Button
@@ -175,7 +157,7 @@ export default function OwnerStatistiquesPage() {
         }
       />
 
-      <SectionCard title="Pharmacie et paramÃ¨tres">
+      <SectionCard title="Pharmacie et paramètres">
         {structuresEnChargement ? (
           <p className="p-2 text-sm text-muted-foreground">Chargement...</p>
         ) : pharmacies.length === 0 ? (
@@ -220,36 +202,27 @@ export default function OwnerStatistiquesPage() {
           </div>
 
           <SectionCard>
-            <p className="mb-4 flex items-center gap-2 text-sm text-muted-foreground">
+            <p className="mb-4 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
               <BarChart3 className="h-4 w-4" />
-              PÃ©riode analysÃ©e : {params.periode || "Toute la pÃ©riode"}
-              {params.date_debut && ` â€” du ${params.date_debut}`}
+              Période analysée : {params.periode || "Toute la période"}
+              {params.date_debut && ` — du ${params.date_debut}`}
               {params.date_fin && ` au ${params.date_fin}`}
-              {params.produit && ` â€” produit : ${params.produit}`}
-              {params.type && ` â€” type : ${params.type}`}
+              {params.produit && ` — produit : ${params.produit}`}
+              {params.type && ` — type : ${params.type}`}
               {params.vente && ` — vente : ${params.vente}`}
               {params.approvisionnement &&
                 ` — approvisionnement : ${params.approvisionnement}`}
-              {params.caisse && ` â€” paiement : ${params.caisse}`}
+              {params.caisse && ` — paiement : ${params.caisse}`}
             </p>
 
             {onglet === "generale" && (
-              <SectionVueGenerale
-                structureId={structureSelectionnee}
-                params={params}
-              />
+              <SectionVueGenerale structureId={structureSelectionnee} params={params} />
             )}
             {onglet === "ventes" && (
-              <SectionVentes
-                structureId={structureSelectionnee}
-                params={params}
-              />
+              <SectionVentes structureId={structureSelectionnee} params={params} />
             )}
             {onglet === "produits" && (
-              <SectionProduits
-                structureId={structureSelectionnee}
-                params={params}
-              />
+              <SectionProduits structureId={structureSelectionnee} params={params} />
             )}
             {onglet === "approvisionnements" && (
               <SectionApprovisionnements
@@ -258,34 +231,19 @@ export default function OwnerStatistiquesPage() {
               />
             )}
             {onglet === "stock" && (
-              <SectionStock
-                structureId={structureSelectionnee}
-                params={params}
-              />
+              <SectionStock structureId={structureSelectionnee} params={params} />
             )}
             {onglet === "caisse" && (
-              <SectionCaisse
-                structureId={structureSelectionnee}
-                params={params}
-              />
+              <SectionCaisse structureId={structureSelectionnee} params={params} />
             )}
             {onglet === "financier" && (
-              <SectionFinancier
-                structureId={structureSelectionnee}
-                params={params}
-              />
+              <SectionFinancier structureId={structureSelectionnee} params={params} />
             )}
             {onglet === "comparaison" && (
-              <SectionComparaison
-                structureId={structureSelectionnee}
-                params={params}
-              />
+              <SectionComparaison structureId={structureSelectionnee} params={params} />
             )}
             {onglet === "details" && (
-              <SectionDetails
-                structureId={structureSelectionnee}
-                params={params}
-              />
+              <SectionDetails structureId={structureSelectionnee} params={params} />
             )}
           </SectionCard>
         </>

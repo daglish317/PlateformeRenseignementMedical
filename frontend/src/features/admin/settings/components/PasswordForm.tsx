@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import { Lock } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PasswordInput } from "@/features/auth/components/PasswordInput";
 import {
   Card,
   CardHeader,
@@ -55,38 +56,36 @@ export function PasswordForm() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="old-password">Mot de passe actuel</Label>
-            <Input
+            <PasswordInput
               id="old-password"
-              type="password"
               value={oldPassword}
+              autoComplete="current-password"
               onChange={(e) => setOldPassword(e.target.value)}
               required
             />
           </div>
           <div className="space-y-2">
             <Label htmlFor="new-password">Nouveau mot de passe</Label>
-            <Input
+            <PasswordInput
               id="new-password"
-              type="password"
               value={newPassword}
+              autoComplete="new-password"
               onChange={(e) => setNewPassword(e.target.value)}
               required
             />
           </div>
           <div className="space-y-2">
             <Label htmlFor="confirm-password">Confirmer le mot de passe</Label>
-            <Input
+            <PasswordInput
               id="confirm-password"
-              type="password"
               value={confirmPassword}
+              autoComplete="new-password"
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
             />
           </div>
 
-          {error && (
-            <p className="text-sm text-destructive">{error}</p>
-          )}
+          {error && <p className="text-sm text-destructive">{error}</p>}
 
           <Button type="submit" disabled={isPending}>
             <Lock className="mr-2 h-4 w-4" />

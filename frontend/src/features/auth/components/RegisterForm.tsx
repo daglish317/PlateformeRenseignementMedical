@@ -1,10 +1,11 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { z } from "zod";
+import { Loader2, ShieldCheck } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,7 +30,12 @@ interface RegisterFormProps {
 
 export function RegisterForm({ onSuccess }: RegisterFormProps) {
   const t = useTranslations("auth");
+  const locale = useLocale();
   const { mutate: register, isPending } = useRegister();
+  const secureNote =
+    locale === "fr"
+      ? "Les accès sont rattachés aux rôles et aux structures autorisées."
+      : "Access is tied to authorized roles and structures.";
 
   const form = useForm<RegisterFormData>({
     resolver: zodResolver(createRegisterSchema(t)),
@@ -58,7 +64,7 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
         <FormField
           control={form.control}
           name="nom"
@@ -66,7 +72,12 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
             <FormItem>
               <FormLabel>{t("name")}</FormLabel>
               <FormControl>
-                <Input placeholder={t("namePlaceholder")} {...field} />
+                <Input
+                  placeholder={t("namePlaceholder")}
+                  autoComplete="name"
+                  className="h-11"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -80,7 +91,13 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
             <FormItem>
               <FormLabel>{t("email")}</FormLabel>
               <FormControl>
-                <Input type="email" placeholder={t("emailPlaceholder")} {...field} />
+                <Input
+                  type="email"
+                  placeholder={t("emailPlaceholder")}
+                  autoComplete="email"
+                  className="h-11"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -94,7 +111,12 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
             <FormItem>
               <FormLabel>{t("password")}</FormLabel>
               <FormControl>
-                <PasswordInput placeholder={t("passwordPlaceholder")} {...field} />
+                <PasswordInput
+                  placeholder={t("passwordPlaceholder")}
+                  autoComplete="new-password"
+                  className="h-11"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -108,16 +130,27 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
             <FormItem>
               <FormLabel>{t("confirmPassword")}</FormLabel>
               <FormControl>
-                <PasswordInput placeholder={t("passwordPlaceholder")} {...field} />
+                <PasswordInput
+                  placeholder={t("passwordPlaceholder")}
+                  autoComplete="new-password"
+                  className="h-11"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
 
-        <Button type="submit" className="w-full" disabled={isPending}>
+        <Button type="submit" className="h-11 w-full shadow-sm" disabled={isPending}>
+          {isPending && <Loader2 className="size-4 animate-spin" />}
           {isPending ? t("signingUp") : t("signUp")}
         </Button>
+
+        <p className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
+          <ShieldCheck className="size-3.5 text-primary" />
+          {secureNote}
+        </p>
       </form>
     </Form>
   );

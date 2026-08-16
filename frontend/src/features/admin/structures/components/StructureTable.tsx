@@ -26,8 +26,8 @@ import { useStructuresStore } from "../store/structures-store";
 import type { StructureAdmin, StructureType } from "../types/structure";
 
 function TypeIcon({ type }: { type: StructureType }) {
-  if (type === "HOPITAL") return <Hospital className="h-4 w-4 text-red-500" />;
-  return <Pill className="h-4 w-4 text-green-500" />;
+  if (type === "HOPITAL") return <Hospital className="h-4 w-4 text-blue-600" />;
+  return <Pill className="h-4 w-4 text-emerald-600" />;
 }
 
 function TableSkeleton() {

@@ -23,8 +23,8 @@ interface StatConfig {
 
 const statsConfig: StatConfig[] = [
   { key: "structures_total", label: "Structures", icon: Building2, color: "text-blue-600" },
-  { key: "hopitaux", label: "Hôpitaux", icon: Hospital, color: "text-red-600" },
-  { key: "pharmacies", label: "Pharmacies", icon: Pill, color: "text-green-600" },
+  { key: "hopitaux", label: "Hôpitaux", icon: Hospital, color: "text-blue-600" },
+  { key: "pharmacies", label: "Pharmacies", icon: Pill, color: "text-emerald-600" },
   { key: "structures_en_attente", label: "En attente", icon: Clock, color: "text-amber-600" },
   { key: "gestionnaires", label: "Gestionnaires", icon: UserCog, color: "text-purple-600" },
   { key: "utilisateurs_publics", label: "Utilisateurs", icon: Users, color: "text-cyan-600" },

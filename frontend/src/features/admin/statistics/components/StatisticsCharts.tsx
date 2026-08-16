@@ -61,7 +61,7 @@ export function StatisticsCharts({ charts }: StatisticsChartsProps) {
           <HorizontalBarChart
             title="Validations"
             data={charts.validations}
-            color="bg-green-500"
+            color="bg-emerald-500"
           />
         </div>
       </CardContent>

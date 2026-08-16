@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo } from "react";
 import { useTheme } from "next-themes";
 import Image from "next/image";
+
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import { useMounted } from "@/hooks/useMounted";
@@ -59,43 +60,45 @@ export function DashboardSidebar({ type, className }: DashboardSidebarProps) {
   };
   const subtitle = subtitles[type];
 
-  const sidebarContent = useMemo(() => (
-    <div className="flex h-full flex-col">
-      <div className="flex h-20 items-center justify-center border-b px-4">
-        {collapsed ? (
-          <Image
-            src={isDark ? "/logos/logo-icon-dark.svg" : "/logos/logo-icon-light.svg"}
-            alt="SantéProx"
-            width={32}
-            height={34}
-            className="shrink-0"
-          />
-        ) : (
-          <Image
-            src={isDark ? "/logos/logo-vertical-dark.svg" : "/logos/logo-vertical-light.svg"}
-            alt="SantéProx"
-            width={140}
-            height={124}
-            className="shrink-0"
-          />
-        )}
-      </div>
+  const sidebarContent = useMemo(
+    () => (
+      <div className="flex h-full flex-col bg-transparent">
+        <div className="dashboard-sidebar-brand flex h-20 items-center justify-center border-b border-border/70 px-4">
+          {collapsed ? (
+            <Image
+              src={isDark ? "/logos/logo-icon-dark.svg" : "/logos/logo-icon-light.svg"}
+              alt="SantéProx"
+              width={32}
+              height={34}
+              className="shrink-0"
+            />
+          ) : (
+            <Image
+              src={isDark ? "/logos/logo-vertical-dark.svg" : "/logos/logo-vertical-light.svg"}
+              alt="SantéProx"
+              width={140}
+              height={124}
+              className="shrink-0"
+            />
+          )}
+        </div>
 
-      <div className="flex-1 overflow-y-auto px-3 py-4">
-        <SidebarMenu
-          items={navigation}
-          collapsed={collapsed}
-          onNavigate={closeMobileMenu}
-        />
+        <div className="flex-1 overflow-y-auto px-3 py-4">
+          <SidebarMenu
+            items={navigation}
+            collapsed={collapsed}
+            onNavigate={closeMobileMenu}
+          />
+        </div>
       </div>
-
-    </div>
-  ), [closeMobileMenu, collapsed, isDark, navigation]);
+    ),
+    [closeMobileMenu, collapsed, isDark, navigation]
+  );
 
   if (isMobile) {
     return (
       <Sheet open={open} onOpenChange={setOpen}>
-        <SheetContent side="left" className="w-72 p-0" showCloseButton={false}>
+        <SheetContent side="left" className={cn("w-72 p-0", className)} showCloseButton={false}>
           <SheetHeader className="sr-only">
             <SheetTitle>{subtitle} - Navigation</SheetTitle>
           </SheetHeader>
@@ -108,7 +111,7 @@ export function DashboardSidebar({ type, className }: DashboardSidebarProps) {
   return (
     <aside
       className={cn(
-        "relative flex h-full shrink-0 border-r bg-background transition-all duration-300",
+        "relative flex h-full shrink-0 border-r border-border/70 shadow-sm transition-all duration-300",
         className
       )}
       style={{

@@ -15,7 +15,7 @@ export default function PublicLayout({
   showFooter = false,
 }: PublicLayoutProps) {
   return (
-    <div className="flex h-dvh flex-col overflow-hidden bg-background">
+    <div className="flex h-dvh flex-col overflow-hidden bg-gradient-to-b from-background via-background to-muted/20">
       <Header showSearch={showSearch} />
 
       <main className="flex-1 min-h-0 overflow-auto">
