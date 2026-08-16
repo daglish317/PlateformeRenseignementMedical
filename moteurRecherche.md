@@ -296,20 +296,22 @@ bouton Voir le détail.
 
 Exemple :
 
-┌──────────────────────────────────────┐
-│ [Photo]                              │
-│                                      │
-│ Pharmacie Centrale                   │
-│                                      │
-│ Paracétamol 500 mg                   │
-│ Stock disponible : 24                │
-│ouvert/fermé                          │
-│ 1,2 km                               │
-│ 15 min à pied                        │
-│ 5 min en voiture                     │
-│                                      │
-│ [Voir le détail]                     │
-└──────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────┐
+│                                                            │
+│  ┌────────────────┐   Pharmacie Centrale                   │
+│  │                │                                        │
+│  │     PHOTO      │   Paracétamol 500 mg                   │
+│  │                │   Stock disponible : 24                │
+│  │                │   🟢 Ouverte/🔴 Fermée                │
+│  │                │                                        │
+│  │                │   1,2 km                               │
+│  │                │   15 min à pied                        │
+│  │                │   5 min en voiture                     │
+│  │                │                                        │
+│  │                │   [ Voir le détail ]                   │
+│  └────────────────┘                                        │
+│                                                            │
+└────────────────────────────────────────────────────────────┘
 17. Quantité affichée au public
 
 La quantité réellement disponible peut être affichée dans le résultat conformément à la décision retenue.

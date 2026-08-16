@@ -122,14 +122,23 @@ class RedisCacheService:
             # Nécessite redis-py avec support SCAN
             from django.core.cache import caches
             redis_cache = caches['default']
-            
-            if hasattr(redis_cache, '_cache'):
-                redis_client = redis_cache._cache.get_client()
-                keys = redis_client.keys(pattern)
-                if keys:
-                    redis_client.delete(*keys)
-                    logger.info(f"Cache DELETE PATTERN: {pattern} ({len(keys)} clés)")
-                    return len(keys)
+
+            backend_cache = getattr(redis_cache, '_cache', None)
+            if backend_cache is None:
+                return 0
+
+            # RedisCache backend de Django expose un client Redis,
+            # mais les backends mémoire utilisent aussi _cache pour un dict interne.
+            get_client = getattr(backend_cache, 'get_client', None)
+            if not callable(get_client):
+                return 0
+
+            redis_client = get_client()
+            keys = redis_client.keys(pattern)
+            if keys:
+                redis_client.delete(*keys)
+                logger.info(f"Cache DELETE PATTERN: {pattern} ({len(keys)} clés)")
+                return len(keys)
             return 0
         except Exception as e:
             logger.error(f"Erreur suppression pattern {pattern}: {e}")

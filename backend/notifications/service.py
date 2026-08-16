@@ -16,6 +16,8 @@ class NotificationService:
         type="SYSTEM",
         structure=None,
         nav_item="",
+        push=False,
+        push_payload=None,
     ):
 
         notif = Notification.objects.create(
@@ -28,6 +30,8 @@ class NotificationService:
         )
 
         NotificationService._push_websocket(notif)
+        if push:
+            NotificationService._push_web(notif, push_payload)
         return notif
 
     @staticmethod
@@ -46,6 +50,18 @@ class NotificationService:
                     "type_notif": notif.type,
                     "nav_item": notif.nav_item,
                 },
+            )
+        except Exception:
+            pass
+
+    @staticmethod
+    def _push_web(notif, payload=None):
+        try:
+            from .push_service import PushService
+
+            PushService.send_notification(
+                notification=notif,
+                payload=payload,
             )
         except Exception:
             pass

@@ -56,7 +56,6 @@ export function DashboardSidebar({ type, className }: DashboardSidebarProps) {
     HOPITAL: "Hôpital",
     PHARMACIE: "Pharmacie",
     OWNER: "Propriétaire",
-    CAISSIER: "Caissier",
   };
   const subtitle = subtitles[type];
 

@@ -165,6 +165,92 @@ class StructureDetailSerializer(serializers.ModelSerializer):
         }
 
 
+class PublicStructureDetailSerializer(serializers.ModelSerializer):
+    """
+    Fiche publique d'une structure (spec moteurRecherche.md §27-30).
+
+    N'expose que les données publiques : ni prix, ni fournisseurs, ni
+    approvisionnements, ni informations de gestion internes.
+    Les horaires affichés sont exactement ceux utilisés par le moteur (§28).
+    """
+
+    est_ouverte = serializers.SerializerMethodField()
+    horaires = serializers.SerializerMethodField()
+    produits = serializers.SerializerMethodField()
+    produits_total = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Structure
+        fields = [
+            "id",
+            "nom",
+            "type",
+            "photo",
+            "adresse",
+            "telephone",
+            "latitude",
+            "longitude",
+            "est_ouverte",
+            "horaires",
+            "produits",
+            "produits_total",
+        ]
+
+    def get_est_ouverte(self, obj):
+        from .services import HoraireService
+
+        return HoraireService.est_ouverte(obj)
+
+    def get_horaires(self, obj):
+        from .models import JourSemaine
+
+        jours = [c[0] for c in JourSemaine.choices]
+        par_jour = {}
+        for h in obj.horaires.all():
+            par_jour.setdefault(h.jour, []).append(h)
+
+        resultat = []
+        for jour in jours:
+            entrees = sorted(
+                par_jour.get(jour, []),
+                key=lambda h: (h.position, h.heure_ouverture),
+            )
+            plages = [
+                {
+                    "ouverture": h.heure_ouverture.strftime("%H:%M"),
+                    "fermeture": h.heure_fermeture.strftime("%H:%M"),
+                }
+                for h in entrees
+                if not h.est_ferme
+            ]
+            resultat.append(
+                {
+                    "jour": jour,
+                    "plages": plages,
+                    "est_ferme": not plages,
+                }
+            )
+        return resultat
+
+    def get_produits(self, obj):
+        if obj.type != "PHARMACIE":
+            return []
+        from stock.services import StockService
+
+        items = StockService.produits_publics(obj).order_by("nom")[:20]
+        return [
+            {"id": str(i.id), "nom": i.nom, "quantite": i.stock_disponible}
+            for i in items
+        ]
+
+    def get_produits_total(self, obj):
+        if obj.type != "PHARMACIE":
+            return 0
+        from stock.services import StockService
+
+        return StockService.produits_publics(obj).count()
+
+
 class StructureValidationSerializer(serializers.Serializer):
 
     action = serializers.ChoiceField(
@@ -221,21 +307,19 @@ class HoraireSerializer(serializers.ModelSerializer):
             "heure_ouverture",
             "heure_fermeture",
             "est_ferme",
+            "position",
         ]
 
 
 class HoraireBulkCreateSerializer(serializers.Serializer):
+    """Enregistre toutes les périodes de la semaine (plusieurs par jour possibles)."""
 
     horaires = HoraireSerializer(many=True)
 
     def validate_horaires(self, value):
-        jours_vus = set()
+        positions_par_jour = {}
         for h in value:
             jour = h.get("jour")
-            if jour in jours_vus:
-                raise serializers.ValidationError(f"Le jour {jour} est duplicé.")
-            jours_vus.add(jour)
-
             if not h.get("est_ferme", False):
                 ouverture = h.get("heure_ouverture")
                 fermeture = h.get("heure_fermeture")
@@ -243,6 +327,11 @@ class HoraireBulkCreateSerializer(serializers.Serializer):
                     raise serializers.ValidationError(
                         f"Pour {jour}: l'heure d'ouverture doit être avant l'heure de fermeture."
                     )
+
+            if not h.get("est_ferme", False):
+                positions_par_jour.setdefault(jour, 0)
+                positions_par_jour[jour] += 1
+
         return value
 
 
@@ -350,12 +439,7 @@ class InviteStructureMemberSerializer(serializers.Serializer):
     structure_id = serializers.UUIDField()
     nom = serializers.CharField(max_length=150)
     email = serializers.EmailField()
-    role = serializers.ChoiceField(
-        choices=[
-            RoleEquipeStructure.GESTIONNAIRE,
-            RoleEquipeStructure.CAISSIER,
-        ]
-    )
+    role = serializers.CharField(max_length=100, required=False, allow_blank=True, allow_null=True)
 
     def validate_nom(self, value):
         value = value.strip()
@@ -365,6 +449,11 @@ class InviteStructureMemberSerializer(serializers.Serializer):
 
     def validate_email(self, value):
         return value.lower().strip()
+
+    def validate_role(self, value):
+        if value:
+            return value.strip()
+        return None
 
 
 class UpdateStructureMemberStatusSerializer(serializers.Serializer):
@@ -403,5 +492,8 @@ class MemberPermissionsUpdateSerializer(serializers.Serializer):
     def validate_permissions(self, value):
         from structures.permission_service import validate_permissions_payload
 
-        return validate_permissions_payload(value)
+        try:
+            return validate_permissions_payload(value)
+        except ValueError as exc:
+            raise serializers.ValidationError(str(exc)) from exc
 

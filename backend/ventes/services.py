@@ -466,10 +466,12 @@ class VenteService:
 
         facture = Facture.objects.create(
             numero=VenteService._generer_numero_facture(),
+            structure=vente.structure,
             vente=vente,
             paiement=paiement,
             montant_total=vente.montant_total,
             nb_articles=vente.nb_articles,
+            beneficiaire=(vente.nom_client or "").strip(),
         )
 
         vente.etat = EtatVente.PAYEE
@@ -667,6 +669,66 @@ class VenteService:
     @staticmethod
     def total_impressions(facture):
         return ImpressionFacture.objects.filter(facture=facture).count()
+
+    @staticmethod
+    @transaction.atomic
+    def generer_facture(vente, utilisateur, beneficiaire="", adresse_ip=None):
+        """Génère une facture à partir d'une vente finalisée, à la demande.
+
+        - La vente doit être payée (finalisée) ;
+        - une vente déjà associée à une facture ne produit pas de doublon ;
+        - le bénéficiaire est obligatoire : il provient de la vente, ou est
+          saisi au moment de la génération ;
+        - le stock n'est jamais modifié ici (la facture est un document).
+        """
+        if vente.etat != EtatVente.PAYEE:
+            raise VenteErreur(
+                "Une facture ne peut être générée qu'à partir d'une vente finalisée."
+            )
+
+        try:
+            vente.facture
+            raise VenteErreur(
+                "Une facture existe déjà pour cette vente : "
+                "consultez-la ou imprimez-la."
+            )
+        except Facture.DoesNotExist:
+            pass
+
+        if not vente.paiement:
+            raise VenteErreur(
+                "Aucun paiement enregistré pour cette vente."
+            )
+
+        nom = (beneficiaire or "").strip() or (vente.nom_client or "").strip()
+        if not nom:
+            raise VenteErreur(
+                "Le nom du bénéficiaire est obligatoire pour générer la facture."
+            )
+
+        facture = Facture.objects.create(
+            numero=VenteService._generer_numero_facture(),
+            structure=vente.structure,
+            vente=vente,
+            paiement=vente.paiement,
+            montant_total=vente.montant_total,
+            nb_articles=vente.nb_articles,
+            beneficiaire=nom,
+        )
+
+        VenteService._journal(
+            structure=vente.structure,
+            utilisateur=utilisateur,
+            action=ActionCaisse.GENERATION_FACTURE,
+            detail=(
+                f"Facture {facture.numero} générée pour la vente "
+                f"{vente.numero} ({vente.montant_total} FCFA)."
+            ),
+            adresse_ip=adresse_ip,
+            vente=vente,
+        )
+
+        return facture
 
     @staticmethod
     def statistiques(structure_id):

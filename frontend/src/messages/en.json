@@ -103,12 +103,43 @@
     }
   },
   "search": {
-    "placeholder": "Search for a hospital, pharmacy, service...",
+    "placeholder": "Search for a medicine (e.g. Paracetamol)...",
     "history": "Recent searches",
-    "suggestions": "Suggestions"
+    "suggestions": "Suggestions",
+    "searching": "Searching...",
+    "noResults": "No results",
+    "noResultsText": "No open pharmacy currently has this product.",
+    "stockAvailable": "Stock available: {quantite}",
+    "open": "Open",
+    "closed": "Closed",
+    "route": "Directions",
+    "details": "View details",
+    "walking": "{minutes} min walk",
+    "driving": "{minutes} min drive"
   },
-  "map": {},
-  "structure": {},
+  "map": {
+    "noResultsTitle": "No results found",
+    "noResultsText": "No open pharmacy matches your search.",
+    "locationUnavailable": "Geolocation unavailable. The map is centered by default.",
+    "walking": "{minutes} min walk",
+    "driving": "{minutes} min drive"
+  },
+  "structure": {
+    "hoursTitle": "Opening hours",
+    "hoursUnavailable": "Opening hours are not available at the moment.",
+    "open": "Open",
+    "closed": "Closed",
+    "productsTitle": "Available products",
+    "productsSearchPlaceholder": "Search for a medicine",
+    "productsSearchEmpty": "No product matches your search in this pharmacy.",
+    "productsUnavailable": "Please contact the pharmacy to check product availability.",
+    "stockAvailable": "Stock available: {quantite}",
+    "loadMore": "Load more",
+    "loading": "Loading...",
+    "notFoundTitle": "Structure not found",
+    "notFoundText": "The medical structure you are looking for does not exist or an error occurred.",
+    "informationsTitle": "Practical information"
+  },
   "catalogue": {},
   "stock": {},
   "servicesMedicaux": {},

@@ -103,12 +103,43 @@
     }
   },
   "search": {
-    "placeholder": "Rechercher un h\u00f4pital, une pharmacie, un service...",
+    "placeholder": "Rechercher un m\u00e9dicament (ex : Parac\u00e9tamol)...",
     "history": "Recherches r\u00e9centes",
-    "suggestions": "Suggestions"
+    "suggestions": "Suggestions",
+    "searching": "Recherche en cours...",
+    "noResults": "Aucun r\u00e9sultat",
+    "noResultsText": "Aucune pharmacie ouverte ne dispose actuellement de ce produit.",
+    "stockAvailable": "Stock disponible : {quantite}",
+    "open": "Ouvert",
+    "closed": "Ferm\u00e9",
+    "route": "Itin\u00e9raire",
+    "details": "Voir le d\u00e9tail",
+    "walking": "{minutes} min \u00e0 pied",
+    "driving": "{minutes} min en voiture"
   },
-  "map": {},
-  "structure": {},
+  "map": {
+    "noResultsTitle": "Aucun r\u00e9sultat trouv\u00e9",
+    "noResultsText": "Aucune pharmacie ouverte ne correspond \u00e0 votre recherche.",
+    "locationUnavailable": "G\u00e9olocalisation non disponible. La carte est centr\u00e9e par d\u00e9faut.",
+    "walking": "{minutes} min \u00e0 pied",
+    "driving": "{minutes} min en voiture"
+  },
+  "structure": {
+    "hoursTitle": "Horaires d'ouverture",
+    "hoursUnavailable": "Les horaires ne sont pas disponibles pour le moment.",
+    "open": "Ouvert",
+    "closed": "Ferm\u00e9",
+    "productsTitle": "Produits disponibles",
+    "productsSearchPlaceholder": "Rechercher un m\u00e9dicament",
+    "productsSearchEmpty": "Aucun produit ne correspond \u00e0 votre recherche dans cette pharmacie.",
+    "productsUnavailable": "Veuillez contacter la pharmacie pour conna\u00eetre la disponibilit\u00e9 des m\u00e9dicaments.",
+    "stockAvailable": "Stock disponible : {quantite}",
+    "loadMore": "Charger plus",
+    "loading": "Chargement...",
+    "notFoundTitle": "Structure introuvable",
+    "notFoundText": "La structure m\u00e9dicale que vous recherchez n'existe pas ou une erreur est survenue.",
+    "informationsTitle": "Informations pratiques"
+  },
   "catalogue": {},
   "stock": {},
   "servicesMedicaux": {},

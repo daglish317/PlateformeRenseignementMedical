@@ -149,6 +149,11 @@ class AlertesService:
         from notifications.service import NotificationService
         from structures.permissions import get_structure_responsables
 
+        push_enabled = alerte.type in {
+            TypeAlerte.STOCK_FAIBLE,
+            TypeAlerte.RUPTURE_STOCK,
+        }
+
         for utilisateur in get_structure_responsables(alerte.structure):
             NotificationService.envoyer(
                 utilisateur=utilisateur,
@@ -157,6 +162,7 @@ class AlertesService:
                 type="STRUCTURE",
                 structure=alerte.structure,
                 nav_item="alertes",
+                push=push_enabled,
             )
 
     @staticmethod

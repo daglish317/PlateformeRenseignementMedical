@@ -26,7 +26,7 @@ function SidebarMenuItemComponent({
   return (
     <Link
       href={item.href}
-      prefetch
+      prefetch={false}
       title={collapsed ? item.label : undefined}
       onClick={handleClick}
       className={cn(

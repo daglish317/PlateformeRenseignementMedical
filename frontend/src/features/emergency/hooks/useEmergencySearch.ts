@@ -25,7 +25,27 @@ export function useEmergencySearch(searchTerm?: string) {
 
   useEffect(() => {
     if (searchMode === "emergency" && query.data) {
-      setResults(query.data);
+      // Adaptation au format du moteur public (les résultats d'urgence
+      // restent compatibles avec la carte de résultat partagée).
+      setResults({
+        query: query.data.query ?? "",
+        normalized_query: query.data.query.toLowerCase(),
+        results: query.data.results.map((r) => ({
+          id: r.structure.id,
+          produit: { nom: r.structure.nom, quantite: 0 },
+          structure: r.structure,
+          est_ouverte: false,
+          distance_km: r.distance_km,
+          temps_marche_min: null,
+          temps_voiture_min: null,
+        })),
+        total: query.data.total,
+        page: query.data.page ?? 1,
+        page_size: query.data.page_size ?? 20,
+        has_next: false,
+        has_previous: false,
+        user_location: null,
+      });
     }
   }, [query.data, setResults, searchMode]);
 

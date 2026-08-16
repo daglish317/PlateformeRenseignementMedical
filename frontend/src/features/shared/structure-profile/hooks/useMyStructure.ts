@@ -21,7 +21,7 @@ export function useMyStructure(enabled = true) {
       return data;
     },
     enabled,
-    staleTime: 10 * 60 * 1000,
+    staleTime: 30 * 1000, // 30 secondes - Plus réactif pour les changements de structure
     gcTime: 30 * 60 * 1000,
     retry: false,
   });

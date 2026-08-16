@@ -170,8 +170,11 @@ def validate_permissions_payload(payload):
         raise ValueError("Format de permissions invalide.")
 
     normalized = {}
+    allowed_modules = {m.value for m in ATTRIBUTABLE_MODULES}
+    has_any_permission = False
+
     for module, actions in payload.items():
-        if module not in {m.value for m in ATTRIBUTABLE_MODULES}:
+        if module not in allowed_modules:
             continue
         if not isinstance(actions, list):
             continue
@@ -181,6 +184,13 @@ def validate_permissions_payload(payload):
                 valid_actions.append(action)
         if valid_actions:
             normalized[module] = list(dict.fromkeys(valid_actions))
+            has_any_permission = True
+
+    if not has_any_permission:
+        raise ValueError(
+            "Au moins une permission doit etre accordee pour activer un membre."
+        )
+
     return normalized
 
 

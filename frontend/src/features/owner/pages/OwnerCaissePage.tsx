@@ -8,7 +8,6 @@ import { PageContainer } from "@/features/shared/dashboard/components/PageContai
 import { PageTitle } from "@/features/shared/dashboard/components/PageTitle";
 import { SectionCard } from "@/features/shared/dashboard/components/SectionCard";
 import { useOwnerStructures } from "@/features/shared/owner-structures/hooks/useOwnerStructures";
-import { CaissierHomePage } from "@/features/caissier/pages/CaissierHomePage";
 
 export default function OwnerCaissePage() {
   const { data, isLoading } = useOwnerStructures();
@@ -53,11 +52,13 @@ export default function OwnerCaissePage() {
       </SectionCard>
 
       {selectedStructureId ? (
-        <CaissierHomePage
-          readonly
-          structureId={selectedStructureId}
-          showHeader={false}
-        />
+        <SectionCard title="Caisse">
+          <div className="rounded-lg border border-border bg-muted/30 p-8 text-center">
+            <p className="text-muted-foreground">
+              Module Caisse - En cours d'implémentation
+            </p>
+          </div>
+        </SectionCard>
       ) : null}
     </PageContainer>
   );

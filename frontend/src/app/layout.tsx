@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import type { Metadata, Viewport } from "next";
 
-import PwaRegister from "@/components/pwa/PwaRegister";
+import { SerwistProvider } from "@serwist/next/react";
 
 import "./globals.css";
 
@@ -21,11 +21,18 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "any" },
-      { url: "/pwa/icon-192.png", sizes: "192x192", type: "image/png" },
-      { url: "/pwa/icon-512.png", sizes: "512x512", type: "image/png" },
+      {
+        url: "/logo_mobile/Gemini_Generated_Image_loefffloefffloef.png",
+        sizes: "any",
+        type: "image/png",
+      },
     ],
     apple: [
-      { url: "/pwa/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+      {
+        url: "/logo_mobile/Gemini_Generated_Image_loefffloefffloef.png",
+        sizes: "any",
+        type: "image/png",
+      },
     ],
   },
 };
@@ -38,8 +45,15 @@ export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html suppressHydrationWarning>
       <body className="min-h-screen antialiased">
-        <PwaRegister />
-        {children}
+        <SerwistProvider
+          swUrl="/sw.js"
+          register={process.env.NODE_ENV === "production"}
+          cacheOnNavigation
+          reloadOnOnline
+          disable={process.env.NODE_ENV !== "production"}
+        >
+          {children}
+        </SerwistProvider>
       </body>
     </html>
   );

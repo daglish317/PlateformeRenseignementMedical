@@ -1,25 +1,29 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 
+import type { UserLocation } from "@/services/map/geolocalisation";
 import type {
-  SearchResponse,
+  PublicPharmacieResponse,
   Structure,
 } from "@/types/search";
 
 type SearchStore = {
   query: string;
-  results: SearchResponse | null;
+  results: PublicPharmacieResponse | null;
   loading: boolean;
   selectedStructure: Structure | null;
   searchMode: "normal" | "emergency";
   page: number;
+  location: UserLocation | null;
 
   setQuery: (query: string) => void;
-  setResults: (results: SearchResponse | null) => void;
+  setResults: (results: PublicPharmacieResponse | null) => void;
+  appendResults: (results: PublicPharmacieResponse) => void;
   setLoading: (loading: boolean) => void;
   setSelectedStructure: (structure: Structure | null) => void;
   setSearchMode: (mode: "normal" | "emergency") => void;
   setPage: (page: number) => void;
+  setLocation: (location: UserLocation | null) => void;
   clear: () => void;
 };
 
@@ -32,13 +36,39 @@ export const useSearchStore = create<SearchStore>()(
       selectedStructure: null,
       searchMode: "normal",
       page: 1,
+      location: null,
 
       setQuery: (query) => set({ query, searchMode: "normal", page: 1 }, false, "setQuery"),
       setResults: (results) => set({ results }, false, "setResults"),
+      appendResults: (next) =>
+        set(
+          (state) => ({
+            results: {
+              ...next,
+              results: [...(state.results?.results ?? []), ...next.results],
+            },
+          }),
+          false,
+          "appendResults"
+        ),
       setLoading: (loading) => set({ loading }, false, "setLoading"),
       setSelectedStructure: (selectedStructure) => set({ selectedStructure }, false, "setSelectedStructure"),
       setSearchMode: (searchMode) => set({ searchMode }, false, "setSearchMode"),
       setPage: (page) => set({ page }, false, "setPage"),
+      setLocation: (location) =>
+        set(
+          (state) => ({
+            location,
+            page: 1,
+            results:
+              state.location?.latitude === location?.latitude &&
+              state.location?.longitude === location?.longitude
+                ? state.results
+                : null,
+          }),
+          false,
+          "setLocation"
+        ),
       clear: () =>
         set(
           {
@@ -48,6 +78,7 @@ export const useSearchStore = create<SearchStore>()(
             selectedStructure: null,
             searchMode: "normal",
             page: 1,
+            location: null,
           },
           false,
           "clear"
@@ -64,3 +95,4 @@ export const useLoading = () => useSearchStore((state) => state.loading);
 export const useSelectedStructure = () => useSearchStore((state) => state.selectedStructure);
 export const useSearchMode = () => useSearchStore((state) => state.searchMode);
 export const usePage = () => useSearchStore((state) => state.page);
+export const useLocation = () => useSearchStore((state) => state.location);

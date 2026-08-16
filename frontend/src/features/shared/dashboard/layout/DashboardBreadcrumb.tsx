@@ -6,7 +6,6 @@ import { ChevronRight } from "lucide-react";
 import { hospitalNavigation } from "../navigation/hospital-navigation";
 import { pharmacyNavigation } from "../navigation/pharmacy-navigation";
 import { ownerNavigation } from "../navigation/owner-navigation";
-import { caissierNavigation } from "../navigation/caissier-navigation";
 
 export function DashboardBreadcrumb() {
   const pathname = usePathname();
@@ -15,9 +14,7 @@ export function DashboardBreadcrumb() {
     ? hospitalNavigation
     : pathname.startsWith("/owner")
       ? ownerNavigation
-      : pathname.startsWith("/caissier")
-        ? caissierNavigation
-        : pharmacyNavigation;
+      : pharmacyNavigation;
 
   const segments = pathname.split("/").filter(Boolean);
 

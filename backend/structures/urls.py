@@ -6,6 +6,7 @@ from .views import (
     AdminListStructuresView,
     ValidateStructureView,
     StructureDetailView,
+    StructureProduitsPublicsView,
     AddFavoriView,
     RemoveFavoriView,
     ListFavorisView,
@@ -39,6 +40,7 @@ urlpatterns = [
     path("admin/validate/<uuid:pk>/", ValidateStructureView.as_view(), name="structure-validate"),
 
     path("<uuid:pk>/", StructureDetailView.as_view(), name="structure-detail"),
+    path("<uuid:structure_id>/produits/", StructureProduitsPublicsView.as_view(), name="structure-produits-publics"),
     path("proches/", StructuresProchesView.as_view()),
     path("submit/", StructureFormSubmitView.as_view()),
 

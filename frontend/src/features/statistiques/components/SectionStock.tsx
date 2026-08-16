@@ -13,6 +13,7 @@ import { useAnalyseStock } from "../hooks/useStatistiques";
 import { StatistiquesParams } from "../types/statistiques";
 import { formatMontant, formatNombre } from "../utils/format";
 import { StatistiqueCards } from "./StatistiqueCards";
+import { StatistiqueDonutChart } from "./StatistiqueDonutChart";
 import { StatistiquesSkeleton } from "./StatistiquesSkeleton";
 import { SectionErreur } from "./SectionErreur";
 
@@ -72,6 +73,12 @@ export function SectionStock({
 
       <div className="rounded-xl border bg-card p-4">
         <h4 className="mb-4 text-sm font-semibold">Répartition par type</h4>
+        <StatistiqueDonutChart
+          data={data.par_type.map((type) => ({
+            nom: LIBELLES_TYPE[type.type] ?? type.type,
+            valeur: type.nb_references,
+          }))}
+        />
         <Table>
           <TableHeader>
             <TableRow>

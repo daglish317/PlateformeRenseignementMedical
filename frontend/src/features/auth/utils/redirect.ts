@@ -1,6 +1,6 @@
 import { User } from "@/features/auth/types/user";
 
-type RedirectPath = "/" | "/admin" | "/owner" | "/pharmacy";
+type RedirectPath = "/" | "/admin" | "/owner" | "/pharmacy" | "/hospital";
 
 export const getRedirectPath = (user: User): RedirectPath => {
 
@@ -13,9 +13,8 @@ export const getRedirectPath = (user: User): RedirectPath => {
       return "/owner";
 
     case "GESTIONNAIRE":
-      return "/pharmacy";
-
     case "CAISSIER":
+      // GESTIONNAIRE et CAISSIER utilisent le même dashboard équipe pharmacie
       return "/pharmacy";
 
     case "PATIENT":

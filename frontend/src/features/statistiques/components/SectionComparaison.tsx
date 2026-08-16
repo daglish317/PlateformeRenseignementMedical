@@ -13,6 +13,7 @@ import {
 import { useComparaison } from "../hooks/useStatistiques";
 import { StatistiquesParams } from "../types/statistiques";
 import { formatNombre, formatVariation } from "../utils/format";
+import { StatistiqueCompareChart } from "./StatistiqueCompareChart";
 import { StatistiquesSkeleton } from "./StatistiquesSkeleton";
 import { SectionErreur } from "./SectionErreur";
 
@@ -99,6 +100,22 @@ export function SectionComparaison({
           {data.periode_precedente.libelle}
         </span>
       </p>
+
+      <StatistiqueCompareChart
+        data={lignes.flatMap((ligne) =>
+          ligne.donnees
+            ? [
+                {
+                  indicateur: ligne.libelle,
+                  actuel: ligne.donnees.actuel,
+                  precedent: ligne.donnees.precedent,
+                },
+              ]
+            : []
+        )}
+        libelleActuel={data.periode_actuelle.libelle}
+        libellePrecedent={data.periode_precedente.libelle}
+      />
 
       <Table>
         <TableHeader>

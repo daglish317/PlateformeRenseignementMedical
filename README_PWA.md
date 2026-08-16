@@ -136,6 +136,60 @@ Ce qui a ete fait :
 
 Le service worker `frontend/public/sw.js` precache maintenant `/offline` et l'utilise comme fallback de navigation quand le reseau est indisponible.
 
+## Notifications push et clics
+
+Fichiers concernes :
+
+- `backend/notifications/push_service.py`
+- `frontend/src/sw.ts`
+- `backend/notifications/views.py`
+
+Ce qui a ete fait :
+
+- ajout d'une charge utile push avec `click_url` pour diriger l'utilisateur vers la page metier la plus pertinente ;
+- routage du clic vers la page concernee du dashboard proprietaire si le `click_url` n'est pas fourni ;
+- conservation d'un fallback par `nav_item` pour les notifications deja en circulation ;
+- ouverture du bon espace en gardant la locale courante quand elle est detectee dans une fenetre deja ouverte.
+
+Redirections mises en place :
+
+- `alertes` -> `/owner/alertes`
+- `messages` -> `/owner/chat`
+- `stock` et `inventaires` -> `/owner/inventaires`
+- `history` -> `/owner/history`
+- `caisse` -> `/owner/caisse`
+- `statistics` -> `/owner/statistics`
+- `profil` -> `/owner/profile`
+- `team` et `structures` -> `/owner/team`
+- `settings` -> `/owner/settings`
+
+## Activation des notifications
+
+Fichiers concernes :
+
+- `frontend/src/features/shared/settings/components/PushNotificationsCard.tsx`
+- `frontend/src/features/shared/settings/api/push-notifications.service.ts`
+- `frontend/src/features/shared/settings/pages/SettingsPage.tsx`
+
+Ce qui a ete fait :
+
+- ajout d'un interrupteur push dans les parametres partages ;
+- affichage reserve au proprietaire ;
+- activation via permission navigateur + subscription Web Push ;
+- desactivation locale de l'appareil courant sans affecter les autres appareils du meme proprietaire ;
+- aucun prompt de permission au chargement de la page.
+
+Variables d'environnement ajoutees :
+
+- `WEB_PUSH_VAPID_PUBLIC_KEY`
+- `WEB_PUSH_VAPID_PRIVATE_KEY`
+- `WEB_PUSH_VAPID_SUBJECT`
+
+Fichier concerne :
+
+- `backend/.env.production.example`
+- `backend/renseignementmedical/settings.py`
+
 ## Verification
 
 Commandes executees :

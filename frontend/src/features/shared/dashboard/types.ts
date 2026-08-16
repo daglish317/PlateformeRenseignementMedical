@@ -1,7 +1,7 @@
 import type { LucideIcon } from "lucide-react";
 import type { ActionPermission, ModuleOperationnel } from "./types/permissions";
 
-export type DashboardType = "HOPITAL" | "PHARMACIE" | "OWNER" | "CAISSIER";
+export type DashboardType = "HOPITAL" | "PHARMACIE" | "OWNER";
 
 export type DashboardNavItem = {
   label: string;
@@ -12,4 +12,5 @@ export type DashboardNavItem = {
   action?: ActionPermission;
   navItem?: string;
   badge?: number;
+  structureType?: "PHARMACIE" | "HOPITAL"; // Pour filtrer selon le type de structure
 };

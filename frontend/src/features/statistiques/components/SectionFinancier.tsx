@@ -13,6 +13,7 @@ import { useAnalyseFinanciere } from "../hooks/useStatistiques";
 import { StatistiquesParams } from "../types/statistiques";
 import { formatMontant, formatNombre } from "../utils/format";
 import { StatistiqueCards } from "./StatistiqueCards";
+import { StatistiqueDonutChart } from "./StatistiqueDonutChart";
 import { StatistiquesSkeleton } from "./StatistiquesSkeleton";
 import { SectionErreur } from "./SectionErreur";
 
@@ -95,7 +96,15 @@ export function SectionFinancier({
             Aucune donnée sur la période.
           </p>
         ) : (
-          <Table>
+          <>
+            <StatistiqueDonutChart
+              data={data.par_mode.map((mode) => ({
+                nom: mode.label,
+                valeur: mode.montant,
+              }))}
+              formatValeur={formatMontant}
+            />
+            <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Mode</TableHead>
@@ -124,6 +133,7 @@ export function SectionFinancier({
               ))}
             </TableBody>
           </Table>
+          </>
         )}
       </div>
     </div>

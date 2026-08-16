@@ -154,3 +154,16 @@ def get_structure_responsables(structure):
         responsables.add(structure.gestionnaire)
 
     return [u for u in responsables if u and u.is_active]
+
+
+def get_structure_proprietaires(structure):
+    """Retourne la liste des proprietaires actifs d'une structure."""
+    membres = (
+        EquipeStructure.objects.filter(
+            structure=structure,
+            role=RoleEquipeStructure.PROPRIETAIRE,
+            statut=StatutEquipeStructure.ACTIF,
+        )
+        .select_related("utilisateur")
+    )
+    return [membre.utilisateur for membre in membres if membre.utilisateur.is_active]

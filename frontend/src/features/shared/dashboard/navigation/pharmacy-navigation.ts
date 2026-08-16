@@ -11,23 +11,29 @@ import {
   History,
   CalendarClock,
   Pill,
+  Banknote,
+  Receipt,
+  BarChart3,
 } from "lucide-react";
 import type { DashboardNavItem } from "../types";
 
+/**
+ * Navigation pour le dashboard équipe pharmacie (GESTIONNAIRE + CAISSIER)
+ * Les modules visibles dépendent des permissions attribuées par le propriétaire
+ * 
+ * IMPORTANT:
+ * - Profil et Paramètres sont toujours visibles (non conditionnés par permissions)
+ * - Messagerie n'est PAS incluse (exclusivement propriétaire)
+ * - Tous les autres modules sont filtrés selon les permissions utilisateur
+ */
 export const pharmacyNavigation: DashboardNavItem[] = [
   {
     label: "Dashboard",
     href: "/pharmacy",
     icon: LayoutDashboard,
   },
-  {
-    label: "Profil",
-    href: "/pharmacy/profile",
-    icon: Building2,
-    module: "PROFIL",
-    action: "CONSULTER",
-    navItem: "profil",
-  },
+  
+  // MODULES CONDITIONNELS - Dépendent des permissions
   {
     label: "Stock",
     href: "/pharmacy/stock",
@@ -37,7 +43,7 @@ export const pharmacyNavigation: DashboardNavItem[] = [
     navItem: "stock",
   },
   {
-    label: "Medicaments",
+    label: "Médicaments",
     href: "/pharmacy/medications",
     icon: Pill,
     module: "STOCK",
@@ -51,6 +57,20 @@ export const pharmacyNavigation: DashboardNavItem[] = [
     module: "VENTE",
     action: "CONSULTER",
     navItem: "vente",
+  },
+  {
+    label: "Caisse",
+    href: "/pharmacy/caisse",
+    icon: Banknote,
+    module: "CAISSE",
+    action: "CONSULTER",
+  },
+  {
+    label: "Factures",
+    href: "/pharmacy/factures",
+    icon: Receipt,
+    module: "FACTURE",
+    action: "CONSULTER",
   },
   {
     label: "Approvisionnement",
@@ -68,7 +88,7 @@ export const pharmacyNavigation: DashboardNavItem[] = [
     action: "CONSULTER",
   },
   {
-    label: "Peremption",
+    label: "Péremption",
     href: "/pharmacy/peremption",
     icon: CalendarClock,
     module: "PEREMPTION",
@@ -98,6 +118,13 @@ export const pharmacyNavigation: DashboardNavItem[] = [
     navItem: "horaires",
   },
   {
+    label: "Statistiques",
+    href: "/pharmacy/statistics",
+    icon: BarChart3,
+    module: "STATISTIQUES",
+    action: "CONSULTER",
+  },
+  {
     label: "Notifications",
     href: "/pharmacy/notifications",
     icon: Bell,
@@ -105,11 +132,17 @@ export const pharmacyNavigation: DashboardNavItem[] = [
     action: "CONSULTER",
     navItem: "notifications",
   },
+  
+  // MODULES OBLIGATOIRES - Toujours visibles (pas de module/action)
   {
-    label: "Parametres",
+    label: "Profil",
+    href: "/pharmacy/profile",
+    icon: Building2,
+    navItem: "profil",
+  },
+  {
+    label: "Paramètres",
     href: "/pharmacy/settings",
     icon: Settings,
-    module: "PARAMETRES",
-    action: "CONSULTER",
   },
 ];

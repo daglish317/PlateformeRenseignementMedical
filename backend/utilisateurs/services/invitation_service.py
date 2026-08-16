@@ -49,6 +49,7 @@ class InvitationService:
     @staticmethod
     @transaction.atomic
     def inviter_gestionnaire(*, nom, email, structure):
+        """Méthode legacy - utilisée pour la compatibilité"""
         return InvitationService._inviter_membre(
             nom=nom,
             email=email,
@@ -60,12 +61,29 @@ class InvitationService:
     @staticmethod
     @transaction.atomic
     def inviter_caissier(*, nom, email, structure):
+        """Méthode legacy - utilisée pour la compatibilité"""
         return InvitationService._inviter_membre(
             nom=nom,
             email=email,
             structure=structure,
             role_utilisateur=RoleUtilisateur.CAISSIER,
             role_equipe=RoleEquipeStructure.CAISSIER,
+        )
+
+    @staticmethod
+    @transaction.atomic
+    def inviter_membre_structure(*, nom, email, structure, role_texte=None):
+        """
+        Nouvelle méthode pour inviter un membre avec un rôle personnalisé (texte libre).
+        Le role_texte est optionnel et sert uniquement de label informatif.
+        Les permissions sont assignées directement au membre, pas basées sur le role.
+        """
+        return InvitationService._inviter_membre(
+            nom=nom,
+            email=email,
+            structure=structure,
+            role_utilisateur=RoleUtilisateur.GESTIONNAIRE,  # Par défaut pour le système
+            role_equipe=role_texte,  # Texte libre ou None
         )
 
     @staticmethod

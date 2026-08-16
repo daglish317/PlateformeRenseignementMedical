@@ -17,13 +17,7 @@ import { MemberPermissionsEditor } from "../components/MemberPermissionsEditor";
 import { useInviteStructureMember } from "../hooks/useInviteStructureMember";
 import { useStructureTeam } from "../hooks/useStructureTeam";
 import { useUpdateStructureMemberStatus } from "../hooks/useUpdateStructureMemberStatus";
-import type { StructureMemberRole, StructureMemberStatus } from "../types/team";
-
-const roleLabels: Record<StructureMemberRole, string> = {
-  PROPRIETAIRE: "Proprietaire",
-  GESTIONNAIRE: "Gestionnaire",
-  CAISSIER: "Caissier",
-};
+import type { StructureMemberStatus } from "../types/team";
 
 const statusLabels: Record<StructureMemberStatus, string> = {
   INVITE: "Invite",
@@ -53,12 +47,12 @@ export function TeamPage() {
 
   const [nom, setNom] = useState("");
   const [email, setEmail] = useState("");
-  const [role, setRole] = useState<"GESTIONNAIRE" | "CAISSIER">("GESTIONNAIRE");
+  const [role, setRole] = useState("");
 
   const editableMembers = useMemo(
     () =>
       (team.data?.results ?? []).filter(
-        (member) => member.role === "GESTIONNAIRE" || member.role === "CAISSIER"
+        (member) => member.role !== "PROPRIETAIRE"
       ),
     [team.data?.results]
   );
@@ -89,9 +83,8 @@ export function TeamPage() {
       effectiveStructureId &&
       nom.trim().length >= 3 &&
       email.trim() &&
-      role &&
       !inviteMember.isPending,
-    [effectiveStructureId, email, inviteMember.isPending, isOwner, nom, role]
+    [effectiveStructureId, email, inviteMember.isPending, isOwner, nom]
   );
 
   function handleCreateStructure(event: FormEvent<HTMLFormElement>) {
@@ -127,13 +120,13 @@ export function TeamPage() {
         structure_id: effectiveStructureId,
         nom: nom.trim(),
         email: email.trim(),
-        role,
+        role: role.trim() || undefined,
       },
       {
         onSuccess: (data) => {
           setNom("");
           setEmail("");
-          setRole("GESTIONNAIRE");
+          setRole("");
           if (data.data?.id) {
             setSelectedMemberId(data.data.id);
           }
@@ -260,7 +253,7 @@ export function TeamPage() {
           </SectionCard>
 
           <SectionCard title="Pre-enregistrer un collaborateur">
-            <form onSubmit={handleInvite} className="grid gap-4 md:grid-cols-[1fr_1fr_220px_auto] md:items-end">
+            <form onSubmit={handleInvite} className="grid gap-4 md:grid-cols-[1fr_1fr_1fr_auto] md:items-end">
               <div className="space-y-2">
                 <Label htmlFor="team-name">Nom complet</Label>
                 <Input
@@ -283,16 +276,14 @@ export function TeamPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="team-role">Role</Label>
-                <Select
+                <Label htmlFor="team-role">Role (optionnel)</Label>
+                <Input
                   id="team-role"
                   value={role}
-                  onChange={(event) => setRole(event.target.value as "GESTIONNAIRE" | "CAISSIER")}
+                  onChange={(event) => setRole(event.target.value)}
+                  placeholder="Ex: Caissier, Gestionnaire, Assistant..."
                   disabled={inviteMember.isPending || !effectiveStructureId}
-                >
-                  <option value="GESTIONNAIRE">Gestionnaire</option>
-                  <option value="CAISSIER">Caissier</option>
-                </Select>
+                />
               </div>
               <Button type="submit" disabled={!canInvite}>
                 {inviteMember.isPending ? (
@@ -353,7 +344,7 @@ export function TeamPage() {
                 {team.data.results.map((member) => {
                   const canManageMember =
                     isOwner &&
-                    (member.role === "GESTIONNAIRE" || member.role === "CAISSIER");
+                    member.role !== "PROPRIETAIRE";
                   const action =
                     member.statut === "SUSPENDU" ? "ACTIVATE" : "DEACTIVATE";
                   const isCurrentMemberUpdating =
@@ -364,7 +355,11 @@ export function TeamPage() {
                     <tr key={member.id} className="border-b last:border-0">
                       <td className="py-3 pr-4 font-medium">{member.nom}</td>
                       <td className="py-3 pr-4 text-muted-foreground">{member.email}</td>
-                      <td className="py-3 pr-4">{roleLabels[member.role]}</td>
+                      <td className="py-3 pr-4">
+                        {member.role === "PROPRIETAIRE" 
+                          ? "Proprietaire" 
+                          : member.role || "-"}
+                      </td>
                       <td className="py-3 pr-4">{statusLabels[member.statut]}</td>
                       <td className="py-3 pr-4 text-right">
                         {canManageMember ? (
@@ -413,7 +408,7 @@ export function TeamPage() {
                 >
                   {editableMembers.map((member) => (
                     <option key={member.id} value={member.id}>
-                      {member.nom} - {roleLabels[member.role]}
+                      {member.nom}{member.role ? ` - ${member.role}` : ""}
                     </option>
                   ))}
                 </Select>

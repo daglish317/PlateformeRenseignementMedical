@@ -8,58 +8,30 @@ import axios from "@/lib/axios";
 
 import { useSearchStore } from "@/store/search-store";
 
-import type { UnifiedSearchResponse, SearchResponse, SearchResult } from "@/types/search";
+import type { PublicPharmacieResponse } from "@/types/search";
 
 type SearchParams = {
   query: string;
-  latitude?: number;
-  longitude?: number;
   page?: number;
   pageSize?: number;
 };
 
-// Fonction pour convertir le nouveau format vers l'ancien pour compatibilité
-function convertToLegacyFormat(unifiedResponse: UnifiedSearchResponse): SearchResponse {
-  return {
-    query: unifiedResponse.query,
-    results: unifiedResponse.results.map(result => ({
-      structure: result.structure,
-      score: result.relevance_score,
-      distance_km: result.distance_km,
-      service_matches: result.type ? [result.type] : [],
-    })),
-    suggestions: unifiedResponse.suggestions,
-    total: unifiedResponse.total,
-    page: 1,
-    page_size: 20,
-  };
-}
-
 export function useSearch({
   query,
-  latitude,
-  longitude,
   page = 1,
   pageSize = 20,
 }: SearchParams) {
-  const setResults = useSearchStore(
-    (state) => state.setResults
-  );
+  const setResults = useSearchStore((state) => state.setResults);
+  const appendResults = useSearchStore((state) => state.appendResults);
+  const setLoading = useSearchStore((state) => state.setLoading);
+  const location = useSearchStore((state) => state.location);
 
-  const setLoading = useSearchStore(
-    (state) => state.setLoading
-  );
-
-  const storePage = useSearchStore(
-    (state) => state.page
-  );
-
-  const searchQuery = useQuery<SearchResponse>({
+  const searchQuery = useQuery<PublicPharmacieResponse>({
     queryKey: [
-      "search",
+      "search-public",
       query,
-      latitude,
-      longitude,
+      location?.latitude,
+      location?.longitude,
       page,
       pageSize,
     ],
@@ -67,35 +39,28 @@ export function useSearch({
     enabled: query.trim().length > 0,
 
     queryFn: async () => {
-      // Utiliser le nouveau moteur de recherche intelligent
-      const { data } = await axios.get<UnifiedSearchResponse>(
-        "/search/unified/",
+      const { data } = await axios.get<PublicPharmacieResponse>(
+        "/search/public/pharmacies/",
         {
           params: {
             q: query,
-            lat: latitude,
-            lon: longitude,
-            limit: pageSize,
-            offset: (page - 1) * pageSize,
+            lat: location?.latitude,
+            lon: location?.longitude,
+            page,
+            page_size: pageSize,
           },
         }
       );
-
-      // Convertir au format legacy pour compatibilité avec le reste du frontend
-      return convertToLegacyFormat(data);
+      return data;
     },
 
-    // Cache plus long pour recherches identiques
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
   });
 
   useEffect(() => {
     setLoading(searchQuery.isFetching);
-  }, [
-    searchQuery.isFetching,
-    setLoading,
-  ]);
+  }, [searchQuery.isFetching, setLoading]);
 
   useEffect(() => {
     if (query.trim().length === 0) {
@@ -103,25 +68,36 @@ export function useSearch({
       return;
     }
 
-    if (searchQuery.data) {
-      setResults(searchQuery.data);
-    }
-
-    // Gestion des erreurs réseau
-    if (searchQuery.error) {
+    if (searchQuery.isError) {
       setResults({
         query,
+        normalized_query: query.toLowerCase(),
         results: [],
-        suggestions: [],
         total: 0,
-        message: "Erreur de connexion. Veuillez vérifier votre connexion Internet et réessayer.",
+        page,
+        page_size: pageSize,
+        has_next: false,
+        has_previous: false,
+        user_location: null,
       });
+      return;
+    }
+
+    if (!searchQuery.data) return;
+
+    if (page <= 1) {
+      setResults(searchQuery.data);
+    } else {
+      appendResults(searchQuery.data);
     }
   }, [
     query,
+    page,
+    pageSize,
     searchQuery.data,
-    searchQuery.error,
+    searchQuery.isError,
     setResults,
+    appendResults,
   ]);
 
   return searchQuery;

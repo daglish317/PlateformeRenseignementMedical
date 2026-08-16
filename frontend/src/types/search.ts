@@ -75,3 +75,37 @@ export type SearchResponse = {
   page_size?: number;
   message?: string;
 };
+
+// ------------------------------------------------------------------
+// Moteur de recherche public (spec moteurRecherche.md)
+// ------------------------------------------------------------------
+
+export type PublicPharmacieResult = {
+  id: string;
+  produit: {
+    nom: string;
+    quantite: number;
+  };
+  structure: Structure;
+  est_ouverte: boolean;
+  distance_km: number | null;
+  temps_marche_min: number | null;
+  temps_voiture_min: number | null;
+};
+
+export type PublicPharmacieResponse = {
+  query: string;
+  normalized_query: string;
+  results: PublicPharmacieResult[];
+  total: number;
+  page: number;
+  page_size: number;
+  has_next: boolean;
+  has_previous: boolean;
+  user_location: { lat: number; lon: number } | null;
+};
+
+export type PublicSuggestionsResponse = {
+  query: string;
+  suggestions: Suggestion[];
+};

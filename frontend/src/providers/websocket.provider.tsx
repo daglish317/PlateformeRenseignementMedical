@@ -31,12 +31,24 @@ export default function WebSocketProvider({ children }: { children: React.ReactN
   const [connected, setConnected] = useState(false);
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<ReturnType<typeof setTimeout>>(null);
+  const reconnectAttemptsRef = useRef(0);
   const mountedRef = useRef(true);
   const intentionalCloseRef = useRef(false);
   const listenersRef = useRef(new Set<(message: NotificationMessage) => void>());
   const connectRef = useRef<() => Promise<void>>(async () => {});
   const authenticated = useAuthStore((s) => s.authenticated);
   const hydrated = useAuthStore((s) => s.hydrated);
+
+  const scheduleReconnect = useCallback(() => {
+    if (!mountedRef.current) return;
+    // Backoff exponentiel (5s, 10s, 20s...) plafonné à 60s avec un peu de jitter
+    // pour éviter un rafraîchissement continu du serveur.
+    const tentatives = reconnectAttemptsRef.current;
+    const delai = Math.min(5000 * 2 ** tentatives, 60000) + Math.random() * 2000;
+    reconnectTimeoutRef.current = setTimeout(() => {
+      if (mountedRef.current) connectRef.current();
+    }, delai);
+  }, []);
 
   const subscribe = useCallback((listener: (message: NotificationMessage) => void) => {
     listenersRef.current.add(listener);
@@ -78,6 +90,7 @@ export default function WebSocketProvider({ children }: { children: React.ReactN
     wsRef.current = ws;
 
     ws.onopen = () => {
+      reconnectAttemptsRef.current = 0;
       if (mountedRef.current) setConnected(true);
     };
 
@@ -94,9 +107,8 @@ export default function WebSocketProvider({ children }: { children: React.ReactN
       setConnected(false);
       if (intentionalCloseRef.current || !mountedRef.current) return;
       if (authenticated && mountedRef.current) {
-        reconnectTimeoutRef.current = setTimeout(() => {
-          if (mountedRef.current) connectRef.current();
-        }, 5000);
+        reconnectAttemptsRef.current += 1;
+        scheduleReconnect();
       }
     };
 
@@ -105,7 +117,7 @@ export default function WebSocketProvider({ children }: { children: React.ReactN
         ws.close();
       }
     };
-  }, [authenticated, hydrated]);
+  }, [authenticated, hydrated, scheduleReconnect]);
 
   useEffect(() => {
     connectRef.current = connect;

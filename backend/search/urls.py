@@ -6,11 +6,19 @@ from .views import (
     SearchHistoryAPIView,
     ReindexAPIView,
 )
+from .views_public import (
+    PublicPharmacySearchView,
+    PublicSuggestionsView,
+)
 
 urlpatterns = [
     # Recherche unifiée principale (Exigences #1-#17)
     path('unified/', UnifiedSearchAPIView.as_view(), name='unified-search'),
-    
+
+    # Moteur public — médicament → pharmacies ouvertes (spec moteurRecherche.md)
+    path('public/pharmacies/', PublicPharmacySearchView.as_view(), name='public-pharmacy-search'),
+    path('public/suggestions/', PublicSuggestionsView.as_view(), name='public-suggestions'),
+
     # Live search pour autocomplétion (Exigence #2)
     path('live/', LiveSearchAPIView.as_view(), name='live-search'),
     

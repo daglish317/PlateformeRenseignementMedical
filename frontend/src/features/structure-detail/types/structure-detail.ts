@@ -3,9 +3,19 @@ export type Service = {
   nom: string;
 };
 
-export type StructureSchedule = {
+export type StructureScheduleDay = {
   jour: string;
-  heures: string;
+  plages: {
+    ouverture: string;
+    fermeture: string;
+  }[];
+  est_ferme: boolean;
+};
+
+export type StructureProduit = {
+  id: string;
+  nom: string;
+  quantite: number;
 };
 
 export type StructureDetail = {
@@ -23,6 +33,17 @@ export type StructureDetail = {
   ouverture?: string;
   website?: string;
   plateauTechnique?: string[];
-  horaires?: StructureSchedule[];
-  medicaments?: string[];
+  est_ouverte: boolean;
+  horaires: StructureScheduleDay[];
+  produits: StructureProduit[];
+  produits_total: number;
+};
+
+export type StructureProduitsResponse = {
+  results: StructureProduit[];
+  total: number;
+  page: number;
+  page_size: number;
+  has_next: boolean;
+  has_previous: boolean;
 };

@@ -9,6 +9,8 @@ from .views import (
     AdminBroadcastNotificationView,
     AdminTriggerWeeklyReminderView,
     MarkAllAsReadView,
+    PushPublicKeyView,
+    PushSubscriptionView,
 )
 
 urlpatterns = [
@@ -20,4 +22,6 @@ urlpatterns = [
     path("admin/send/", AdminSendNotificationView.as_view()),
     path("admin/broadcast/", AdminBroadcastNotificationView.as_view()),
     path("admin/weekly-reminder/", AdminTriggerWeeklyReminderView.as_view()),
+    path("push/public-key/", PushPublicKeyView.as_view()),
+    path("push/subscription/", PushSubscriptionView.as_view()),
 ]

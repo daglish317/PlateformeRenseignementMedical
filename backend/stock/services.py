@@ -1,6 +1,7 @@
 from django.db import transaction, models
 from django.utils import timezone
 
+from core.utils.text import normaliser_texte
 from .models import (
     Approvisionnement,
     FormePharmaceutique,
@@ -11,7 +12,7 @@ from .models import (
 )
 from notifications.service import NotificationService
 from notifications.models import TypeNotification
-from structures.permissions import get_structure_responsables
+from structures.permissions import get_structure_proprietaires, get_structure_responsables
 
 
 class StockService:
@@ -36,6 +37,7 @@ class StockService:
                 "quantite": quantite,
                 "disponible": disponible,
                 "seuil_alerte": seuil_alerte,
+                "nom_normalise": normaliser_texte(nom),
             },
         )
 
@@ -122,6 +124,96 @@ class StockService:
             structure=structure,
             quantite__gt=0,
             quantite__lt=10,
+        )
+
+    # ------------------------------------------------------------------
+    # Disponibilité publique (moteur de recherche public)
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def _annotations_peremption():
+        """Annotations déterminant si un article possède au moins un lot non périmé.
+
+        Règle déterministe : un produit est exclu du moteur public si tous ses
+        lots enregistrés sont périmés. S'il n'existe aucune donnée de péremption,
+        le produit n'est pas considéré comme expiré.
+        """
+        from django.db.models import Exists, OuterRef
+
+        aujourdhui = timezone.localdate()
+        lot_non_expire = LigneApprovisionnement.objects.filter(
+            medicament__structure_id=OuterRef("structure_id"),
+            medicament__nom=OuterRef("nom"),
+            date_peremption__gte=aujourdhui,
+        )
+        lot_existe = LigneApprovisionnement.objects.filter(
+            medicament__structure_id=OuterRef("structure_id"),
+            medicament__nom=OuterRef("nom"),
+        )
+        return {
+            "_a_lot_non_expire": Exists(lot_non_expire),
+            "_a_des_lots": Exists(lot_existe),
+        }
+
+    @staticmethod
+    def produits_publics(structure, recherche=""):
+        """Médicaments réellement disponibles au public pour une structure donnée.
+
+        - stock disponible (physique − réservé) strictement positif ;
+        - produit non périmé (source de vérité : LigneApprovisionnement) ;
+        - nom insensible à la casse si `recherche` fournie.
+        """
+        from django.db.models import F, Q
+
+        recherche = normaliser_texte(recherche)
+        qs = StockItem.objects.filter(
+            structure=structure,
+            type_item=StockItem.TYPE_MEDICAMENT,
+        ).filter(quantite__gt=F("quantite_reservee"))
+        if recherche:
+            qs = qs.filter(nom_normalise__icontains=recherche)
+        qs = qs.annotate(**StockService._annotations_peremption())
+        return qs.filter(Q(_a_lot_non_expire=True) | Q(_a_des_lots=False))
+
+    @staticmethod
+    def produits_publics_globaux(recherche=""):
+        """Médicaments disponibles au public dans toutes les pharmacies éligibles.
+
+        Pharmacie : type PHARMACIE, active (statut ACTIVE), non supprimée,
+        localisation exploitable (lat/lon renseignés).
+        """
+        from django.db.models import F, Q
+
+        recherche = normaliser_texte(recherche)
+        qs = StockItem.objects.filter(
+            type_item=StockItem.TYPE_MEDICAMENT,
+            structure__type="PHARMACIE",
+            structure__statut="ACTIVE",
+            structure__est_supprimee=False,
+            structure__latitude__isnull=False,
+            structure__longitude__isnull=False,
+        ).filter(quantite__gt=F("quantite_reservee"))
+        if recherche:
+            qs = qs.filter(nom_normalise__icontains=recherche)
+        qs = qs.annotate(**StockService._annotations_peremption())
+        return qs.filter(Q(_a_lot_non_expire=True) | Q(_a_des_lots=False))
+
+    @staticmethod
+    def suggestions_medicaments(requete, limite=8):
+        """Noms de médicaments réellement présents en pharmacie (suggestions)."""
+        requete = normaliser_texte(requete)
+        qs = StockItem.objects.filter(
+            type_item=StockItem.TYPE_MEDICAMENT,
+            structure__type="PHARMACIE",
+            structure__statut="ACTIVE",
+            structure__est_supprimee=False,
+        )
+        if requete:
+            qs = qs.filter(nom_normalise__icontains=requete)
+        return list(
+            qs.values_list("nom", flat=True)
+            .distinct()
+            .order_by("nom")[:limite]
         )
 
 
@@ -279,8 +371,13 @@ class ApprovisionnementService:
                     "quantite": 0,
                     "seuil_alerte": 5,
                     "disponible": True,
+                    "nom_normalise": normaliser_texte(nom),
                 },
             )
+            if stock_item.nom_normalise != normaliser_texte(nom):
+                StockItem.objects.filter(pk=stock_item.pk).update(
+                    nom_normalise=normaliser_texte(nom)
+                )
             stock_avant = stock_item.quantite
             stock_item.quantite += quantite
             stock_item.disponible = True
@@ -308,6 +405,24 @@ class ApprovisionnementService:
             )
 
             StockService._verifier_alerte(stock_item)
+
+            from datetime import timedelta
+
+            limite_peremption = timezone.localdate() + timedelta(days=92)
+            if date_peremption <= limite_peremption:
+                for proprietaire in get_structure_proprietaires(structure):
+                    NotificationService.envoyer(
+                        utilisateur=proprietaire,
+                        titre="Péremption proche",
+                        message=(
+                            f"{nom} expirera le {date_peremption:%d/%m/%Y} "
+                            f"dans la structure {structure.nom}."
+                        ),
+                        type=TypeNotification.STRUCTURE,
+                        structure=structure,
+                        nav_item="peremption",
+                        push=True,
+                    )
 
         motif_notif = f"Livraison {appro.date_reception}"
         if appro.fournisseur:

@@ -1,6 +1,7 @@
 "use client";
 
 import { use } from "react";
+import { useTranslations } from "next-intl";
 import PublicLayout from "@/components/layout/PublicLayout";
 import { useStructureDetail } from "@/features/structure-detail/hooks/useStructureDetail";
 import StructureHeader from "@/features/structure-detail/components/StructureHeader";
@@ -24,6 +25,7 @@ type StructurePageProps = {
 
 export default function StructurePage({ params }: StructurePageProps) {
   const { id } = use(params);
+  const t = useTranslations("structure");
   const { data: structure, isLoading: loading, error } = useStructureDetail(id);
 
   if (loading) {
@@ -40,15 +42,14 @@ export default function StructurePage({ params }: StructurePageProps) {
     return (
       <PublicLayout showSearch={false} showFooter={true}>
         <div className="container mx-auto px-4 py-16 text-center">
-          <h1 className="mb-4 text-2xl font-bold">Structure introuvable</h1>
-          <p className="text-muted-foreground">
-            La structure médicale que vous recherchez n&apos;existe pas ou une erreur est
-            survenue.
-          </p>
+          <h1 className="mb-4 text-2xl font-bold">{t("notFoundTitle")}</h1>
+          <p className="text-muted-foreground">{t("notFoundText")}</p>
         </div>
       </PublicLayout>
     );
   }
+
+  const estPharmacie = structure.type === "PHARMACIE";
 
   return (
     <PublicLayout showSearch={false} showFooter={true}>
@@ -66,12 +67,16 @@ export default function StructurePage({ params }: StructurePageProps) {
             <div id="infos" className="scroll-mt-20">
               <StructureInfo structure={structure} />
             </div>
-            <div id="services" className="scroll-mt-20">
-              <StructureServices structure={structure} />
-            </div>
-            <div id="plateau" className="scroll-mt-20">
-              <PlateauTechnique structure={structure} />
-            </div>
+            {!estPharmacie && (
+              <>
+                <div id="services" className="scroll-mt-20">
+                  <StructureServices structure={structure} />
+                </div>
+                <div id="plateau" className="scroll-mt-20">
+                  <PlateauTechnique structure={structure} />
+                </div>
+              </>
+            )}
             <div id="medicaments" className="scroll-mt-20">
               <StructureMedicaments structure={structure} />
             </div>

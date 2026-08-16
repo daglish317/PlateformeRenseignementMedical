@@ -10,6 +10,7 @@ from .serializers import (
     StructureListSerializer,
     StructureAdminListSerializer,
     StructureDetailSerializer,
+    PublicStructureDetailSerializer,
     StructureValidationSerializer,
     EquipeStructureSerializer,
     FavoriCreateSerializer,
@@ -124,7 +125,10 @@ class StructureDetailView(APIView):
     def get(self, request, pk):
 
         try:
-            structure = Structure.objects.get(id=pk)
+            structure = (
+                Structure.objects.prefetch_related("horaires")
+                .get(id=pk, est_supprimee=False)
+            )
         except Structure.DoesNotExist:
             return Response(
                 {"message": "Structure introuvable"},
@@ -132,7 +136,9 @@ class StructureDetailView(APIView):
             )
 
         return Response(
-            StructureDetailSerializer(structure).data
+            PublicStructureDetailSerializer(
+                structure, context={"request": request}
+            ).data
         )
 
     @responsable_structure_required
@@ -157,6 +163,62 @@ class StructureDetailView(APIView):
         serializer.save()
 
         return Response(StructureDetailSerializer(structure).data)
+
+
+class StructureProduitsPublicsView(APIView):
+    """Recherche interne à une pharmacie (§29) : limitée à ses produits, règles de disponibilité appliquées."""
+
+    def get(self, request, structure_id):
+
+        try:
+            structure = Structure.objects.get(
+                id=structure_id,
+                type="PHARMACIE",
+                est_supprimee=False,
+            )
+        except Structure.DoesNotExist:
+            return Response(
+                {"message": "Pharmacie introuvable"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        from stock.services import StockService
+
+        recherche = (request.query_params.get("q") or "").strip()
+        items = StockService.produits_publics(structure, recherche=recherche).order_by(
+            "nom"
+        )
+
+        try:
+            page = max(int(request.query_params.get("page", 1)), 1)
+        except ValueError:
+            page = 1
+        try:
+            page_size = min(int(request.query_params.get("page_size", 20)), 50)
+        except ValueError:
+            page_size = 20
+
+        total = items.count()
+        start = (page - 1) * page_size
+        page_items = items[start : start + page_size]
+
+        return Response(
+            {
+                "results": [
+                    {
+                        "id": str(i.id),
+                        "nom": i.nom,
+                        "quantite": i.stock_disponible,
+                    }
+                    for i in page_items
+                ],
+                "total": total,
+                "page": page,
+                "page_size": page_size,
+                "has_next": (start + page_size) < total,
+                "has_previous": page > 1,
+            }
+        )
 
 
 class ValidateStructureView(APIView):
@@ -361,7 +423,7 @@ class ListHorairesView(APIView):
 
         horaires = Horaire.objects.filter(
             structure_id=structure_id,
-        ).order_by("jour")
+        ).order_by("jour", "position", "heure_ouverture")
 
         return Response(HoraireSerializer(horaires, many=True).data)
 
@@ -380,21 +442,27 @@ class SetHorairesView(APIView):
 
         Horaire.objects.filter(structure=structure).delete()
 
+        positions_par_jour = {}
         horaires = []
         for h in serializer.validated_data["horaires"]:
+            jour = h["jour"]
+            positions_par_jour[jour] = positions_par_jour.get(jour, -1) + 1
             horaires.append(
                 Horaire(
                     structure=structure,
-                    jour=h["jour"],
+                    jour=jour,
                     heure_ouverture=h.get("heure_ouverture"),
                     heure_fermeture=h.get("heure_fermeture"),
                     est_ferme=h.get("est_ferme", False),
+                    position=positions_par_jour[jour],
                 )
             )
 
         Horaire.objects.bulk_create(horaires)
 
-        horaires_crees = Horaire.objects.filter(structure=structure).order_by("jour")
+        horaires_crees = Horaire.objects.filter(structure=structure).order_by(
+            "jour", "position", "heure_ouverture"
+        )
 
         return Response(
             {
@@ -575,30 +643,27 @@ class MyStructureTeamView(APIView):
         structure = Structure.objects.get(id=structure_id, est_supprimee=False)
 
         try:
-            if serializer.validated_data["role"] == RoleEquipeStructure.GESTIONNAIRE:
-                membre = InvitationService.inviter_gestionnaire(
-                    nom=serializer.validated_data["nom"],
-                    email=serializer.validated_data["email"],
-                    structure=structure,
-                )
-            else:
-                membre = InvitationService.inviter_caissier(
-                    nom=serializer.validated_data["nom"],
-                    email=serializer.validated_data["email"],
-                    structure=structure,
-                )
+            # Utilise la nouvelle méthode qui accepte un rôle texte libre
+            utilisateur = InvitationService.inviter_membre_structure(
+                nom=serializer.validated_data["nom"],
+                email=serializer.validated_data["email"],
+                structure=structure,
+                role_texte=serializer.validated_data.get("role"),
+            )
+            
+            # Récupère le membre créé pour retourner ses données
+            membre = EquipeStructure.objects.filter(
+                utilisateur=utilisateur,
+                structure=structure
+            ).first()
+            
         except ValueError as e:
             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response(
             {
                 "message": "Collaborateur pre-enregistre. Il creera son compte sur la page d'inscription.",
-                "data": {
-                    "id": str(membre.id),
-                    "nom": membre.nom,
-                    "email": membre.email,
-                    "role": membre.role,
-                },
+                "data": EquipeStructureSerializer(membre).data,
             },
             status=status.HTTP_201_CREATED,
         )
@@ -624,12 +689,10 @@ class StructureTeamMemberStatusView(APIView):
 
         assert_proprietaire_owns_structure(request.user, membership.structure_id)
 
-        if membership.role not in {
-            RoleEquipeStructure.GESTIONNAIRE,
-            RoleEquipeStructure.CAISSIER,
-        }:
+        # Seuls les membres opérationnels (non-propriétaires) peuvent être activés/désactivés
+        if membership.role == RoleEquipeStructure.PROPRIETAIRE:
             return Response(
-                {"detail": "Seuls les gestionnaires et caissiers peuvent etre modifies."},
+                {"detail": "Le proprietaire ne peut pas etre modifie."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -706,12 +769,10 @@ class MemberPermissionsView(APIView):
 
         assert_proprietaire_owns_structure(request.user, membership.structure_id)
 
-        if membership.role not in {
-            RoleEquipeStructure.GESTIONNAIRE,
-            RoleEquipeStructure.CAISSIER,
-        }:
+        # Les permissions s'appliquent à tous les membres sauf le propriétaire
+        if membership.role == RoleEquipeStructure.PROPRIETAIRE:
             return Response(
-                {"detail": "Les permissions ne s'appliquent qu'aux gestionnaires et caissiers."},
+                {"detail": "Les permissions ne s'appliquent pas au propriétaire."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -741,12 +802,10 @@ class MemberPermissionsView(APIView):
 
         assert_proprietaire_owns_structure(request.user, membership.structure_id)
 
-        if membership.role not in {
-            RoleEquipeStructure.GESTIONNAIRE,
-            RoleEquipeStructure.CAISSIER,
-        }:
+        # Les permissions s'appliquent à tous les membres sauf le propriétaire
+        if membership.role == RoleEquipeStructure.PROPRIETAIRE:
             return Response(
-                {"detail": "Les permissions ne s'appliquent qu'aux gestionnaires et caissiers."},
+                {"detail": "Les permissions ne s'appliquent pas au propriétaire."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 

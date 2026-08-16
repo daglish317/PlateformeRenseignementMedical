@@ -13,6 +13,7 @@ import { StatistiquesParams } from "../types/statistiques";
 import { formatMontant, formatNombre } from "../utils/format";
 import { StatistiqueBarChart } from "./StatistiqueBarChart";
 import { StatistiqueCards } from "./StatistiqueCards";
+import { StatistiqueDonutChart } from "./StatistiqueDonutChart";
 import { StatistiquesSkeleton } from "./StatistiquesSkeleton";
 import { SectionErreur } from "./SectionErreur";
 
@@ -64,8 +65,15 @@ export function SectionCaisse({
       <div className="grid gap-6 lg:grid-cols-2">
         <div className="rounded-xl border bg-card p-4">
           <h4 className="mb-4 text-sm font-semibold">
-            Paiements par mode
+            Répartition des paiements par mode
           </h4>
+          <StatistiqueDonutChart
+            data={data.paiements_par_mode.map((mode) => ({
+              nom: mode.label,
+              valeur: mode.montant,
+            }))}
+            formatValeur={formatMontant}
+          />
           {data.paiements_par_mode.length === 0 ? (
             <p className="p-4 text-sm text-muted-foreground">
               Aucun paiement sur la période.

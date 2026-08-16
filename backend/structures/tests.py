@@ -161,3 +161,16 @@ class StructureTests(TestCase):
         member.refresh_from_db()
         self.assertEqual(membership.statut, StatutEquipeStructure.INVITE)
         self.assertFalse(member.is_active)
+
+    def test_owner_cannot_save_empty_member_permissions(self):
+        owner, member, membership = self._create_owner_structure_team()
+        self.client.force_authenticate(user=owner)
+
+        response = self.client.put(
+            f"/api/structures/team/{membership.id}/permissions/",
+            {"permissions": {}},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("Au moins une permission", str(response.data))

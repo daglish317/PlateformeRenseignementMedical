@@ -251,6 +251,16 @@ REPLY_TO_EMAIL = os.getenv("REPLY_TO_EMAIL", "support@santeprox.com")
 EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", DEFAULT_FROM_EMAIL)
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
 
+# ---------------------------------------------------------------------------
+# Web Push / PWA
+# ---------------------------------------------------------------------------
+WEB_PUSH_VAPID_PUBLIC_KEY = os.getenv("WEB_PUSH_VAPID_PUBLIC_KEY", "")
+WEB_PUSH_VAPID_PRIVATE_KEY = os.getenv("WEB_PUSH_VAPID_PRIVATE_KEY", "")
+WEB_PUSH_VAPID_SUBJECT = os.getenv(
+    "WEB_PUSH_VAPID_SUBJECT",
+    "mailto:support@santeprox.com",
+)
+
 if IS_PRODUCTION or os.getenv("EMAIL_USE_SMTP", "false").lower() == "true":
     EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
     EMAIL_HOST = os.getenv("EMAIL_HOST", "smtp.gmail.com")

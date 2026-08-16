@@ -1,5 +1,12 @@
 from django.urls import path
 
+from .facture_views import (
+    FactureDetailModuleView,
+    FactureListView,
+    FacturePDFView,
+    GenererFactureView,
+    VentesEligiblesFactureView,
+)
 from .views import (
     AjouterLigneVenteView,
     AnnulerVenteCaisseView,
@@ -61,5 +68,19 @@ urlpatterns = [
         "caisse/<uuid:pk>/reception/pdf/",
         ReceptionPDFView.as_view(),
         name="vente-reception-pdf",
+    ),
+    # Module Facture
+    path("factures/", FactureListView.as_view(), name="facture-liste"),
+    path(
+        "factures/ventes-disponibles/",
+        VentesEligiblesFactureView.as_view(),
+        name="facture-ventes-eligibles",
+    ),
+    path("factures/generer/", GenererFactureView.as_view(), name="facture-generer"),
+    path("factures/<uuid:pk>/", FactureDetailModuleView.as_view(), name="facture-detail"),
+    path(
+        "factures/<uuid:pk>/pdf/",
+        FacturePDFView.as_view(),
+        name="facture-pdf",
     ),
 ]

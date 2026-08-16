@@ -12,6 +12,7 @@ import { useApprovisionnements } from "../hooks/useStatistiques";
 import { StatistiquesParams } from "../types/statistiques";
 import { formatMontant, formatNombre } from "../utils/format";
 import { StatistiqueBarChart } from "./StatistiqueBarChart";
+import { StatistiqueBarChartHorizontal } from "./StatistiqueBarChartHorizontal";
 import { StatistiqueCards } from "./StatistiqueCards";
 import { StatistiquesSkeleton } from "./StatistiquesSkeleton";
 import { SectionErreur } from "./SectionErreur";
@@ -92,7 +93,19 @@ export function SectionApprovisionnements({
             Aucun approvisionnement sur la période.
           </p>
         ) : (
-          <Table>
+          <>
+            <StatistiqueBarChartHorizontal
+              data={data.produits_frequents.map((produit) => ({
+                nom: produit.nom,
+                valeur: produit.quantite_totale,
+              }))}
+              color="#14b8a6"
+              hauteur={Math.min(
+                Math.max(data.produits_frequents.length * 36, 140),
+                320
+              )}
+            />
+            <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Produit</TableHead>
@@ -116,6 +129,7 @@ export function SectionApprovisionnements({
               ))}
             </TableBody>
           </Table>
+          </>
         )}
       </div>
     </div>

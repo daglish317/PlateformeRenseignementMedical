@@ -11,7 +11,8 @@ export function useMyPermissions(structureId?: string, enabled = true) {
     queryKey: [...MY_PERMISSIONS_QUERY_KEY, structureId ?? ""],
     queryFn: () => dashboardPermissionsService.getMyPermissions(),
     enabled: Boolean(structureId) && enabled,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 30 * 1000,
+    refetchOnWindowFocus: true,
     gcTime: 30 * 60 * 1000,
     retry: false,
   });

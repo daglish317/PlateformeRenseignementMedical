@@ -9,21 +9,20 @@ import {
   pharmacyNavigation,
 } from "../navigation/pharmacy-navigation";
 import { ownerNavigation } from "../navigation/owner-navigation";
-import { caissierNavigation } from "../navigation/caissier-navigation";
 import type { DashboardNavItem, DashboardType } from "../types";
 import { useMyStructureId } from "./useMyStructureId";
 import { useMyPermissions } from "./useMyPermissions";
+import { useMyStructure } from "@/features/shared/structure-profile/hooks/useMyStructure";
 import { filterDashboardNavigation } from "../utils/permissions";
 
 const NAVIGATION: Record<DashboardType, DashboardNavItem[]> = {
   HOPITAL: hospitalNavigation,
   PHARMACIE: pharmacyNavigation,
   OWNER: ownerNavigation,
-  CAISSIER: caissierNavigation,
 };
 
 function isActiveRoute(pathname: string, href: string): boolean {
-  if (href === "/hospital" || href === "/pharmacy" || href === "/owner" || href === "/caissier") {
+  if (href === "/hospital" || href === "/pharmacy" || href === "/owner") {
     return pathname === href;
   }
   return pathname === href || pathname.startsWith(href + "/");
@@ -34,24 +33,41 @@ export function useDashboardNavigation(type: DashboardType) {
   const { unreadByNavItem } = useNotifications();
   const user = useAuthStore((state) => state.user);
   const { data: structureId } = useMyStructureId(type !== "OWNER");
+
+  // Pour le propriétaire, récupérer le type de structure pour filtrer
+  const { data: myStructure } = useMyStructure(type === "OWNER");
+  const structureType = myStructure?.type;
+  const ownerStructureId = myStructure?.id;
+  const activeStructureId = type === "OWNER" ? ownerStructureId : structureId;
+
   const { data: permissions } = useMyPermissions(
-    structureId,
-    type !== "OWNER" && Boolean(structureId)
+    activeStructureId,
+    Boolean(activeStructureId)
   );
 
   const baseNavigation = NAVIGATION[type];
 
   const navigation = useMemo(
-    () =>
-      filterDashboardNavigation(
-        baseNavigation,
+    () => {
+      // Filtrer d'abord selon le type de structure pour le propriétaire
+      let filteredByType = baseNavigation;
+      if (type === "OWNER" && structureType) {
+        filteredByType = baseNavigation.filter(
+          (item) => !item.structureType || item.structureType === structureType
+        );
+      }
+
+      // Ensuite filtrer selon les permissions
+      return filterDashboardNavigation(
+        filteredByType,
         user?.role,
         permissions?.modules
       ).map((item) => ({
         ...item,
         badge: item.navItem ? unreadByNavItem[item.navItem] ?? 0 : undefined,
-      })),
-    [baseNavigation, permissions?.modules, unreadByNavItem, user?.role]
+      }));
+    },
+    [baseNavigation, structureType, permissions?.modules, unreadByNavItem, user?.role, type]
   );
 
   const activeItem = useMemo(

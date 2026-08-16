@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Loader2, ShieldOff, UsersRound } from "lucide-react";
+import { AlertCircle, Loader2, ShieldOff, UsersRound } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { SectionCard } from "@/features/shared/dashboard/components/SectionCard";
@@ -19,10 +19,12 @@ const MODULE_LABELS: Record<string, string> = {
   STOCK: "Stock",
   VENTE: "Vente",
   CAISSE: "Caisse",
+  FACTURE: "Facture",
   INVENTAIRE: "Inventaire",
   ALERTES: "Alertes",
   PEREMPTION: "Péremption",
   HISTORIQUE: "Historique",
+  STATISTIQUES: "Statistiques",
   HORAIRES: "Horaires",
   NOTIFICATIONS: "Notifications",
   PROFIL: "Profil",
@@ -50,14 +52,31 @@ const MODULE_ORDER: ModuleOperationnel[] = [
   "STOCK",
   "VENTE",
   "CAISSE",
+  "FACTURE",
   "INVENTAIRE",
   "ALERTES",
   "PEREMPTION",
   "HISTORIQUE",
+  "STATISTIQUES",
   "HORAIRES",
   "NOTIFICATIONS",
   "PROFIL",
   "PARAMETRES",
+];
+
+const MODULE_GROUPS: Array<{ title: string; modules: ModuleOperationnel[] }> = [
+  {
+    title: "Opérations métier",
+    modules: ["APPROVISIONNEMENT", "STOCK", "VENTE", "CAISSE", "FACTURE"],
+  },
+  {
+    title: "Suivi et contrôle",
+    modules: ["INVENTAIRE", "ALERTES", "PEREMPTION", "HISTORIQUE", "STATISTIQUES"],
+  },
+  {
+    title: "Gestion et accès",
+    modules: ["HORAIRES", "NOTIFICATIONS", "PROFIL", "PARAMETRES"],
+  },
 ];
 
 function clonePermissions(input: TeamPermissionMap | undefined): TeamPermissionMap {
@@ -102,6 +121,9 @@ function MemberPermissionsEditorContent({
   const baselinePermissions = clonePermissions(permissions);
   const isChanged =
     JSON.stringify(draftPermissions) !== JSON.stringify(baselinePermissions);
+  const hasAnyPermission = Object.values(draftPermissions).some(
+    (actions) => (actions?.length ?? 0) > 0
+  );
 
   const togglePermission = (module: ModuleOperationnel, action: ActionPermission) => {
     setDraftPermissions((current) => {
@@ -154,31 +176,61 @@ function MemberPermissionsEditorContent({
         Messagerie n&apos;est pas attribuable aux membres opérationnels.
       </p>
 
-      <div className="grid gap-4 lg:grid-cols-2">
-        {modules.map(({ module, actions }) => {
-          const currentActions = new Set(draftPermissions[module] ?? []);
+      <div className="space-y-6">
+        {!hasAnyPermission && (
+          <div className="flex items-start gap-3 rounded-lg border border-dashed bg-muted/30 p-4 text-sm text-muted-foreground">
+            <AlertCircle className="mt-0.5 size-5" />
+            <p>
+              Ce membre n&apos;a encore aucun module activé. Le propriétaire doit
+              au moins lui accorder une permission pour qu&apos;il voie un espace
+              opérationnel cohérent.
+            </p>
+          </div>
+        )}
+
+        {MODULE_GROUPS.map((group) => {
+          const groupModules = modules.filter(({ module }) =>
+            group.modules.includes(module)
+          );
+
+          if (groupModules.length === 0) return null;
+
           return (
-            <div key={module} className="rounded-lg border p-4">
-              <div className="mb-3">
-                <h4 className="font-medium">{MODULE_LABELS[module] ?? module}</h4>
+            <div key={group.title} className="space-y-3">
+              <div>
+                <h4 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                  {group.title}
+                </h4>
               </div>
-              <div className="grid gap-2 sm:grid-cols-2">
-                {actions.map((action) => {
-                  const checked = currentActions.has(action);
+              <div className="grid gap-4 lg:grid-cols-2">
+                {groupModules.map(({ module, actions }) => {
+                  const currentActions = new Set(draftPermissions[module] ?? []);
                   return (
-                    <label
-                      key={`${module}-${action}`}
-                      className="flex items-center gap-2 rounded-md border bg-background px-3 py-2 text-sm"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={checked}
-                        onChange={() => togglePermission(module, action)}
-                        disabled={!editable}
-                        className="h-4 w-4 rounded border-input"
-                      />
-                      <span>{ACTION_LABELS[action] ?? action}</span>
-                    </label>
+                    <div key={module} className="rounded-lg border p-4">
+                      <div className="mb-3">
+                        <h5 className="font-medium">{MODULE_LABELS[module] ?? module}</h5>
+                      </div>
+                      <div className="grid gap-2 sm:grid-cols-2">
+                        {actions.map((action) => {
+                          const checked = currentActions.has(action);
+                          return (
+                            <label
+                              key={`${module}-${action}`}
+                              className="flex items-center gap-2 rounded-md border bg-background px-3 py-2 text-sm"
+                            >
+                              <input
+                                type="checkbox"
+                                checked={checked}
+                                onChange={() => togglePermission(module, action)}
+                                disabled={!editable}
+                                className="h-4 w-4 rounded border-input"
+                              />
+                              <span>{ACTION_LABELS[action] ?? action}</span>
+                            </label>
+                          );
+                        })}
+                      </div>
+                    </div>
                   );
                 })}
               </div>

@@ -17,6 +17,11 @@ const TYPE_TO_ROUTE: Record<string, string> = {
   PHARMACIE: "pharmacy",
 };
 
+const TYPE_TO_STRUCTURE_TYPE: Partial<Record<DashboardType, string>> = {
+  HOPITAL: "HOPITAL",
+  PHARMACIE: "PHARMACIE",
+};
+
 function isAllowedRole(role: RoleUtilisateur, type: DashboardType): boolean {
   switch (type) {
     case "HOPITAL":
@@ -25,8 +30,6 @@ function isAllowedRole(role: RoleUtilisateur, type: DashboardType): boolean {
       return role === "GESTIONNAIRE" || role === "CAISSIER";
     case "OWNER":
       return role === "PROPRIETAIRE";
-    case "CAISSIER":
-      return role === "CAISSIER";
   }
 }
 
@@ -52,14 +55,14 @@ export function DashboardRoute({ children, type }: DashboardRouteProps) {
   const {
     data: structure,
     isLoading: structureLoading,
-    isError: structureError,
   } = useMyStructure(canCheckStructure);
   const {
     data: permissions,
     isLoading: permissionsLoading,
-    isError: permissionsError,
   } = useMyPermissions(structure?.id, canCheckStructure && Boolean(structure?.id));
   const routeRequirement = getDashboardRouteRequirement(type, pathname);
+  const structureType = structure?.type?.toUpperCase();
+  const expectedStructureType = TYPE_TO_STRUCTURE_TYPE[type];
   const hasRoutePermission =
     !routeRequirement?.blocked &&
     (!routeRequirement?.module ||
@@ -84,19 +87,16 @@ export function DashboardRoute({ children, type }: DashboardRouteProps) {
 
     if (!requiresStructure) return;
 
-    if (structureError || permissionsError) {
-      router.replace("/gestionnaire/setup");
-      return;
-    }
-
     if (structureLoading || permissionsLoading) {
       return;
     }
 
-    if (!structure) return;
-
     if (routeRequirement?.blocked) {
       router.replace(`/${type.toLowerCase()}`);
+      return;
+    }
+
+    if (!structure) {
       return;
     }
 
@@ -105,9 +105,7 @@ export function DashboardRoute({ children, type }: DashboardRouteProps) {
       return;
     }
 
-    const structureType = structure.type.toUpperCase();
-
-    if (structureType !== type) {
+    if (structureType && expectedStructureType && structureType !== expectedStructureType) {
       const route = TYPE_TO_ROUTE[structureType] || "hospital";
       router.replace(`/${route}`);
     }
@@ -116,14 +114,14 @@ export function DashboardRoute({ children, type }: DashboardRouteProps) {
     hydrated,
     hasRoutePermission,
     pathname,
-    permissionsError,
     permissionsLoading,
     requiresStructure,
     routeRequirement,
     router,
     structure,
     structureLoading,
-    structureError,
+    structureType,
+    expectedStructureType,
     type,
     user,
   ]);
@@ -136,10 +134,9 @@ export function DashboardRoute({ children, type }: DashboardRouteProps) {
     (requiresStructure &&
       (structureLoading ||
         permissionsLoading ||
-        structureError ||
-        permissionsError ||
-        !structure ||
-        structure.type.toUpperCase() !== type ||
+        (structureType && expectedStructureType
+          ? structureType !== expectedStructureType
+          : false) ||
         Boolean(routeRequirement?.blocked) ||
         (routeRequirement && !hasRoutePermission)));
 

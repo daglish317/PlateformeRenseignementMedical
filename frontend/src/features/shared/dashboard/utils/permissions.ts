@@ -19,14 +19,18 @@ export function canAccessDashboardNavItem(
   role?: string | null,
   permissions?: ModulePermissionsMap
 ): boolean {
+  // Vérifier d'abord la permission de rôle (pour owner par exemple)
   if (item.permission && role && item.permission !== role) {
     return false;
   }
 
+  // Si pas de module défini, c'est un élément toujours visible
+  // (Dashboard, Profil, Paramètres pour les membres d'équipe)
   if (!item.module) {
     return true;
   }
 
+  // Pour les items avec module, vérifier les permissions
   return hasModuleAction(permissions, item.module, (item.action as ActionPermission) ?? "CONSULTER");
 }
 

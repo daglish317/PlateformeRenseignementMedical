@@ -12,6 +12,7 @@ import {
 import { useProduitsVendus } from "../hooks/useStatistiques";
 import { StatistiquesParams } from "../types/statistiques";
 import { formatMontant, formatNombre } from "../utils/format";
+import { StatistiqueBarChartHorizontal } from "./StatistiqueBarChartHorizontal";
 import { StatistiquesSkeleton } from "./StatistiquesSkeleton";
 import { SectionErreur } from "./SectionErreur";
 
@@ -71,20 +72,38 @@ export function SectionProduits({
   if (error || !data) return <SectionErreur onReessayer={() => refetch()} />;
 
   return (
-    <div className="grid gap-6 lg:grid-cols-2">
-      <div className="rounded-xl border bg-card p-4">
-        <h4 className="mb-4 flex items-center gap-2 text-sm font-semibold">
-          <Trophy className="h-4 w-4 text-success" />
-          Produits les plus vendus
-        </h4>
-        <TableauProduits produits={data.plus_vendus} />
-      </div>
-      <div className="rounded-xl border bg-card p-4">
-        <h4 className="mb-4 flex items-center gap-2 text-sm font-semibold">
-          <TrendingDown className="h-4 w-4 text-warning" />
-          Produits les moins vendus
-        </h4>
-        <TableauProduits produits={data.moins_vendus} />
+    <div className="space-y-6">
+      <div className="grid gap-6 lg:grid-cols-2">
+        <div className="rounded-xl border bg-card p-4">
+          <h4 className="mb-4 flex items-center gap-2 text-sm font-semibold">
+            <Trophy className="h-4 w-4 text-success" />
+            Produits les plus vendus
+          </h4>
+          <StatistiqueBarChartHorizontal
+            data={data.plus_vendus.map((produit) => ({
+              nom: produit.nom,
+              valeur: produit.quantite,
+            }))}
+            color="#10b981"
+            hauteur={Math.min(Math.max(data.plus_vendus.length * 36, 140), 320)}
+          />
+          <TableauProduits produits={data.plus_vendus} />
+        </div>
+        <div className="rounded-xl border bg-card p-4">
+          <h4 className="mb-4 flex items-center gap-2 text-sm font-semibold">
+            <TrendingDown className="h-4 w-4 text-warning" />
+            Produits les moins vendus
+          </h4>
+          <StatistiqueBarChartHorizontal
+            data={data.moins_vendus.map((produit) => ({
+              nom: produit.nom,
+              valeur: produit.quantite,
+            }))}
+            color="#f59e0b"
+            hauteur={Math.min(Math.max(data.moins_vendus.length * 36, 140), 320)}
+          />
+          <TableauProduits produits={data.moins_vendus} />
+        </div>
       </div>
     </div>
   );

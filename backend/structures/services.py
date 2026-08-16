@@ -115,6 +115,43 @@ class StructureService:
         return structure
 
 
+class HoraireService:
+    """Détermination de l'état ouvert/fermé d'une structure à partir de ses horaires officiels."""
+
+    JOURS = ["LUNDI", "MARDI", "MERCREDI", "JEUDI", "VENDREDI", "SAMEDI", "DIMANCHE"]
+
+    @staticmethod
+    def est_ouverte(structure, moment=None, horaires=None):
+        """
+        Retourne True si la structure est ouverte au moment donné (défaut: maintenant).
+
+        `horaires` peut être une liste pré-chargée (prefetch) pour éviter des requêtes.
+        Les horaires officiels enregistrés sont la seule source de vérité.
+        """
+        if not structure:
+            return False
+
+        moment = moment or timezone.localtime()
+        jour = HoraireService.JOURS[moment.weekday()]
+        heure = moment.time()
+
+        if horaires is None:
+            horaires = structure.horaires.filter(
+                jour=jour,
+                est_ferme=False,
+            )
+        else:
+            horaires = [
+                h for h in horaires
+                if h.jour == jour and not h.est_ferme
+            ]
+
+        for h in horaires:
+            if h.heure_ouverture <= heure <= h.heure_fermeture:
+                return True
+        return False
+
+
 class StructureGeoService:
 
     @staticmethod

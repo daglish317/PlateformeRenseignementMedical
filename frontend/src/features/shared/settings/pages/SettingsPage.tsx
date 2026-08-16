@@ -7,9 +7,12 @@ import { useProfile } from "../hooks/useProfile";
 import { ProfileCard } from "../components/ProfileCard";
 import { PreferencesForm } from "../components/PreferencesForm";
 import { PasswordForm } from "../components/PasswordForm";
+import { PushNotificationsCard } from "../components/PushNotificationsCard";
+import { useAuthStore } from "@/features/auth/store/auth-store";
 
 export function SettingsPage() {
   const { data: profile, isLoading, isError, refetch } = useProfile();
+  const role = useAuthStore((state) => state.user?.role);
 
   if (isLoading) {
     return (
@@ -42,6 +45,8 @@ export function SettingsPage() {
         <ProfileCard profile={profile} />
         <PreferencesForm />
       </div>
+
+      {role === "PROPRIETAIRE" ? <PushNotificationsCard /> : null}
 
       <PasswordForm />
     </PageContainer>

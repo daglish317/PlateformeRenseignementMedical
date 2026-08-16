@@ -4,18 +4,13 @@ import { useEffect } from "react";
 import { useRouter } from "@/i18n/navigation";
 
 import { useAuthStore } from "@/features/auth/store/auth-store";
-import { useMyStructure } from "@/features/shared/structure-profile/hooks/useMyStructure";
-
-const TYPE_TO_ROUTE: Record<string, string> = {
-  HOPITAL: "hospital",
-  PHARMACIE: "pharmacy",
-};
+import { getRedirectPath } from "@/features/auth/utils/redirect";
 
 export default function GestionnaireRootPage() {
   const router = useRouter();
   const authenticated = useAuthStore((state) => state.authenticated);
   const hydrated = useAuthStore((state) => state.hydrated);
-  const { data: structure, isError } = useMyStructure(hydrated && authenticated);
+  const user = useAuthStore((state) => state.user);
 
   useEffect(() => {
     if (!hydrated) return;
@@ -25,22 +20,12 @@ export default function GestionnaireRootPage() {
       return;
     }
 
-    if (isError) {
-      router.replace("/gestionnaire/setup");
+    if (!user) {
       return;
     }
 
-    if (!structure) return;
-
-    const statut = structure.statut;
-    const route = TYPE_TO_ROUTE[structure.type.toUpperCase()] || "hospital";
-
-    if (statut === "ACTIVE") {
-      router.replace(`/${route}`);
-    } else {
-      router.replace("/gestionnaire/setup");
-    }
-  }, [authenticated, hydrated, isError, router, structure]);
+    router.replace(getRedirectPath(user));
+  }, [authenticated, hydrated, router, user]);
 
   return null;
 }

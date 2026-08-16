@@ -1,5 +1,6 @@
 ﻿"use client";
 import { useMemo, useState } from "react";
+import dynamic from "next/dynamic";
 import { BarChart3, Building2, FileSpreadsheet, FileText } from "lucide-react";
 import { PageTitle } from "@/features/shared/dashboard/components/PageTitle";
 import { SectionCard } from "@/features/shared/dashboard/components/SectionCard";
@@ -15,15 +16,73 @@ import {
 import { ONGLETS_STATISTIQUES } from "@/features/statistiques/constants/periodes";
 import { useTelechargerStatistiques } from "@/features/statistiques/hooks/useStatistiques";
 import { OngletStatistiques, StatistiquesParams } from "@/features/statistiques/types/statistiques";
-import { SectionVueGenerale } from "@/features/statistiques/components/SectionVueGenerale";
-import { SectionVentes } from "@/features/statistiques/components/SectionVentes";
-import { SectionProduits } from "@/features/statistiques/components/SectionProduits";
-import { SectionApprovisionnements } from "@/features/statistiques/components/SectionApprovisionnements";
-import { SectionStock } from "@/features/statistiques/components/SectionStock";
-import { SectionCaisse } from "@/features/statistiques/components/SectionCaisse";
-import { SectionFinancier } from "@/features/statistiques/components/SectionFinancier";
-import { SectionComparaison } from "@/features/statistiques/components/SectionComparaison";
-import { SectionDetails } from "@/features/statistiques/components/SectionDetails";
+import { StatistiquesSkeleton } from "@/features/statistiques/components/StatistiquesSkeleton";
+
+// Chargement paresseux des sections : recharts et les données ne sont
+// téléchargés que lorsque l'onglet correspondant est ouvert.
+const SectionVueGenerale = dynamic(
+  () =>
+    import("@/features/statistiques/components/SectionVueGenerale").then(
+      (m) => m.SectionVueGenerale
+    ),
+  { loading: () => <StatistiquesSkeleton /> }
+);
+const SectionVentes = dynamic(
+  () =>
+    import("@/features/statistiques/components/SectionVentes").then(
+      (m) => m.SectionVentes
+    ),
+  { loading: () => <StatistiquesSkeleton /> }
+);
+const SectionProduits = dynamic(
+  () =>
+    import("@/features/statistiques/components/SectionProduits").then(
+      (m) => m.SectionProduits
+    ),
+  { loading: () => <StatistiquesSkeleton /> }
+);
+const SectionApprovisionnements = dynamic(
+  () =>
+    import("@/features/statistiques/components/SectionApprovisionnements").then(
+      (m) => m.SectionApprovisionnements
+    ),
+  { loading: () => <StatistiquesSkeleton /> }
+);
+const SectionStock = dynamic(
+  () =>
+    import("@/features/statistiques/components/SectionStock").then(
+      (m) => m.SectionStock
+    ),
+  { loading: () => <StatistiquesSkeleton /> }
+);
+const SectionCaisse = dynamic(
+  () =>
+    import("@/features/statistiques/components/SectionCaisse").then(
+      (m) => m.SectionCaisse
+    ),
+  { loading: () => <StatistiquesSkeleton /> }
+);
+const SectionFinancier = dynamic(
+  () =>
+    import("@/features/statistiques/components/SectionFinancier").then(
+      (m) => m.SectionFinancier
+    ),
+  { loading: () => <StatistiquesSkeleton /> }
+);
+const SectionComparaison = dynamic(
+  () =>
+    import("@/features/statistiques/components/SectionComparaison").then(
+      (m) => m.SectionComparaison
+    ),
+  { loading: () => <StatistiquesSkeleton /> }
+);
+const SectionDetails = dynamic(
+  () =>
+    import("@/features/statistiques/components/SectionDetails").then(
+      (m) => m.SectionDetails
+    ),
+  { loading: () => <StatistiquesSkeleton /> }
+);
 
 function construireParams(etat: EtatParametres): StatistiquesParams {
   const params: StatistiquesParams = { periode: etat.periode };

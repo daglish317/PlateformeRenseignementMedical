@@ -40,6 +40,7 @@ class ActionCaisse(models.TextChoices):
     IMPRESSION = "IMPRESSION", "Impression du reçu"
     REIMPRESSION = "REIMPRESSION", "Réimpression du reçu"
     RETOUR_CAISSE = "RETOUR_CAISSE", "Retour en caisse"
+    GENERATION_FACTURE = "GENERATION_FACTURE", "Génération de la facture"
 
 
 class ResultatOperation(models.TextChoices):
@@ -192,6 +193,12 @@ class Facture(models.Model):
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
+    structure = models.ForeignKey(
+        "structures.Structure",
+        on_delete=models.CASCADE,
+        related_name="factures",
+    )
+
     numero = models.CharField(max_length=30, unique=True)
 
     vente = models.OneToOneField(
@@ -205,6 +212,8 @@ class Facture(models.Model):
         on_delete=models.CASCADE,
         related_name="facture",
     )
+
+    beneficiaire = models.CharField(max_length=255, blank=True, default="")
 
     montant_total = models.DecimalField(max_digits=14, decimal_places=2)
     nb_articles = models.PositiveIntegerField()

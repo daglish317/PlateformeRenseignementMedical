@@ -11,6 +11,7 @@ class ModuleOperationnel(models.TextChoices):
     STOCK = "STOCK", "Stock"
     VENTE = "VENTE", "Vente"
     CAISSE = "CAISSE", "Caisse"
+    FACTURE = "FACTURE", "Facture"
     SERVICES_MEDICAUX = "SERVICES_MEDICAUX", "Services medicaux"
     PLATEAUX_TECHNIQUES = "PLATEAUX_TECHNIQUES", "Plateaux techniques"
     PRISES_EN_CHARGE = "PRISES_EN_CHARGE", "Prises en charge"
@@ -18,6 +19,7 @@ class ModuleOperationnel(models.TextChoices):
     ALERTES = "ALERTES", "Alertes"
     PEREMPTION = "PEREMPTION", "Peremption"
     HISTORIQUE = "HISTORIQUE", "Historique"
+    STATISTIQUES = "STATISTIQUES", "Statistiques"
     HORAIRES = "HORAIRES", "Horaires"
     NOTIFICATIONS = "NOTIFICATIONS", "Notifications"
     PROFIL = "PROFIL", "Profil"
@@ -74,6 +76,14 @@ MODULE_ACTIONS = {
         ActionPermission.RETOUR_CAISSE,
         ActionPermission.SUPPRIMER,
     ],
+    ModuleOperationnel.FACTURE: [
+        ActionPermission.CONSULTER,
+        ActionPermission.CREER,
+        ActionPermission.IMPRIMER,
+        ActionPermission.RECHERCHER,
+        ActionPermission.FILTRER,
+        ActionPermission.EXPORTER,
+    ],
     ModuleOperationnel.SERVICES_MEDICAUX: [
         ActionPermission.CONSULTER,
         ActionPermission.CREER,
@@ -116,6 +126,11 @@ MODULE_ACTIONS = {
         ActionPermission.FILTRER,
         ActionPermission.RECHERCHER,
         ActionPermission.EXPORTER,
+    ],
+    ModuleOperationnel.STATISTIQUES: [
+        ActionPermission.CONSULTER,
+        ActionPermission.EXPORTER,
+        ActionPermission.IMPRIMER,
     ],
     ModuleOperationnel.HORAIRES: [
         ActionPermission.CONSULTER,

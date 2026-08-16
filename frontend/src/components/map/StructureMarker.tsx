@@ -3,6 +3,7 @@
 import { Marker, Popup } from "react-leaflet";
 import L from "leaflet";
 import { Phone, MapPin, Navigation, Info } from "lucide-react";
+import { useRouter } from "@/i18n/navigation";
 
 import { useStructureSelectionStore } from "@/features/structure-selection/store/structure-selection-store";
 import type { MapStructure } from "./MedicalMap";
@@ -79,6 +80,7 @@ function buildIcon(type: string, selected: boolean) {
 export default function StructureMarker({
   structure,
 }: StructureMarkerProps) {
+  const router = useRouter();
   const setSelectedStructure = useStructureSelectionStore((state) => state.setSelectedStructure);
   const selectedStructure = useStructureSelectionStore((state) => state.selectedStructure);
   // Ne pas afficher le marqueur si pas de coordonnées
@@ -100,7 +102,7 @@ export default function StructureMarker({
     : null;
 
   const handleViewDetails = () => {
-    window.location.href = `/structures/${structure.id}`;
+    router.push(`/structure/${structure.id}`);
   };
 
   const handleGetDirections = () => {

@@ -22,6 +22,8 @@ from .models import (
     EtatVente,
     Facture,
     ImpressionFacture,
+    LigneVente,
+    ModePaiement,
     MotifRetour,
     OperationCaisse,
     Paiement,
@@ -1278,4 +1280,291 @@ class JournalCaisseTests(VenteBaseTestCase):
     def test_gestionnaire_interdit_sur_le_journal_caissier(self):
         self._as_caissier(self.gestionnaire)
         response = self.client.get("/api/ventes/caisse/historique/")
+        self.assertEqual(response.status_code, 403)
+
+
+class FactureModuleTestCase(TestCase):
+    """Tests du module Facture (production, consultation, PDF, permissions).
+
+    Utilise un propriétaire (accès complet sans MembrePermission) pour
+    construire les données, et un caissier sans permission pour vérifier le
+    contrôle d'accès granulaire du module FACTURE.
+    """
+
+    def setUp(self):
+        self.client = APIClient()
+
+        self.structure = Structure.objects.create(
+            nom="Pharmacie Test",
+            type=TypeStructure.PHARMACIE,
+            statut=StatutStructure.ACTIVE,
+            adresse="Abidjan",
+            telephone="0102030405",
+        )
+        self.autre_structure = Structure.objects.create(
+            nom="Autre Pharmacie",
+            type=TypeStructure.PHARMACIE,
+            statut=StatutStructure.ACTIVE,
+            adresse="Abidjan",
+            telephone="0000000000",
+        )
+
+        self.proprietaire = Utilisateur.objects.create_user(
+            email="proprio-facture@test.com",
+            password="password123",
+            nom="Proprio",
+            role=RoleUtilisateur.PROPRIETAIRE,
+            type_authentification=TypeAuthentification.EMAIL,
+            email_verifie=True,
+        )
+        EquipeStructure.objects.create(
+            structure=self.structure,
+            utilisateur=self.proprietaire,
+            role=RoleEquipeStructure.PROPRIETAIRE,
+            statut=StatutEquipeStructure.ACTIF,
+        )
+        EquipeStructure.objects.create(
+            structure=self.autre_structure,
+            utilisateur=self.proprietaire,
+            role=RoleEquipeStructure.PROPRIETAIRE,
+            statut=StatutEquipeStructure.ACTIF,
+        )
+
+        self.caissier = Utilisateur.objects.create_user(
+            email="caissier-facture@test.com",
+            password="password123",
+            nom="Cais",
+            role=RoleUtilisateur.CAISSIER,
+            type_authentification=TypeAuthentification.EMAIL,
+            email_verifie=True,
+        )
+        EquipeStructure.objects.create(
+            structure=self.structure,
+            utilisateur=self.caissier,
+            role=RoleEquipeStructure.CAISSIER,
+            statut=StatutEquipeStructure.ACTIF,
+        )
+
+        self.medicament = Medicament.objects.create(
+            structure=self.structure,
+            nom="Paracétamol 500mg",
+            forme_pharmaceutique="COMPRIME",
+            prix_vente=Decimal("500.00"),
+        )
+        StockItem.objects.create(
+            structure=self.structure,
+            nom=self.medicament.nom,
+            type_item=StockItem.TYPE_MEDICAMENT,
+            quantite=100,
+            quantite_reservee=0,
+        )
+
+    def _vente_payee(self, nom_client="", structure=None):
+        structure = structure or self.structure
+        vente = Vente.objects.create(
+            structure=structure,
+            numero=VenteService._generer_numero_vente(structure),
+            etat=EtatVente.PAYEE,
+            prepare_par=self.proprietaire,
+            nom_client=nom_client,
+            montant_total=Decimal("2500.00"),
+            nb_articles=5,
+            validee_le=timezone.now(),
+        )
+        LigneVente.objects.create(
+            vente=vente,
+            medicament=self.medicament,
+            designation=self.medicament.nom,
+            forme_pharmaceutique="COMPRIME",
+            prix_unitaire=Decimal("500.00"),
+            quantite=5,
+            montant=Decimal("2500.00"),
+        )
+        Paiement.objects.create(
+            vente=vente,
+            mode=ModePaiement.ESPECES,
+            montant=vente.montant_total,
+            encaisse_par=self.caissier,
+        )
+        return vente
+
+    def test_liste_recherche_perimetre_structure(self):
+        self.client.force_authenticate(user=self.proprietaire)
+        vente = self._vente_payee(nom_client="Jean Dupont")
+        self._vente_payee(nom_client="", structure=self.autre_structure)
+
+        facture = Facture.objects.create(
+            numero="F20000101-0001",
+            structure=self.structure,
+            vente=vente,
+            paiement=vente.paiement,
+            montant_total=vente.montant_total,
+            nb_articles=vente.nb_articles,
+            beneficiaire="Jean Dupont",
+        )
+
+        # Propriétaire sans structure_id -> 400
+        response = self.client.get("/api/ventes/factures/")
+        self.assertEqual(response.status_code, 400)
+
+        # Liste limitée à la structure
+        response = self.client.get(
+            f"/api/ventes/factures/?structure_id={self.structure.id}"
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]["numero"], "F20000101-0001")
+        self.assertEqual(response.data[0]["beneficiaire"], "Jean Dupont")
+
+        response = self.client.get(
+            f"/api/ventes/factures/?structure_id={self.autre_structure.id}"
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 0)
+
+        # Recherche combinable (numéro, référence vente, bénéficiaire)
+        for filtre in [
+            "recherche=jean",
+            "recherche=F20000101-0001",
+            f"recherche={vente.numero}",
+            "beneficiaire=dupont",
+        ]:
+            response = self.client.get(
+                f"/api/ventes/factures/?structure_id={self.structure.id}&{filtre}"
+            )
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(len(response.data), 1)
+
+        response = self.client.get(
+            f"/api/ventes/factures/?structure_id={self.structure.id}&recherche=introuvable"
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 0)
+
+    def test_detail_et_pdf(self):
+        self.client.force_authenticate(user=self.proprietaire)
+        vente = self._vente_payee(nom_client="Jean Dupont")
+        facture = Facture.objects.create(
+            numero="F20000101-0002",
+            structure=self.structure,
+            vente=vente,
+            paiement=vente.paiement,
+            montant_total=vente.montant_total,
+            nb_articles=vente.nb_articles,
+            beneficiaire="Jean Dupont",
+        )
+
+        response = self.client.get(f"/api/ventes/factures/{facture.id}/")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["vente_numero"], vente.numero)
+        self.assertEqual(len(response.data["lignes"]), 1)
+        self.assertIn("structure_adresse", response.data)
+        self.assertIn("paiement_mode", response.data)
+
+        response = self.client.get(f"/api/ventes/factures/{facture.id}/pdf/")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response["Content-Type"], "application/pdf")
+        self.assertTrue(b"".join(response.streaming_content).startswith(b"%PDF"))
+
+    def test_generer_facture(self):
+        self.client.force_authenticate(user=self.proprietaire)
+        vente = self._vente_payee(nom_client="")
+        vente_a_facture = self._vente_payee(nom_client="Deja Facture")
+        Facture.objects.create(
+            numero="F20000101-0003",
+            structure=self.structure,
+            vente=vente_a_facture,
+            paiement=vente_a_facture.paiement,
+            montant_total=vente_a_facture.montant_total,
+            nb_articles=vente_a_facture.nb_articles,
+            beneficiaire="Deja Facture",
+        )
+        vente_en_cours = Vente.objects.create(
+            structure=self.structure,
+            numero=VenteService._generer_numero_vente(self.structure),
+            etat=EtatVente.EN_PREPARATION,
+            prepare_par=self.proprietaire,
+            nom_client="Client",
+        )
+
+        # Ventes éligibles : seule la vente payée sans facture apparaît
+        response = self.client.get(
+            f"/api/ventes/factures/ventes-disponibles/?structure_id={self.structure.id}"
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 1)
+
+        # Bénéficiaire obligatoire
+        response = self.client.post(
+            "/api/ventes/factures/generer/",
+            {"vente_id": str(vente.id)},
+            format="json",
+        )
+        self.assertEqual(response.status_code, 400)
+
+        # Génération avec bénéficiaire saisi
+        response = self.client.post(
+            "/api/ventes/factures/generer/",
+            {"vente_id": str(vente.id), "beneficiaire": "Amadou Koné"},
+            format="json",
+        )
+        self.assertEqual(response.status_code, 201)
+        facture = Facture.objects.get(vente=vente)
+        self.assertEqual(facture.beneficiaire, "Amadou Koné")
+        self.assertEqual(facture.structure_id, self.structure.id)
+        self.assertTrue(
+            OperationCaisse.objects.filter(
+                action=ActionCaisse.GENERATION_FACTURE
+            ).exists()
+        )
+
+        # Pas de doublon
+        response = self.client.post(
+            "/api/ventes/factures/generer/",
+            {"vente_id": str(vente.id), "beneficiaire": "Amadou Koné"},
+            format="json",
+        )
+        self.assertEqual(response.status_code, 400)
+
+        # Vente déjà facturée refusée
+        response = self.client.post(
+            "/api/ventes/factures/generer/",
+            {"vente_id": str(vente_a_facture.id), "beneficiaire": "X"},
+            format="json",
+        )
+        self.assertEqual(response.status_code, 400)
+
+        # Vente non finalisée refusée
+        response = self.client.post(
+            "/api/ventes/factures/generer/",
+            {"vente_id": str(vente_en_cours.id), "beneficiaire": "Client"},
+            format="json",
+        )
+        self.assertEqual(response.status_code, 400)
+
+        # vente_id absent
+        response = self.client.post(
+            "/api/ventes/factures/generer/", {}, format="json"
+        )
+        self.assertEqual(response.status_code, 400)
+
+    def test_permission_module_requise(self):
+        self.client.force_authenticate(user=self.caissier)
+        vente = self._vente_payee(nom_client="Jean")
+        facture = Facture.objects.create(
+            numero="F20000101-0004",
+            structure=self.structure,
+            vente=vente,
+            paiement=vente.paiement,
+            montant_total=vente.montant_total,
+            nb_articles=vente.nb_articles,
+            beneficiaire="Jean",
+        )
+
+        # Caissier sans MembrePermission FACTURE -> 403
+        response = self.client.get(
+            f"/api/ventes/factures/?structure_id={self.structure.id}"
+        )
+        self.assertEqual(response.status_code, 403)
+        response = self.client.get(f"/api/ventes/factures/{facture.id}/")
         self.assertEqual(response.status_code, 403)

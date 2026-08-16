@@ -5,8 +5,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 
 from .models import Notification
-from .serializers import NotificationSerializer
+from .serializers import NotificationSerializer, PushSubscriptionSerializer, PushSubscriptionResponseSerializer
 from .service import NotificationService
+from .push_service import PushService
 from utilisateurs.models import Utilisateur
 from utilisateurs.decorators import admin_required
 
@@ -169,3 +170,47 @@ class MarkAllAsReadView(APIView):
             queryset = queryset.filter(nav_item=nav_item)
         updated = queryset.update(est_lue=True)
         return Response({"message": f"{updated} notification(s) marquée(s) comme lue(s)"})
+
+
+class PushPublicKeyView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        if request.user.role != "PROPRIETAIRE":
+            return Response({"detail": "Accès réservé au propriétaire."}, status=403)
+        return Response({"public_key": PushService.get_public_key()})
+
+
+class PushSubscriptionView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        if request.user.role != "PROPRIETAIRE":
+            return Response({"detail": "Accès réservé au propriétaire."}, status=403)
+
+        serializer = PushSubscriptionSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        subscription = PushService.save_subscription(
+            utilisateur=request.user,
+            subscription_data=serializer.validated_data,
+            user_agent=request.META.get("HTTP_USER_AGENT", ""),
+        )
+        return Response(
+            PushSubscriptionResponseSerializer(subscription).data,
+            status=status.HTTP_201_CREATED,
+        )
+
+    def delete(self, request):
+        if request.user.role != "PROPRIETAIRE":
+            return Response({"detail": "Accès réservé au propriétaire."}, status=403)
+
+        endpoint = request.data.get("endpoint")
+        if not endpoint:
+            return Response({"detail": "Endpoint manquant."}, status=400)
+
+        updated = PushService.remove_subscription(
+            utilisateur=request.user,
+            endpoint=endpoint,
+        )
+        return Response({"message": f"{updated} subscription(s) désactivée(s)"} , status=status.HTTP_200_OK)

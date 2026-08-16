@@ -1,6 +1,8 @@
 from django.contrib import admin
 from django.urls import path, include
 
+from search.views_routing import RoutingView
+
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/utilisateurs/", include("utilisateurs.urls")),
@@ -22,4 +24,5 @@ urlpatterns = [
     path("api/messagerie/", include("messagerie.urls")),
     path("api/core/", include("core.urls")),
     path("api/services/", include("structures.services_urls")),
+    path("api/routing/", RoutingView.as_view(), name="routing"),
 ]

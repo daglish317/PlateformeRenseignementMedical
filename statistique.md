@@ -20,6 +20,7 @@ filtrage ;
 comparaison des périodes ;
 consultation des détails statistiques ;
 export des résultats.
+
 GESTIONNAIRE
 
 Aucun accès au module Statistiques.

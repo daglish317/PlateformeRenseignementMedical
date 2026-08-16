@@ -16,6 +16,7 @@ class StatutStructure(models.TextChoices):
 
 
 class RoleEquipeStructure(models.TextChoices):
+    """Rôles prédéfinis (compatibilité legacy - non utilisé pour les nouveaux membres)"""
     PROPRIETAIRE = "PROPRIETAIRE", "Proprietaire"
     GESTIONNAIRE = "GESTIONNAIRE", "Gestionnaire"
     CAISSIER = "CAISSIER", "Caissier"
@@ -156,9 +157,11 @@ class EquipeStructure(models.Model):
     )
 
     role = models.CharField(
-        max_length=20,
-        choices=RoleEquipeStructure.choices,
+        max_length=100,
+        blank=True,
+        null=True,
         db_index=True,
+        help_text="Rôle personnalisé défini par le propriétaire (texte libre optionnel)"
     )
 
     statut = models.CharField(
@@ -343,14 +346,16 @@ class Horaire(models.Model):
         default=False,
     )
 
+    position = models.PositiveSmallIntegerField(
+        default=0,
+        help_text="Ordre de la période au sein de la journée (plusieurs périodes/jour).",
+    )
+
     class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=["structure", "jour"],
-                name="unique_horaire_structure_jour",
-            )
+        indexes = [
+            models.Index(fields=["structure", "jour"]),
         ]
-        ordering = ["jour"]
+        ordering = ["jour", "position", "heure_ouverture"]
 
     def __str__(self):
         if self.est_ferme:

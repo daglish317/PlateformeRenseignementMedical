@@ -4,7 +4,7 @@ import type {
   PermissionRegistryResponse,
 } from "@/features/shared/dashboard/types/permissions";
 
-export type StructureMemberRole = "PROPRIETAIRE" | "GESTIONNAIRE" | "CAISSIER";
+export type StructureMemberRole = "PROPRIETAIRE" | string; // PROPRIETAIRE is system role, others are free text
 export type StructureMemberStatus = "INVITE" | "ACTIF" | "SUSPENDU";
 
 export type TeamPermissionMap = Partial<Record<ModuleOperationnel, ActionPermission[]>>;
@@ -14,7 +14,7 @@ export type StructureTeamMember = {
   utilisateur_id: string;
   nom: string;
   email: string;
-  role: StructureMemberRole;
+  role: string | null; // Free text role or null
   statut: StructureMemberStatus;
   is_active: boolean;
   date_invitation: string;
@@ -47,7 +47,7 @@ export type InviteStructureMemberPayload = {
   structure_id: string;
   nom: string;
   email: string;
-  role: "GESTIONNAIRE" | "CAISSIER";
+  role?: string | null; // Optional free text role
 };
 
 export type UpdateStructureMemberStatusPayload = {

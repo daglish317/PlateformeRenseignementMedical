@@ -38,6 +38,14 @@ class StockItem(models.Model):
 
     nom = models.CharField(max_length=255)
 
+    nom_normalise = models.CharField(
+        max_length=255,
+        blank=True,
+        default="",
+        db_index=True,
+        help_text="Nom normalisé (sans accents, minuscules) utilisé par la recherche publique.",
+    )
+
     type_item = models.CharField(
         max_length=50,
         choices=[

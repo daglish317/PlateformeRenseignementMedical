@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 
 import SearchInput from "./SearchInput";
 import SearchDropdown from "./SearchDropdown";
@@ -15,6 +16,8 @@ import { useSearch } from "@/hooks/useSearch";
 export default function SearchBar() {
   const [inputValue, setInputValue] = useState("");
   const [open, setOpen] = useState(false);
+
+  const t = useTranslations("search");
 
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -72,6 +75,7 @@ export default function SearchBar() {
     <div ref={containerRef} className="relative w-full">
       <SearchInput
         value={inputValue}
+        placeholder={t("placeholder")}
         onChange={(value) => {
           setInputValue(value);
           setOpen(true);

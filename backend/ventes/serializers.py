@@ -64,12 +64,77 @@ class FactureSerializer(serializers.ModelSerializer):
         model = Facture
         fields = [
             "id",
+            "structure",
             "numero",
             "vente",
             "paiement",
+            "beneficiaire",
             "montant_total",
             "nb_articles",
             "cree_le",
+        ]
+
+
+class FactureListSerializer(serializers.ModelSerializer):
+
+    vente_numero = serializers.CharField(
+        source="vente.numero",
+        read_only=True,
+    )
+    vente_date = serializers.DateTimeField(
+        source="vente.validee_le",
+        read_only=True,
+    )
+    structure_nom = serializers.CharField(
+        source="structure.nom",
+        read_only=True,
+    )
+
+    class Meta:
+        model = Facture
+        fields = [
+            "id",
+            "numero",
+            "structure",
+            "structure_nom",
+            "vente",
+            "vente_numero",
+            "vente_date",
+            "beneficiaire",
+            "montant_total",
+            "nb_articles",
+            "cree_le",
+        ]
+
+
+class FactureDetailSerializer(FactureListSerializer):
+    """Facture enrichie : produits (lignes), paiement, pharmacie."""
+
+    lignes = LigneVenteSerializer(
+        source="vente.lignes",
+        many=True,
+        read_only=True,
+    )
+    paiement_mode = serializers.CharField(
+        source="paiement.mode",
+        read_only=True,
+    )
+    structure_adresse = serializers.CharField(
+        source="structure.adresse",
+        read_only=True,
+    )
+    structure_telephone = serializers.CharField(
+        source="structure.telephone",
+        read_only=True,
+    )
+
+    class Meta(FactureListSerializer.Meta):
+        fields = FactureListSerializer.Meta.fields + [
+            "paiement",
+            "paiement_mode",
+            "lignes",
+            "structure_adresse",
+            "structure_telephone",
         ]
 
 

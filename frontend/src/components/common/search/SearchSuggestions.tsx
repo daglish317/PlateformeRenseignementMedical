@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import SearchItem from "./SearchItem";
 import { Suggestion } from "@/types/search";
 
@@ -12,10 +13,12 @@ export default function SearchSuggestions({
   suggestions,
   onSelect,
 }: SearchSuggestionsProps) {
+  const t = useTranslations("search");
+
   if (suggestions.length === 0) {
     return (
       <div className="px-4 py-6 text-center text-sm text-muted-foreground">
-        Aucun résultat trouvé.
+        {t("noResults")}
       </div>
     );
   }
@@ -23,7 +26,7 @@ export default function SearchSuggestions({
   return (
     <div className="py-2">
       <div className="px-4 pb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-        Suggestions
+        {t("suggestions")}
       </div>
 
       {suggestions.map((item, index) => (

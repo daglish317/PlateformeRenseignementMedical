@@ -1,29 +1,21 @@
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
+import withSerwistInit from "@serwist/next";
 
 const withNextIntl = createNextIntlPlugin(
   "./src/i18n/request.ts"
 );
 
-let withPWA = (config: NextConfig) => config;
-
-try {
-  // Utilise le plugin si la dependance est installee. En cas de connexion npm
-  // instable, la PWA native reste fonctionnelle sans bloquer Next.
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const nextPWA = require("@ducanh2912/next-pwa").default;
-  withPWA = nextPWA({
-    dest: "public",
-    register: false,
-    sw: "next-pwa-sw.js",
-    fallbackRoutes: {
-      document: "/offline",
-    },
-    disable: process.env.NODE_ENV === "development",
-  });
-} catch {
-  withPWA = (config: NextConfig) => config;
-}
+const withPWA = withSerwistInit({
+  swSrc: "./src/sw.ts",
+  swDest: "./public/sw.js",
+  swUrl: "/sw.js",
+  scope: "/",
+  register: false,
+  cacheOnNavigation: true,
+  reloadOnOnline: true,
+  disable: process.env.NODE_ENV !== "production",
+});
 
 const nextConfig: NextConfig = {
   // Optimisation des images
@@ -136,6 +128,10 @@ const nextConfig: NextConfig = {
   // Production optimizations
   reactStrictMode: true,
   poweredByHeader: false,
+
+  // Masque l'indicateur "N" de developpement (Rendering/Building).
+  // Dev-only : aucune incidence en production, les erreurs restent visibles.
+  devIndicators: false,
 };
 
-export default withPWA(withNextIntl(nextConfig));
+export default withNextIntl(withPWA(nextConfig));
