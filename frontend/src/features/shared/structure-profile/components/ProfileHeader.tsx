@@ -16,6 +16,10 @@ const statutConfig: Record<StructureProfile["statut"], { label: string; classNam
     label: "Active",
     className: "bg-green-100 text-green-800 border border-green-300",
   },
+  SUSPENDUE: {
+    label: "Suspendue",
+    className: "bg-amber-100 text-amber-800 border border-amber-300",
+  },
   REFUSEE: {
     label: "Refusée",
     className: "bg-red-100 text-red-800 border border-red-300",
@@ -47,9 +51,7 @@ export function ProfileHeader({ structure }: ProfileHeaderProps) {
           <h1 className="text-2xl font-bold tracking-tight">{structure.nom}</h1>
           <div className="mt-1 flex items-center gap-2 text-sm text-muted-foreground">
             <Calendar className="h-4 w-4" />
-            <span>
-              Créée le {new Date(structure.date_creation).toLocaleDateString("fr-FR")}
-            </span>
+            <span>Créée le {new Date(structure.date_creation).toLocaleDateString("fr-FR")}</span>
           </div>
         </div>
       </div>

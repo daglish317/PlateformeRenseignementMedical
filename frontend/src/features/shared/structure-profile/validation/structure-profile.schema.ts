@@ -28,10 +28,41 @@ export function validateAddress(address: string): string | null {
   return null;
 }
 
+export function validateCoordinates(latitude?: string, longitude?: string): ValidationError[] {
+  const errors: ValidationError[] = [];
+  const lat = latitude?.trim() ?? "";
+  const lon = longitude?.trim() ?? "";
+
+  if (!lat && !lon) {
+    return errors;
+  }
+
+  if (!lat || !lon) {
+    if (!lat) errors.push({ field: "latitude", message: "La latitude est requise avec la longitude" });
+    if (!lon) errors.push({ field: "longitude", message: "La longitude est requise avec la latitude" });
+    return errors;
+  }
+
+  const latNumber = Number(lat);
+  const lonNumber = Number(lon);
+
+  if (!Number.isFinite(latNumber) || latNumber < -90 || latNumber > 90) {
+    errors.push({ field: "latitude", message: "Latitude invalide (-90 à 90)" });
+  }
+
+  if (!Number.isFinite(lonNumber) || lonNumber < -180 || lonNumber > 180) {
+    errors.push({ field: "longitude", message: "Longitude invalide (-180 à 180)" });
+  }
+
+  return errors;
+}
+
 export function validateStructureFields(fields: {
   nom?: string;
   telephone?: string;
   adresse?: string;
+  latitude?: string;
+  longitude?: string;
 }): ValidationError[] {
   const errors: ValidationError[] = [];
 
@@ -49,6 +80,8 @@ export function validateStructureFields(fields: {
     const error = validateAddress(fields.adresse);
     if (error) errors.push({ field: "adresse", message: error });
   }
+
+  errors.push(...validateCoordinates(fields.latitude, fields.longitude));
 
   return errors;
 }

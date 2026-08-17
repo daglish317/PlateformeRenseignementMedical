@@ -42,10 +42,7 @@ export function PendingStructures({ structures }: PendingStructuresProps) {
       ) : (
         <div className="space-y-3">
           {structures.map((structure) => (
-            <div
-              key={structure.id}
-              className="flex items-center gap-4 rounded-lg border p-3"
-            >
+            <div key={structure.id} className="flex items-center gap-4 rounded-lg border p-3">
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-muted">
                 {structure.photo ? (
                   <img

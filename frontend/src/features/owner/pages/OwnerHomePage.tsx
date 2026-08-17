@@ -7,6 +7,8 @@ import {
   Hospital,
   Loader2,
   MapPin,
+  Power,
+  PowerOff,
   PlusCircle,
   Store,
   UserPlus,
@@ -20,6 +22,7 @@ import { PageContainer } from "@/features/shared/dashboard/components/PageContai
 import { PageTitle } from "@/features/shared/dashboard/components/PageTitle";
 import { SectionCard } from "@/features/shared/dashboard/components/SectionCard";
 import { useOwnerStructures } from "@/features/shared/owner-structures/hooks/useOwnerStructures";
+import { useUpdateOwnerStructureStatus } from "@/features/shared/owner-structures/hooks/useUpdateOwnerStructureStatus";
 
 const STATUT_LABELS: Record<
   string,
@@ -27,6 +30,7 @@ const STATUT_LABELS: Record<
 > = {
   ACTIVE: { label: "Active", variant: "success" },
   EN_ATTENTE: { label: "En attente", variant: "warning" },
+  SUSPENDUE: { label: "Suspendue", variant: "destructive" },
   REFUSEE: { label: "Refusée", variant: "destructive" },
 };
 
@@ -48,6 +52,7 @@ const STRUCTURE_VISUALS = {
 export function OwnerHomePage() {
   const user = useAuthStore((state) => state.user);
   const { data, isLoading } = useOwnerStructures();
+  const updateStructureStatus = useUpdateOwnerStructureStatus();
 
   const structures = data?.results ?? [];
   const pharmaciesCount = structures.filter((structure) => structure.type === "PHARMACIE").length;
@@ -145,8 +150,8 @@ export function OwnerHomePage() {
               </Link>
             </div>
             <p className="mt-5 text-xs leading-5 text-muted-foreground">
-              Le collaborateur ne reçoit pas d'email. Il crée son compte avec
-              l'adresse pré-enregistrée et arrive dans l'espace autorisé.
+              Le collaborateur ne reçoit pas d&apos;email. Il crée son compte avec
+              l&apos;adresse pré-enregistrée et arrive dans l&apos;espace autorisé.
             </p>
           </div>
         </div>
@@ -161,7 +166,7 @@ export function OwnerHomePage() {
         ) : structures.length === 0 ? (
           <div className="flex flex-col items-start gap-4 rounded-lg border border-dashed p-5">
             <p className="text-sm text-muted-foreground">
-              Vous n'avez encore aucune structure.
+              Vous n&apos;avez encore aucune structure.
             </p>
             <Link href="/owner/team">
               <Button>
@@ -179,6 +184,10 @@ export function OwnerHomePage() {
               };
               const visual = STRUCTURE_VISUALS[structure.type];
               const Icon = visual.icon;
+              const isActive = structure.statut === "ACTIVE";
+              const isUpdating =
+                updateStructureStatus.isPending &&
+                updateStructureStatus.variables?.id === structure.id;
 
               return (
                 <div
@@ -204,6 +213,27 @@ export function OwnerHomePage() {
                   </div>
                   <div className="flex flex-wrap items-center gap-2 md:justify-end">
                     <Badge variant={statut.variant}>{statut.label}</Badge>
+                    <Button
+                      type="button"
+                      variant={isActive ? "outline" : "secondary"}
+                      size="sm"
+                      disabled={isUpdating}
+                      onClick={() =>
+                        updateStructureStatus.mutate({
+                          id: structure.id,
+                          action: isActive ? "DEACTIVATE" : "ACTIVATE",
+                        })
+                      }
+                    >
+                      {isUpdating ? (
+                        <Loader2 className="size-4 animate-spin" />
+                      ) : isActive ? (
+                        <PowerOff className="size-4" />
+                      ) : (
+                        <Power className="size-4" />
+                      )}
+                      {isActive ? "Désactiver" : "Activer"}
+                    </Button>
                     <Link href="/owner/team">
                       <Button variant="ghost" size="sm">
                         Gérer

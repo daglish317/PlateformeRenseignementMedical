@@ -23,12 +23,14 @@ const pharmacieIcon = L.divIcon({
 const statutBadgeVariant: Record<string, "warning" | "success" | "destructive"> = {
   EN_ATTENTE: "warning",
   ACTIVE: "success",
+  SUSPENDUE: "warning",
   REFUSEE: "destructive",
 };
 
 const statutLabel: Record<string, string> = {
   EN_ATTENTE: "En attente",
   ACTIVE: "Active",
+  SUSPENDUE: "Suspendue",
   REFUSEE: "Refusée",
 };
 
@@ -48,21 +50,15 @@ export default function MapInner({ structures, location, zoomControl = false }: 
           const icon = structure.type === "HOPITAL" ? hopitalIcon : pharmacieIcon;
 
           return (
-            <Marker
-              key={structure.id}
-              position={[structure.latitude, structure.longitude]}
-              icon={icon}
-            >
+            <Marker key={structure.id} position={[structure.latitude, structure.longitude]} icon={icon}>
               <Popup>
-                <div className="space-y-2 min-w-[180px]">
+                <div className="min-w-[180px] space-y-2">
                   <h3 className="font-semibold">{structure.nom}</h3>
                   <p className="text-sm text-muted-foreground">
                     {structure.type === "HOPITAL" ? "Hôpital" : "Pharmacie"}
                   </p>
                   <p className="text-sm">{structure.adresse}</p>
-                  {structure.telephone && (
-                    <p className="text-xs text-muted-foreground">{structure.telephone}</p>
-                  )}
+                  {structure.telephone && <p className="text-xs text-muted-foreground">{structure.telephone}</p>}
                   <Badge variant={statutBadgeVariant[structure.statut] ?? "secondary"}>
                     {statutLabel[structure.statut] ?? structure.statut}
                   </Badge>

@@ -4,6 +4,7 @@ import { FormEvent, useMemo, useState } from "react";
 import {
   Building2,
   Loader2,
+  LocateFixed,
   Power,
   PowerOff,
   ShieldCheck,
@@ -26,6 +27,7 @@ import { useInviteStructureMember } from "../hooks/useInviteStructureMember";
 import { useStructureTeam } from "../hooks/useStructureTeam";
 import { useUpdateStructureMemberStatus } from "../hooks/useUpdateStructureMemberStatus";
 import type { StructureMemberStatus } from "../types/team";
+import { useCurrentLocation } from "@/hooks/map/useCurrentLocation";
 
 type InvitedRole = "GESTIONNAIRE" | "CAISSIER";
 
@@ -49,6 +51,11 @@ function formatRole(role?: string | null) {
   return ROLE_LABELS[role] ?? role;
 }
 
+function isValidCoordinate(value: string, min: number, max: number) {
+  const numberValue = Number(value);
+  return Number.isFinite(numberValue) && numberValue >= min && numberValue <= max;
+}
+
 export function TeamPage() {
   const user = useAuthStore((state) => state.user);
   const isOwner = user?.role === "PROPRIETAIRE";
@@ -57,6 +64,7 @@ export function TeamPage() {
   const createStructure = useCreateOwnerStructure();
   const inviteMember = useInviteStructureMember();
   const updateMemberStatus = useUpdateStructureMemberStatus();
+  const { locateUser, loading: locatingStructure } = useCurrentLocation();
 
   const [selectedStructureId, setSelectedStructureId] = useState("");
   const [selectedMemberId, setSelectedMemberId] = useState("");
@@ -68,6 +76,8 @@ export function TeamPage() {
   const [structureType, setStructureType] = useState<"HOPITAL" | "PHARMACIE">("PHARMACIE");
   const [structureAdresse, setStructureAdresse] = useState("");
   const [structureTelephone, setStructureTelephone] = useState("");
+  const [structureLatitude, setStructureLatitude] = useState("");
+  const [structureLongitude, setStructureLongitude] = useState("");
 
   const [nom, setNom] = useState("");
   const [email, setEmail] = useState("");
@@ -96,9 +106,24 @@ export function TeamPage() {
   const selectedMember =
     editableMembers.find((member) => member.id === resolvedSelectedMemberId) ?? null;
 
+  const coordinatesValid =
+    isValidCoordinate(structureLatitude, -90, 90) &&
+    isValidCoordinate(structureLongitude, -180, 180);
+
   const canCreateStructure = useMemo(
-    () => isOwner && structureNom.trim().length >= 3 && !createStructure.isPending,
-    [createStructure.isPending, isOwner, structureNom]
+    () =>
+      isOwner &&
+      structureNom.trim().length >= 3 &&
+      coordinatesValid &&
+      !createStructure.isPending &&
+      !locatingStructure,
+    [
+      coordinatesValid,
+      createStructure.isPending,
+      isOwner,
+      locatingStructure,
+      structureNom,
+    ]
   );
 
   const canInvite = useMemo(
@@ -121,6 +146,8 @@ export function TeamPage() {
         type: structureType,
         adresse: structureAdresse.trim(),
         telephone: structureTelephone.trim(),
+        latitude: structureLatitude.trim(),
+        longitude: structureLongitude.trim(),
       },
       {
         onSuccess: ({ data }) => {
@@ -130,9 +157,18 @@ export function TeamPage() {
           setStructureType("PHARMACIE");
           setStructureAdresse("");
           setStructureTelephone("");
+          setStructureLatitude("");
+          setStructureLongitude("");
         },
       }
     );
+  }
+
+  async function handleUseCurrentLocation() {
+    const position = await locateUser();
+    if (!position) return;
+    setStructureLatitude(position.latitude.toFixed(8));
+    setStructureLongitude(position.longitude.toFixed(8));
   }
 
   function handleInvite(event: FormEvent<HTMLFormElement>) {
@@ -238,7 +274,52 @@ export function TeamPage() {
                     disabled={createStructure.isPending}
                   />
                 </div>
+                <div className="space-y-2">
+                  <Label htmlFor="structure-latitude">Latitude</Label>
+                  <Input
+                    id="structure-latitude"
+                    inputMode="decimal"
+                    value={structureLatitude}
+                    onChange={(event) => setStructureLatitude(event.target.value)}
+                    placeholder="Ex. 3.84803300"
+                    disabled={createStructure.isPending || locatingStructure}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="structure-longitude">Longitude</Label>
+                  <Input
+                    id="structure-longitude"
+                    inputMode="decimal"
+                    value={structureLongitude}
+                    onChange={(event) => setStructureLongitude(event.target.value)}
+                    placeholder="Ex. 11.50207500"
+                    disabled={createStructure.isPending || locatingStructure}
+                  />
+                </div>
               </div>
+              <div className="flex flex-col gap-3 rounded-lg border bg-muted/30 p-3 text-sm sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-muted-foreground">
+                  La localisation est obligatoire pour afficher la structure sur la carte publique et dans les recherches.
+                </p>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleUseCurrentLocation}
+                  disabled={createStructure.isPending || locatingStructure}
+                >
+                  {locatingStructure ? (
+                    <Loader2 className="size-4 animate-spin" />
+                  ) : (
+                    <LocateFixed className="size-4" />
+                  )}
+                  Utiliser ma position
+                </Button>
+              </div>
+              {!coordinatesValid && (
+                <p className="text-xs text-destructive">
+                  Renseignez une latitude valide (-90 à 90) et une longitude valide (-180 à 180).
+                </p>
+              )}
               <Button type="submit" disabled={!canCreateStructure}>
                 {createStructure.isPending ? (
                   <Loader2 className="size-4 animate-spin" />

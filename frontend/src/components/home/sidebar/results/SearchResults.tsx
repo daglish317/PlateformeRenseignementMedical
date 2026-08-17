@@ -63,6 +63,9 @@ export default function SearchResults({
           <p className="mt-1 text-sm text-muted-foreground">
             {t("noResultsText")}
           </p>
+          <p className="mt-3 text-xs leading-5 text-muted-foreground">
+            Seules les pharmacies validées, localisées, ouvertes et avec stock disponible sont affichées.
+          </p>
         </div>
       </div>
     );

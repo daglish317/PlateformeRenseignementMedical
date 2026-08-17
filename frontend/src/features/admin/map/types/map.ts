@@ -1,5 +1,5 @@
 export type StructureType = "HOPITAL" | "PHARMACIE";
-export type StructureStatut = "EN_ATTENTE" | "ACTIVE" | "REFUSEE";
+export type StructureStatut = "EN_ATTENTE" | "ACTIVE" | "SUSPENDUE" | "REFUSEE";
 
 export interface AdminMapStructure {
   id: string;

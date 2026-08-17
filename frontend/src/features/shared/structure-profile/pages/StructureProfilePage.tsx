@@ -21,10 +21,18 @@ export function StructureProfilePage() {
   const deletePhotoMutation = useDeletePhoto();
 
   const [isEditing, setIsEditing] = useState(false);
-  const [editValues, setEditValues] = useState<{ nom: string; adresse: string; telephone: string }>({
+  const [editValues, setEditValues] = useState<{
+    nom: string;
+    adresse: string;
+    telephone: string;
+    latitude: string;
+    longitude: string;
+  }>({
     nom: "",
     adresse: "",
     telephone: "",
+    latitude: "",
+    longitude: "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -34,6 +42,8 @@ export function StructureProfilePage() {
       nom: structure.nom,
       adresse: structure.adresse,
       telephone: structure.telephone,
+      latitude: structure.latitude != null ? String(structure.latitude) : "",
+      longitude: structure.longitude != null ? String(structure.longitude) : "",
     });
     setErrors({});
     setIsEditing(true);
@@ -59,7 +69,16 @@ export function StructureProfilePage() {
 
     setErrors({});
     updateMutation.mutate(
-      { id: structure.id, payload: editValues },
+      {
+        id: structure.id,
+        payload: {
+          nom: editValues.nom,
+          adresse: editValues.adresse,
+          telephone: editValues.telephone,
+          latitude: editValues.latitude.trim() || null,
+          longitude: editValues.longitude.trim() || null,
+        },
+      },
       {
         onSuccess: () => setIsEditing(false),
       }
@@ -132,7 +151,12 @@ export function StructureProfilePage() {
             <ProfileInformations
               structure={
                 isEditing
-                  ? { ...structure, ...editValues }
+                  ? {
+                      ...structure,
+                      nom: editValues.nom,
+                      adresse: editValues.adresse,
+                      telephone: editValues.telephone,
+                    }
                   : structure
               }
               isEditing={isEditing}
@@ -152,8 +176,11 @@ export function StructureProfilePage() {
 
           <SectionCard title="Localisation">
             <ProfileLocation
-              latitude={structure.latitude}
-              longitude={structure.longitude}
+              latitude={isEditing ? editValues.latitude : structure.latitude}
+              longitude={isEditing ? editValues.longitude : structure.longitude}
+              isEditing={isEditing}
+              onFieldChange={handleFieldChange}
+              errors={errors}
             />
           </SectionCard>
         </div>

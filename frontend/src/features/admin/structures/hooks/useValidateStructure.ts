@@ -17,3 +17,25 @@ export function useValidateStructure() {
     },
   });
 }
+
+export function useUpdateStructureStatus() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      id,
+      action,
+    }: {
+      id: string;
+      action: "ACTIVATE" | "DEACTIVATE";
+    }) => structuresService.updateStatus(id, action),
+    onSuccess: (data) => {
+      toast.success(data.message || "Statut mis à jour");
+      queryClient.invalidateQueries({ queryKey: ["admin", "structures"] });
+      queryClient.invalidateQueries({ queryKey: ["admin", "dashboard"] });
+    },
+    onError: () => {
+      toast.error("Impossible de modifier le statut de cette structure");
+    },
+  });
+}

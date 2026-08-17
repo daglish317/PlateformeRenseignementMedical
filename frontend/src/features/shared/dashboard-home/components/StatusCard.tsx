@@ -2,7 +2,7 @@
 
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Clock, CheckCircle, AlertCircle, XCircle } from "lucide-react";
+import { AlertCircle, CheckCircle, Clock, XCircle } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { SectionCard } from "../../dashboard/components/SectionCard";
@@ -13,15 +13,22 @@ interface StatusCardProps {
 }
 
 const statutConfig: Record<
-  string,
+  StructureInfo["statut"],
   {
     label: string;
-    variant: "warning" | "success" | "destructive";
+    variant: "warning" | "success" | "destructive" | "outline";
     icon: React.ComponentType<{ className?: string }>;
+    className?: string;
   }
 > = {
   EN_ATTENTE: { label: "En attente de validation", variant: "warning", icon: Clock },
   ACTIVE: { label: "Validée", variant: "success", icon: CheckCircle },
+  SUSPENDUE: {
+    label: "Suspendue",
+    variant: "outline",
+    icon: AlertCircle,
+    className: "border-amber-300 bg-amber-50 text-amber-800 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-300",
+  },
   REFUSEE: { label: "Refusée", variant: "destructive", icon: XCircle },
 };
 
@@ -42,7 +49,9 @@ export function StatusCard({ structure }: StatusCardProps) {
                   ? "bg-emerald-100 dark:bg-emerald-900/30"
                   : structure.statut === "REFUSEE"
                     ? "bg-red-100 dark:bg-red-900/30"
-                    : "bg-amber-100 dark:bg-amber-900/30"
+                    : structure.statut === "SUSPENDUE"
+                      ? "bg-amber-100 dark:bg-amber-900/30"
+                      : "bg-amber-100 dark:bg-amber-900/30"
               }`}
             >
               <Icon
@@ -51,13 +60,17 @@ export function StatusCard({ structure }: StatusCardProps) {
                     ? "text-emerald-600 dark:text-emerald-300"
                     : structure.statut === "REFUSEE"
                       ? "text-red-600 dark:text-red-300"
-                      : "text-amber-600 dark:text-amber-300"
+                      : structure.statut === "SUSPENDUE"
+                        ? "text-amber-600 dark:text-amber-300"
+                        : "text-amber-600 dark:text-amber-300"
                 }`}
               />
             </div>
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2">
-                <Badge variant={config.variant}>{config.label}</Badge>
+                <Badge variant={config.variant} className={config.className}>
+                  {config.label}
+                </Badge>
                 <Badge variant="outline">{isHospital ? "Hôpital" : "Pharmacie"}</Badge>
               </div>
               <p className="mt-2 text-sm leading-6 text-muted-foreground">

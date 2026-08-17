@@ -1,5 +1,5 @@
 import api from "@/lib/axios";
-import type { StructureProfile } from "../types/structure-profile";
+import type { StructureProfile, UpdateStructurePayload } from "../types/structure-profile";
 
 export const structureProfileService = {
   async getMyStructure(): Promise<StructureProfile> {
@@ -9,7 +9,7 @@ export const structureProfileService = {
 
   async updateStructure(
     id: string,
-    payload: { nom?: string; adresse?: string; telephone?: string }
+    payload: UpdateStructurePayload
   ): Promise<StructureProfile> {
     const { data } = await api.patch(`/structures/${id}/`, payload);
     return data;

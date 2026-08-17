@@ -7,7 +7,7 @@ export interface StructureProfile {
   telephone: string;
   latitude: number | null;
   longitude: number | null;
-  statut: "EN_ATTENTE" | "ACTIVE" | "REFUSEE";
+  statut: "EN_ATTENTE" | "ACTIVE" | "SUSPENDUE" | "REFUSEE";
   date_creation: string;
   date_validation: string | null;
   motif_refus: string | null;
@@ -19,4 +19,6 @@ export interface UpdateStructurePayload {
   nom?: string;
   adresse?: string;
   telephone?: string;
+  latitude?: string | null;
+  longitude?: string | null;
 }

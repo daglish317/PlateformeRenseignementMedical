@@ -4,11 +4,11 @@ export function MapLegend() {
   return (
     <div className="flex items-center gap-4 text-sm text-muted-foreground">
       <div className="flex items-center gap-1.5">
-        <div className="h-3 w-3 rounded-full bg-blue-600 border border-white" />
+        <div className="h-3 w-3 rounded-full border border-white bg-blue-600" />
         <span>Hôpital</span>
       </div>
       <div className="flex items-center gap-1.5">
-        <div className="h-3 w-3 rounded-full bg-emerald-600 border border-white" />
+        <div className="h-3 w-3 rounded-full border border-white bg-emerald-600" />
         <span>Pharmacie</span>
       </div>
       <div className="flex items-center gap-1.5">
@@ -18,6 +18,10 @@ export function MapLegend() {
       <div className="flex items-center gap-1.5">
         <div className="h-2.5 w-2.5 rounded-full bg-green-500" />
         <span>Active</span>
+      </div>
+      <div className="flex items-center gap-1.5">
+        <div className="h-2.5 w-2.5 rounded-full bg-amber-500" />
+        <span>Suspendue</span>
       </div>
       <div className="flex items-center gap-1.5">
         <div className="h-2.5 w-2.5 rounded-full bg-red-500" />

@@ -11,11 +11,16 @@ interface WelcomeCardProps {
 }
 
 const statutConfig: Record<
-  string,
-  { label: string; variant: "warning" | "success" | "destructive" }
+  StructureInfo["statut"],
+  { label: string; variant: "warning" | "success" | "destructive" | "outline"; className?: string }
 > = {
   EN_ATTENTE: { label: "En attente", variant: "warning" },
   ACTIVE: { label: "Active", variant: "success" },
+  SUSPENDUE: {
+    label: "Suspendue",
+    variant: "outline",
+    className: "border-amber-300 bg-amber-50 text-amber-800 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-300",
+  },
   REFUSEE: { label: "Refusée", variant: "destructive" },
 };
 
@@ -35,7 +40,9 @@ export function WelcomeCard({ structure }: WelcomeCardProps) {
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2">
                 <Badge variant="secondary">{isHospital ? "Hôpital" : "Pharmacie"}</Badge>
-                <Badge variant={badge.variant}>{badge.label}</Badge>
+                <Badge variant={badge.variant} className={badge.className}>
+                  {badge.label}
+                </Badge>
               </div>
               <h2 className="mt-3 text-2xl font-semibold tracking-tight md:text-3xl">
                 {structure.nom}

@@ -2,7 +2,7 @@
 
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { Phone, MapPin, Calendar } from "lucide-react";
+import { Calendar, MapPin, Phone } from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -66,9 +66,17 @@ export function StructureDetails({ structure, open, onOpenChange, onValidate, on
           <div className="flex flex-col gap-4">
             <InfoRow icon={MapPin} label="Adresse" value={structure.adresse} />
             <InfoRow icon={Phone} label="Téléphone" value={structure.telephone} />
-            <InfoRow icon={Calendar} label="Date de création" value={format(new Date(structure.date_creation), "dd MMMM yyyy", { locale: fr })} />
+            <InfoRow
+              icon={Calendar}
+              label="Date de création"
+              value={format(new Date(structure.date_creation), "dd MMMM yyyy", { locale: fr })}
+            />
             {structure.date_validation && (
-              <InfoRow icon={Calendar} label="Date de validation" value={format(new Date(structure.date_validation), "dd MMMM yyyy", { locale: fr })} />
+              <InfoRow
+                icon={Calendar}
+                label="Date de validation"
+                value={format(new Date(structure.date_validation), "dd MMMM yyyy", { locale: fr })}
+              />
             )}
           </div>
 
@@ -76,17 +84,10 @@ export function StructureDetails({ structure, open, onOpenChange, onValidate, on
             <>
               <Separator />
               <div className="flex gap-3">
-                <Button
-                  className="flex-1"
-                  onClick={() => onValidate(structure)}
-                >
+                <Button className="flex-1" onClick={() => onValidate(structure)}>
                   Valider
                 </Button>
-                <Button
-                  variant="destructive"
-                  className="flex-1"
-                  onClick={() => onReject(structure)}
-                >
+                <Button variant="destructive" className="flex-1" onClick={() => onReject(structure)}>
                   Refuser
                 </Button>
               </div>

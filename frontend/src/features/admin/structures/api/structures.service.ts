@@ -28,4 +28,12 @@ export const structuresService = {
     const response = await api.patch(`/structures/admin/validate/${id}/`, { action: "REJECT", motif });
     return response.data;
   },
+
+  updateStatus: async (
+    id: string,
+    action: "ACTIVATE" | "DEACTIVATE"
+  ): Promise<{ message: string; data: StructureAdmin }> => {
+    const response = await api.patch(`/structures/admin/${id}/status/`, { action });
+    return response.data;
+  },
 };

@@ -19,27 +19,19 @@ export function StructureFilters() {
           className="pl-9"
         />
       </div>
-      <Select
-        value={filters.statut}
-        onChange={(e) => setFilters({ statut: e.target.value })}
-      >
+      <Select value={filters.statut} onChange={(e) => setFilters({ statut: e.target.value })}>
         <option value="">Tous les statuts</option>
         <option value="EN_ATTENTE">En attente</option>
         <option value="ACTIVE">Active</option>
+        <option value="SUSPENDUE">Suspendue</option>
         <option value="REFUSEE">Refusée</option>
       </Select>
-      <Select
-        value={filters.type}
-        onChange={(e) => setFilters({ type: e.target.value })}
-      >
+      <Select value={filters.type} onChange={(e) => setFilters({ type: e.target.value })}>
         <option value="">Tous les types</option>
         <option value="HOPITAL">Hôpital</option>
         <option value="PHARMACIE">Pharmacie</option>
       </Select>
-      <Select
-        value={filters.ordering}
-        onChange={(e) => setFilters({ ordering: e.target.value })}
-      >
+      <Select value={filters.ordering} onChange={(e) => setFilters({ ordering: e.target.value })}>
         <option value="-date_creation">Date (récent)</option>
         <option value="date_creation">Date (ancien)</option>
         <option value="nom">Nom A-Z</option>

@@ -16,7 +16,7 @@ export interface DashboardStructure {
   photo: string | null;
   adresse: string;
   telephone?: string;
-  statut: "EN_ATTENTE" | "ACTIVE" | "REFUSEE";
+  statut: "EN_ATTENTE" | "ACTIVE" | "SUSPENDUE" | "REFUSEE";
   date_creation?: string;
   latitude?: number | null;
   longitude?: number | null;

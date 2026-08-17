@@ -1,4 +1,4 @@
-export type StructureStatut = "EN_ATTENTE" | "ACTIVE" | "REFUSEE";
+export type StructureStatut = "EN_ATTENTE" | "ACTIVE" | "SUSPENDUE" | "REFUSEE";
 export type StructureType = "HOPITAL" | "PHARMACIE";
 
 export interface StructureAdmin {

@@ -3,6 +3,7 @@ import type {
   CreateOwnerStructurePayload,
   OwnerStructure,
   OwnerStructuresResponse,
+  UpdateOwnerStructureStatusPayload,
 } from "../types/owner-structure";
 
 export const ownerStructuresService = {
@@ -13,6 +14,16 @@ export const ownerStructuresService = {
 
   async create(payload: CreateOwnerStructurePayload): Promise<{ message: string; data: OwnerStructure }> {
     const { data } = await api.post<{ message: string; data: OwnerStructure }>("/structures/owner/", payload);
+    return data;
+  },
+
+  async updateStatus(
+    payload: UpdateOwnerStructureStatusPayload
+  ): Promise<{ message: string; data: OwnerStructure }> {
+    const { data } = await api.patch<{ message: string; data: OwnerStructure }>(
+      `/structures/owner/${payload.id}/status/`,
+      { action: payload.action }
+    );
     return data;
   },
 };

@@ -2,7 +2,7 @@
 
 import { Marker, Popup } from "react-leaflet";
 import L from "leaflet";
-import { Phone, MapPin, Navigation, Info } from "lucide-react";
+import { Car, Footprints, Info, MapPin, Navigation, Phone } from "lucide-react";
 import { useRouter } from "@/i18n/navigation";
 
 import { useStructureSelectionStore } from "@/features/structure-selection/store/structure-selection-store";
@@ -147,14 +147,21 @@ export default function StructureMarker({
           {/* Distance et temps */}
           {structure.distance_km !== null && structure.distance_km !== undefined && (
             <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
-              <span className="font-medium">
-                📍 {structure.distance_km.toFixed(1)} km
+              <span className="inline-flex items-center gap-1 font-medium">
+                <MapPin className="h-3.5 w-3.5" />
+                {structure.distance_km.toFixed(1)} km
               </span>
               {walkingTimeMinutes !== null && walkingTimeMinutes > 0 && (
-                <span>🚶 ~{walkingTimeMinutes} min</span>
+                <span className="inline-flex items-center gap-1">
+                  <Footprints className="h-3.5 w-3.5" />
+                  ~{walkingTimeMinutes} min
+                </span>
               )}
               {drivingTimeMinutes !== null && drivingTimeMinutes > 0 && (
-                <span>🚗 ~{drivingTimeMinutes} min</span>
+                <span className="inline-flex items-center gap-1">
+                  <Car className="h-3.5 w-3.5" />
+                  ~{drivingTimeMinutes} min
+                </span>
               )}
             </div>
           )}
