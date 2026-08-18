@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
+import { useSearchParams } from "next/navigation";
 
 import { AuthLayout } from "@/features/auth/components/AuthLayout";
 import { AuthCard } from "@/features/auth/components/AuthCard";
@@ -14,8 +15,13 @@ import { useAuthRedirect } from "@/features/auth/hooks/useAuthRedirect";
 
 export default function RegisterPage() {
   const t = useTranslations("auth");
+  const searchParams = useSearchParams();
   const { redirectAfterAuth } = useAuthRedirect();
   const [isOwnerActivation, setIsOwnerActivation] = useState(false);
+  const returnTo = searchParams.get("returnTo");
+  const loginHref = returnTo
+    ? `/connexion?returnTo=${encodeURIComponent(returnTo)}`
+    : "/connexion";
 
   return (
     <AuthLayout>
@@ -64,7 +70,7 @@ export default function RegisterPage() {
             ) : (
               <>
                 {t("hasAccount")}{" "}
-                <Link href="/connexion" className="font-medium text-primary hover:underline">
+                <Link href={loginHref} className="font-medium text-primary hover:underline">
                   {t("signIn")}
                 </Link>
               </>

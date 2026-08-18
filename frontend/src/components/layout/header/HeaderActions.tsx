@@ -1,28 +1,94 @@
-﻿"use client";
+"use client";
 
 import LanguageSwitcher from "@/components/layout/LanguageSwitcher";
 import ThemeToggle from "@/components/layout/ThemeToggle";
-import { Link } from "@/i18n/navigation";
-import { Heart, LogOut, User } from "lucide-react";
+import { Link, useRouter } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useAuthStore } from "@/features/auth/store/auth-store";
 import { useLogout } from "@/features/auth/hooks/useLogout";
+import { ChevronDown, Heart, LogOut, MessageSquare, User } from "lucide-react";
 
-export default function HeaderActions() {
+type HeaderActionsProps = {
+  showPublicLinks?: boolean;
+};
+
+type ContactMenuProps = {
+  contactHref: string;
+  feedbackHref: string;
+};
+
+function ContactMenu({
+  contactHref,
+  feedbackHref,
+}: ContactMenuProps) {
+  const router = useRouter();
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        className="inline-flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+        aria-label="Ouvrir les liens de contact"
+      >
+        <MessageSquare className="h-4 w-4" />
+        Nous contacter
+        <ChevronDown className="h-4 w-4" />
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="min-w-52">
+        <DropdownMenuItem onClick={() => router.push(contactHref)}>
+          Me contacter
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => router.push(feedbackHref)}>
+          Laisser un avis
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+export default function HeaderActions({
+  showPublicLinks = false,
+}: HeaderActionsProps) {
   const authenticated = useAuthStore((state) => state.authenticated);
   const { mutate: logout, isPending } = useLogout();
+
+  const contactHref = authenticated
+    ? "/contact"
+    : "/inscription?returnTo=/contact";
+  const feedbackHref = authenticated
+    ? "/feedback"
+    : "/inscription?returnTo=/feedback";
 
   if (authenticated) {
     return (
       <div className="flex items-center gap-2 shrink-0">
+        {showPublicLinks && (
+          <ContactMenu contactHref={contactHref} feedbackHref={feedbackHref} />
+        )}
+
         <Link href="/favoris">
-          <Button variant="ghost" size="icon" className="rounded-full text-muted-foreground hover:text-foreground" aria-label="Favoris">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="rounded-full text-muted-foreground hover:text-foreground"
+            aria-label="Favoris"
+          >
             <Heart className="h-5 w-5" />
           </Button>
         </Link>
 
         <Link href="/profil">
-          <Button variant="ghost" size="icon" className="rounded-full text-muted-foreground hover:text-foreground" aria-label="Profil">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="rounded-full text-muted-foreground hover:text-foreground"
+            aria-label="Profil"
+          >
             <User className="h-5 w-5" />
           </Button>
         </Link>
@@ -40,8 +106,17 @@ export default function HeaderActions() {
 
   return (
     <div className="flex items-center gap-2 shrink-0">
+      {showPublicLinks && (
+        <ContactMenu contactHref={contactHref} feedbackHref={feedbackHref} />
+      )}
+
       <Link href="/favoris">
-        <Button variant="ghost" size="icon" className="rounded-full text-muted-foreground hover:text-foreground" aria-label="Favoris">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="rounded-full text-muted-foreground hover:text-foreground"
+          aria-label="Favoris"
+        >
           <Heart className="h-5 w-5" />
         </Button>
       </Link>
@@ -56,9 +131,7 @@ export default function HeaderActions() {
       </Link>
 
       <Link href="/inscription">
-          <Button size="sm">
-          S&apos;inscrire
-        </Button>
+        <Button size="sm">S&apos;inscrire</Button>
       </Link>
     </div>
   );

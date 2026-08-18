@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { Heart, LogOut, Menu, MessageSquare } from "lucide-react";
+import { ChevronDown, Heart, LogOut, Menu, MessageSquare } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
@@ -31,6 +31,7 @@ type MobileMenuProps = {
 export default function MobileMenu({ showSearch = true }: MobileMenuProps) {
   const t = useTranslations("auth");
   const [open, setOpen] = useState(false);
+  const [showContactLinks, setShowContactLinks] = useState(false);
   const authenticated = useAuthStore((state) => state.authenticated);
   const { mutate: logout, isPending } = useLogout();
 
@@ -107,6 +108,41 @@ export default function MobileMenu({ showSearch = true }: MobileMenuProps) {
             <LanguageSwitcher />
             <ThemeToggle />
 
+            {showSearch && (
+              <div className="rounded-xl border border-border bg-muted/20 p-3">
+                <button
+                  type="button"
+                  className="flex w-full items-center justify-between gap-3 text-left text-sm font-medium text-foreground"
+                  onClick={() => setShowContactLinks((value) => !value)}
+                >
+                  <span className="inline-flex items-center gap-2">
+                    <MessageSquare className="h-4 w-4 text-primary" />
+                    Nous contacter
+                  </span>
+                  <ChevronDown
+                    className={`h-4 w-4 transition-transform ${
+                      showContactLinks ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
+
+                {showContactLinks && (
+                  <div className="mt-3 flex flex-col gap-2">
+                    <Link href={authenticated ? "/contact" : "/inscription?returnTo=/contact"}>
+                      <Button variant="ghost" className="w-full justify-start rounded-lg">
+                        Me contacter
+                      </Button>
+                    </Link>
+                    <Link href={authenticated ? "/feedback" : "/inscription?returnTo=/feedback"}>
+                      <Button variant="ghost" className="w-full justify-start rounded-lg">
+                        Laisser un avis
+                      </Button>
+                    </Link>
+                  </div>
+                )}
+              </div>
+            )}
+
             {authenticated ? (
               <div className="flex flex-col gap-3">
                 <Button
@@ -139,13 +175,6 @@ export default function MobileMenu({ showSearch = true }: MobileMenuProps) {
               <Button variant="ghost" className="w-full justify-start">
                 <Heart className="mr-2 h-4 w-4" />
                 Favoris
-              </Button>
-            </Link>
-
-            <Link href="/feedback">
-              <Button variant="ghost" className="w-full justify-start">
-                <MessageSquare className="mr-2 h-4 w-4" />
-                Feedback
               </Button>
             </Link>
           </div>

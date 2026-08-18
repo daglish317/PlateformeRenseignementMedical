@@ -28,7 +28,7 @@ export default function HeaderMenu({
         />
       )}
 
-      <HeaderActions />
+      <HeaderActions showPublicLinks={showSearch} />
     </div>
   );
 }

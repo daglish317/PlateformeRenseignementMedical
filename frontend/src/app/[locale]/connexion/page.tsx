@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { useSearchParams } from "next/navigation";
 
 import { AuthLayout } from "@/features/auth/components/AuthLayout";
 import { AuthCard } from "@/features/auth/components/AuthCard";
@@ -13,7 +14,12 @@ import { GuestRoute } from "@/features/auth/components/GuestRoute";
 
 export default function LoginPage() {
   const t = useTranslations("auth");
+  const searchParams = useSearchParams();
   const { redirectAfterAuth } = useAuthRedirect();
+  const returnTo = searchParams.get("returnTo");
+  const registerHref = returnTo
+    ? `/inscription?returnTo=${encodeURIComponent(returnTo)}`
+    : "/inscription";
 
   return (
     <GuestRoute>
@@ -28,7 +34,7 @@ export default function LoginPage() {
 
             <p className="text-center text-sm text-muted-foreground">
               {t("noAccount")}{" "}
-              <Link href="/inscription" className="font-medium text-primary hover:underline">
+              <Link href={registerHref} className="font-medium text-primary hover:underline">
                 {t("signUp")}
               </Link>
             </p>
