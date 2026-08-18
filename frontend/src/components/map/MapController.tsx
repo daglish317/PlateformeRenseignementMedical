@@ -5,7 +5,7 @@ import { useEffect } from "react";
 
 import type { UserLocation } from "@/services/map/geolocalisation";
 import { MAP } from "@/constants/map";
-import { useStructureSelectionStore } from "@/features/structure-selection/store/structure-selection-store";
+import { useSelectedStructure } from "@/store/search-store";
 
 type MapControllerProps = {
   location?: UserLocation | null;
@@ -15,7 +15,7 @@ export default function MapController({
   location,
 }: MapControllerProps) {
   const map = useMap();
-  const selectedStructure = useStructureSelectionStore((state) => state.selectedStructure);
+  const selectedStructure = useSelectedStructure();
 
   useEffect(() => {
     if (!location) {

@@ -7,7 +7,7 @@ import { ArrowRight, Car, Footprints, MapPin, Pill } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import type { PublicPharmacieResult } from "@/types/search";
-import { useStructureSelectionStore } from "@/features/structure-selection/store/structure-selection-store";
+import { useSearchStore } from "@/store/search-store";
 import { useRoute } from "@/features/routing/hooks/useRoute";
 import { useCurrentLocation } from "@/hooks/map/useCurrentLocation";
 import FavoriteButton from "@/features/favorites/components/FavoriteButton";
@@ -20,8 +20,8 @@ type StructureCardProps = {
 export default function StructureCard({ result }: StructureCardProps) {
   const t = useTranslations("search");
   const { structure, produit, distance_km, temps_marche_min, temps_voiture_min, est_ouverte } = result;
-  const setSelectedStructure = useStructureSelectionStore((state) => state.setSelectedStructure);
-  const selectedStructure = useStructureSelectionStore((state) => state.selectedStructure);
+  const setSelectedStructure = useSearchStore((state) => state.setSelectedStructure);
+  const selectedStructure = useSearchStore((state) => state.selectedStructure);
 
   const { calculateRoute, loading: routeLoading } = useRoute();
   const { locateUser } = useCurrentLocation();

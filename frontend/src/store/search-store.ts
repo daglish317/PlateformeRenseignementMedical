@@ -38,7 +38,17 @@ export const useSearchStore = create<SearchStore>()(
       page: 1,
       location: null,
 
-      setQuery: (query) => set({ query, searchMode: "normal", page: 1 }, false, "setQuery"),
+      setQuery: (query) =>
+        set(
+          {
+            query,
+            searchMode: "normal",
+            page: 1,
+            selectedStructure: null,
+          },
+          false,
+          "setQuery"
+        ),
       setResults: (results) => set({ results }, false, "setResults"),
       appendResults: (next) =>
         set(
@@ -60,6 +70,7 @@ export const useSearchStore = create<SearchStore>()(
           (state) => ({
             location,
             page: 1,
+            selectedStructure: null,
             results:
               state.location?.latitude === location?.latitude &&
               state.location?.longitude === location?.longitude

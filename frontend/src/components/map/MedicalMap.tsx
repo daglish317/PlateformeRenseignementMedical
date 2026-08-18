@@ -8,7 +8,9 @@ import { useCurrentLocation } from "@/hooks/map/useCurrentLocation";
 import { usePositionWatcher } from "@/hooks/map/usePositionWatcher";
 import MapControls from "./MapControls";
 import MapSkeleton from "./MapSkeleton";
-import { useLocation, useQuery, useResults, useSearchStore } from "@/store/search-store";
+import { useLocation, useQuery, useResults, useSearchStore, useSelectedStructure } from "@/store/search-store";
+import { useRoute } from "@/features/routing/hooks/useRoute";
+import { useRoutingStore } from "@/features/routing/store/routing-store";
 
 const UserMarker = dynamic(() => import("./UserMarker"), { ssr: false });
 const StructureMarker = dynamic(() => import("./StructureMarker"), { ssr: false });
@@ -18,7 +20,7 @@ export type MapStructure = {
   nom: string;
   type: string;
   adresse: string;
-  telephone?: string;
+  telephone: string;
   latitude: number | null;
   longitude: number | null;
   distance_km?: number | null;
@@ -69,8 +71,11 @@ function MedicalMap() {
   // Position partagée via le store : la recherche (§21) et la carte restent synchronisées.
   const tMap = useTranslations("map");
   const location = useLocation();
+  const selectedStructure = useSelectedStructure();
   const setLocation = useSearchStore((state) => state.setLocation);
   const { locateUser, error: locationError } = useCurrentLocation();
+  const { calculateRouteAsync } = useRoute();
+  const clearRoute = useRoutingStore((state) => state.clearRoute);
 
   // Suivi continu contrôlé (§21-26) : mise à jour uniquement après un
   // déplacement significatif, avec intervalle de repos.
@@ -80,14 +85,10 @@ function MedicalMap() {
   const query = useQuery();
 
   // La carte et la liste utilisent le même ensemble de données filtrées (§20).
-  // Les résultats sont au niveau (pharmacie, produit) : on regroupe par pharmacie
-  // pour éviter les marqueurs superposés.
-  const seen = new Set<string>();
-  const structures = (results?.results ?? []).flatMap((item) => {
-    if (seen.has(item.structure.id)) return [];
-    seen.add(item.structure.id);
-    return [{ ...item.structure, distance_km: item.distance_km }];
-  });
+  const structures = results?.map_results ?? (results?.results ?? []).map((item) => ({
+    ...item.structure,
+    distance_km: item.distance_km,
+  }));
 
   const showEmptyState = query.trim().length > 0 && structures.length === 0 && results !== null;
 
@@ -106,6 +107,25 @@ function MedicalMap() {
       toast.warning(tMap("locationUnavailable"));
     }
   }, [locationError, tMap]);
+
+  useEffect(() => {
+    if (!selectedStructure || !location) {
+      clearRoute();
+      return;
+    }
+
+    if (selectedStructure.latitude === null || selectedStructure.longitude === null) {
+      clearRoute();
+      return;
+    }
+
+    void calculateRouteAsync({
+      startLat: location.latitude,
+      startLng: location.longitude,
+      endLat: selectedStructure.latitude,
+      endLng: selectedStructure.longitude,
+    });
+  }, [selectedStructure, location, calculateRouteAsync, clearRoute]);
 
   return (
     <div className="relative h-full w-full">

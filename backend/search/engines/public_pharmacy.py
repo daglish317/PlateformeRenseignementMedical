@@ -139,6 +139,32 @@ class PublicPharmacySearchEngine:
         start = (page - 1) * page_size
         page_lignes = lignes[start:start + page_size]
 
+        map_results = []
+        structures_vues = set()
+        for ligne in lignes[:200]:
+            structure_id = str(ligne["structure_id"])
+            if structure_id in structures_vues:
+                continue
+            structures_vues.add(structure_id)
+            map_results.append(
+                {
+                    "id": structure_id,
+                    "nom": ligne["structure__nom"],
+                    "type": ligne["structure__type"],
+                    "adresse": ligne["structure__adresse"],
+                    "telephone": ligne["structure__telephone"],
+                    "latitude": ligne["structure__latitude"],
+                    "longitude": ligne["structure__longitude"],
+                    "distance_km": (
+                        round(ligne["distance_km"], 2)
+                        if ligne["distance_km"] is not None
+                        else None
+                    ),
+                    "temps_marche_min": ligne["temps_marche_min"],
+                    "temps_voiture_min": ligne["temps_voiture_min"],
+                }
+            )
+
         results = [
             {
                 "id": str(ligne["id"]),
@@ -172,6 +198,7 @@ class PublicPharmacySearchEngine:
 
         return {
             "results": results,
+            "map_results": map_results,
             "total": total,
             "normalized_query": normaliser_texte(query),
         }

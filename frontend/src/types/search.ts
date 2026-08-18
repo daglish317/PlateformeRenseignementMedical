@@ -97,6 +97,7 @@ export type PublicPharmacieResponse = {
   query: string;
   normalized_query: string;
   results: PublicPharmacieResult[];
+  map_results?: Structure[];
   total: number;
   page: number;
   page_size: number;
