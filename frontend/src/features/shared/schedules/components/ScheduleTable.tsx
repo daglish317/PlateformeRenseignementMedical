@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { Pencil } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -10,32 +10,42 @@ interface ScheduleTableProps {
   onEdit: (schedule: Schedule) => void;
 }
 
+function formatHours(schedule: Schedule) {
+  if (schedule.est_ferme) return "—";
+  if (schedule.heure_ouverture === schedule.heure_fermeture) {
+    return "24h/24";
+  }
+  return schedule.heure_ouverture;
+}
+
 export function ScheduleTable({ schedules, onEdit }: ScheduleTableProps) {
   return (
     <div className="w-full overflow-x-auto">
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b text-left text-muted-foreground">
-            <th className="py-3 px-4 font-medium">Jour</th>
-            <th className="py-3 px-4 font-medium">Heure ouverture</th>
-            <th className="py-3 px-4 font-medium">Heure fermeture</th>
-            <th className="py-3 px-4 font-medium">Statut</th>
-            <th className="py-3 px-4 font-medium text-right">Actions</th>
+            <th className="px-4 py-3 font-medium">Jour</th>
+            <th className="px-4 py-3 font-medium">Heure ouverture</th>
+            <th className="px-4 py-3 font-medium">Heure fermeture</th>
+            <th className="px-4 py-3 font-medium">Statut</th>
+            <th className="px-4 py-3 font-medium text-right">Actions</th>
           </tr>
         </thead>
         <tbody>
           {schedules.map((schedule) => (
             <tr key={schedule.id} className="border-b last:border-0">
-              <td className="py-3 px-4 capitalize font-medium">
+              <td className="px-4 py-3 font-medium capitalize">
                 {schedule.jour.toLowerCase()}
               </td>
-              <td className="py-3 px-4">
-                {schedule.est_ferme ? "—" : schedule.heure_ouverture}
+              <td className="px-4 py-3">{formatHours(schedule)}</td>
+              <td className="px-4 py-3">
+                {schedule.est_ferme
+                  ? "—"
+                  : schedule.heure_ouverture === schedule.heure_fermeture
+                    ? "24h/24"
+                    : schedule.heure_fermeture}
               </td>
-              <td className="py-3 px-4">
-                {schedule.est_ferme ? "—" : schedule.heure_fermeture}
-              </td>
-              <td className="py-3 px-4">
+              <td className="px-4 py-3">
                 {schedule.est_ferme ? (
                   <Badge variant="destructive">Fermé</Badge>
                 ) : (
@@ -44,7 +54,7 @@ export function ScheduleTable({ schedules, onEdit }: ScheduleTableProps) {
                   </Badge>
                 )}
               </td>
-              <td className="py-3 px-4 text-right">
+              <td className="px-4 py-3 text-right">
                 <Button
                   variant="ghost"
                   size="icon"

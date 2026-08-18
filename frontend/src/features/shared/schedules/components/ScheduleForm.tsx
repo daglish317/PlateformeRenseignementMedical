@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SchedulePayload } from "../types/schedule";
 import { ClosedSwitch } from "./ClosedSwitch";
-import { validateSchedule } from "../validation/schedule.schema";
+import { isTwentyFourHours, validateSchedule } from "../validation/schedule.schema";
 
 interface ScheduleFormProps {
   schedule: SchedulePayload;
@@ -25,6 +25,8 @@ export function ScheduleForm({
   const [heureFermeture, setHeureFermeture] = useState(schedule.heure_fermeture);
   const [estFerme, setEstFerme] = useState(schedule.est_ferme);
   const [error, setError] = useState<string | null>(null);
+
+  const isAlwaysOpen = !estFerme && isTwentyFourHours(heureOuverture, heureFermeture);
 
   const handleSave = () => {
     const validationError = validateSchedule({
@@ -46,8 +48,8 @@ export function ScheduleForm({
   };
 
   return (
-    <div className="space-y-4 p-4 border rounded-lg bg-muted/30">
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <div className="space-y-4 rounded-lg border bg-muted/30 p-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div>
           <Label className="text-sm text-muted-foreground">Jour</Label>
           <p className="font-medium capitalize">{schedule.jour.toLowerCase()}</p>
@@ -79,9 +81,15 @@ export function ScheduleForm({
         <Label>Fermé</Label>
       </div>
 
+      {isAlwaysOpen ? (
+        <p className="text-sm text-muted-foreground">
+          Cette plage est interprétée comme une ouverture continue 24h/24.
+        </p>
+      ) : null}
+
       {error && <p className="text-sm text-destructive">{error}</p>}
 
-      <div className="flex gap-2 justify-end">
+      <div className="flex justify-end gap-2">
         <Button variant="outline" onClick={onCancel} disabled={isSaving}>
           Annuler
         </Button>

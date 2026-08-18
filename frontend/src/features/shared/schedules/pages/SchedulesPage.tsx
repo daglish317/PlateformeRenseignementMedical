@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { PageTitle } from "@/features/shared/dashboard/components/PageTitle";
@@ -147,7 +147,7 @@ export function SchedulesPage({ structureId }: SchedulesPageProps) {
               Modifiez les horaires de chaque jour puis enregistrez.
             </p>
             {allSchedules.map((s) => (
-              <div key={s.jour} className="grid grid-cols-1 sm:grid-cols-4 gap-3 items-center border-b pb-3">
+              <div key={s.jour} className="grid grid-cols-1 items-center gap-3 border-b pb-3 sm:grid-cols-4">
                 <span className="font-medium capitalize">{s.jour.toLowerCase()}</span>
                 <div>
                   <label className="text-xs text-muted-foreground">Ouverture</label>
@@ -180,7 +180,7 @@ export function SchedulesPage({ structureId }: SchedulesPageProps) {
                 </div>
               </div>
             ))}
-            <div className="flex gap-2 justify-end pt-2">
+            <div className="flex justify-end gap-2 pt-2">
               <Button variant="outline" onClick={() => { setIsBulkEdit(false); setAllSchedules(null); }} disabled={isSaving}>
                 Annuler
               </Button>

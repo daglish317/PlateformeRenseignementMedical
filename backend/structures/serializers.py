@@ -1,4 +1,4 @@
-from rest_framework import serializers
+﻿from rest_framework import serializers
 from .models import (
     EquipeStructure,
     RoleEquipeStructure,
@@ -327,18 +327,20 @@ class HoraireBulkCreateSerializer(serializers.Serializer):
 
     def validate_horaires(self, value):
         positions_par_jour = {}
-        for h in value:
-            jour = h.get("jour")
-            if not h.get("est_ferme", False):
-                ouverture = h.get("heure_ouverture")
-                fermeture = h.get("heure_fermeture")
-                if not ouverture or not fermeture:
-                    raise serializers.ValidationError(
-                        f"Pour {jour}: les heures d'ouverture et de fermeture sont obligatoires."
-                    )
-            if not h.get("est_ferme", False):
-                positions_par_jour.setdefault(jour, 0)
-                positions_par_jour[jour] += 1
+        for horaire in value:
+            jour = horaire.get("jour")
+            if horaire.get("est_ferme", False):
+                continue
+
+            ouverture = horaire.get("heure_ouverture")
+            fermeture = horaire.get("heure_fermeture")
+            if not ouverture or not fermeture:
+                raise serializers.ValidationError(
+                    f"Pour {jour}: les heures d'ouverture et de fermeture sont obligatoires."
+                )
+
+            positions_par_jour.setdefault(jour, 0)
+            positions_par_jour[jour] += 1
 
         return value
 
@@ -533,4 +535,5 @@ class MemberPermissionsUpdateSerializer(serializers.Serializer):
             return validate_permissions_payload(value)
         except ValueError as exc:
             raise serializers.ValidationError(str(exc)) from exc
+
 

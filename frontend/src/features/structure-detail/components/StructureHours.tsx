@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { Clock } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -13,15 +13,23 @@ function jourLabel(jour: string): string {
   return jour.charAt(0) + jour.slice(1).toLowerCase();
 }
 
+function formatPlage(ouverture: string, fermeture: string): string {
+  if (ouverture === fermeture) {
+    return "Ouverture continue 24h/24";
+  }
+
+  return `${ouverture} - ${fermeture}`;
+}
+
 export default function StructureHours({ structure }: StructureHoursProps) {
   const t = useTranslations("structure");
   const horaires = structure.horaires ?? [];
 
   return (
-    <section className="bg-card rounded-3xl p-8 shadow-sm border border-border mt-8">
-      <div className="flex items-center justify-between gap-3 mb-6">
+    <section className="mt-8 rounded-3xl border border-border bg-card p-8 shadow-sm">
+      <div className="mb-6 flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="p-3 bg-primary/10 rounded-2xl">
+          <div className="rounded-2xl bg-primary/10 p-3">
             <Clock className="h-6 w-6 text-primary" />
           </div>
           <h2 className="text-2xl font-bold">{t("hoursTitle")}</h2>
@@ -65,7 +73,7 @@ export default function StructureHours({ structure }: StructureHoursProps) {
                   ? t("closed")
                   : horaire.plages.map((plage, index) => (
                       <span key={index} className="block">
-                        {plage.ouverture} — {plage.fermeture}
+                        {formatPlage(plage.ouverture, plage.fermeture)}
                       </span>
                     ))}
               </span>
