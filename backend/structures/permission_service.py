@@ -3,6 +3,7 @@
 from rest_framework.exceptions import PermissionDenied
 
 from .models import EquipeStructure, MembrePermission, StatutEquipeStructure
+from .models import RoleEquipeStructure, Structure, TypeStructure
 from .permission_registry import (
     ATTRIBUTABLE_MODULES,
     MODULE_ACTIONS,
@@ -40,6 +41,29 @@ def user_has_full_structure_access(user, structure_id):
         return True
     if user.role == "PROPRIETAIRE" and user_is_proprietaire_of(user, structure_id):
         return True
+    if Structure.objects.filter(
+        id=structure_id,
+        type=TypeStructure.HOPITAL,
+        est_supprimee=False,
+    ).exists():
+        if EquipeStructure.objects.filter(
+            utilisateur=user,
+            structure_id=structure_id,
+            role__in={
+                RoleEquipeStructure.PROPRIETAIRE,
+                RoleEquipeStructure.GESTIONNAIRE,
+            },
+            statut=StatutEquipeStructure.ACTIF,
+            structure__est_supprimee=False,
+        ).exists():
+            return True
+        if user.role == "GESTIONNAIRE" and Structure.objects.filter(
+            id=structure_id,
+            type=TypeStructure.HOPITAL,
+            gestionnaire=user,
+            est_supprimee=False,
+        ).exists():
+            return True
     return False
 
 

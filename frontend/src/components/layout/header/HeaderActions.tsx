@@ -56,8 +56,8 @@ export default function HeaderActions() {
       </Link>
 
       <Link href="/inscription">
-        <Button size="sm">
-          S'inscrire
+          <Button size="sm">
+          S&apos;inscrire
         </Button>
       </Link>
     </div>

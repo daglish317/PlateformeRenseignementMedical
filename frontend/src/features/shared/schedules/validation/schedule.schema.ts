@@ -5,7 +5,6 @@ export function validateOpeningClosing(
 ): string | null {
   if (estFerme) return null;
   if (!opening || !closing) return "Les horaires sont requis.";
-  if (opening >= closing) return "L'heure d'ouverture doit être avant l'heure de fermeture.";
   return null;
 }
 

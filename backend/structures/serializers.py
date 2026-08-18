@@ -279,6 +279,15 @@ class StructureValidationSerializer(serializers.Serializer):
         return attrs
 
 
+class UpdateStructureStatusSerializer(serializers.Serializer):
+    action = serializers.ChoiceField(
+        choices=[
+            ("ACTIVATE", "ACTIVATE"),
+            ("DEACTIVATE", "DEACTIVATE"),
+        ]
+    )
+
+
 class FavoriCreateSerializer(serializers.Serializer):
 
     structure_id = serializers.UUIDField()
@@ -323,11 +332,10 @@ class HoraireBulkCreateSerializer(serializers.Serializer):
             if not h.get("est_ferme", False):
                 ouverture = h.get("heure_ouverture")
                 fermeture = h.get("heure_fermeture")
-                if ouverture and fermeture and ouverture >= fermeture:
+                if not ouverture or not fermeture:
                     raise serializers.ValidationError(
-                        f"Pour {jour}: l'heure d'ouverture doit être avant l'heure de fermeture."
+                        f"Pour {jour}: les heures d'ouverture et de fermeture sont obligatoires."
                     )
-
             if not h.get("est_ferme", False):
                 positions_par_jour.setdefault(jour, 0)
                 positions_par_jour[jour] += 1
@@ -470,6 +478,16 @@ class ProprietaireStructureCreateSerializer(serializers.Serializer):
     type = serializers.ChoiceField(choices=["HOPITAL", "PHARMACIE"])
     adresse = serializers.CharField(max_length=255, required=False, allow_blank=True)
     telephone = serializers.CharField(max_length=30, required=False, allow_blank=True)
+    latitude = serializers.DecimalField(
+        max_digits=12,
+        decimal_places=8,
+        required=True,
+    )
+    longitude = serializers.DecimalField(
+        max_digits=12,
+        decimal_places=8,
+        required=True,
+    )
 
     def validate_nom(self, value):
         value = value.strip()
@@ -482,6 +500,25 @@ class ProprietaireStructureCreateSerializer(serializers.Serializer):
 
     def validate_telephone(self, value):
         return value.strip()
+
+    def validate_latitude(self, value):
+        if value is not None and not (-90 <= value <= 90):
+            raise serializers.ValidationError("La latitude doit être comprise entre -90 et 90.")
+        return value
+
+    def validate_longitude(self, value):
+        if value is not None and not (-180 <= value <= 180):
+            raise serializers.ValidationError("La longitude doit être comprise entre -180 et 180.")
+        return value
+
+    def validate(self, attrs):
+        latitude = attrs.get("latitude")
+        longitude = attrs.get("longitude")
+        if latitude is None or longitude is None:
+            raise serializers.ValidationError(
+                "La localisation de la structure est obligatoire."
+            )
+        return attrs
 
 
 class MemberPermissionsUpdateSerializer(serializers.Serializer):

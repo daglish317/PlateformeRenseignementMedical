@@ -85,7 +85,7 @@ def _get_structure_caisse(request):
     structure = get_user_structure(request.user)
     if not structure:
         return None, Response(
-            {"detail": "Aucune structure associÃ©e Ã  votre compte."},
+            {"detail": "Aucune structure associée à votre compte."},
             status=status.HTTP_404_NOT_FOUND,
         )
     return structure, None

@@ -141,8 +141,14 @@ export function LigneForm({
         </div>
 
         <div>
-          <Label>Quantite actuelle en stock</Label>
-          <Input type="number" value={stockAvant} readOnly disabled />
+          <Label>Stock avant livraison</Label>
+          <Input
+            type="number"
+            min={0}
+            value={stockAvant}
+            onChange={(e) => setStockAvant(Number(e.target.value))}
+            placeholder="0"
+          />
         </div>
 
         <div>

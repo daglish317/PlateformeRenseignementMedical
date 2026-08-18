@@ -17,7 +17,7 @@ export default function PharmacyCaissePage() {
 
       <div className="rounded-lg border border-border bg-card p-8 text-center">
         <p className="text-muted-foreground">
-          Module Caisse - En cours d'implémentation
+          Module Caisse - En cours d&apos;implémentation
         </p>
       </div>
     </div>

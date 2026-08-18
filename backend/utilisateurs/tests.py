@@ -175,6 +175,63 @@ class InvitationFlowTests(TestCase):
             ).exists()
         )
 
+    def test_login_membre_hopital_expose_active_structure(self):
+        hopital = Structure.objects.create(
+            nom="Hopital Test",
+            type=TypeStructure.HOPITAL,
+        )
+        InvitationService.inviter_gestionnaire(
+            nom="Gest Hopital",
+            email="gest-hopital@test.com",
+            structure=hopital,
+        )
+
+        self.client.post("/api/utilisateurs/register/", {
+            "nom": "Gestionnaire Hopital",
+            "email": "gest-hopital@test.com",
+            "password": "password123",
+        })
+        response = self.client.post("/api/utilisateurs/login/", {
+            "email": "gest-hopital@test.com",
+            "password": "password123",
+        })
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["user"]["role"], RoleUtilisateur.GESTIONNAIRE)
+        self.assertEqual(response.data["user"]["active_structure"]["id"], str(hopital.id))
+        self.assertEqual(response.data["user"]["active_structure"]["type"], TypeStructure.HOPITAL)
+
+        token = response.data["tokens"]["access"]
+        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {token}")
+        permissions_response = self.client.get("/api/structures/me/permissions/")
+        self.assertEqual(permissions_response.status_code, 200)
+        self.assertTrue(permissions_response.data["full_access"])
+        self.assertIn("PROFIL", permissions_response.data["modules"])
+
+    def test_login_gestionnaire_hopital_legacy_expose_active_structure(self):
+        gestionnaire = Utilisateur.objects.create_user(
+            email="gest-hopital-legacy@test.com",
+            password="password123",
+            nom="Gest Hopital Legacy",
+            role=RoleUtilisateur.GESTIONNAIRE,
+            type_authentification=TypeAuthentification.EMAIL,
+            email_verifie=True,
+        )
+        hopital = Structure.objects.create(
+            nom="Hopital Legacy",
+            type=TypeStructure.HOPITAL,
+            gestionnaire=gestionnaire,
+        )
+
+        response = self.client.post("/api/utilisateurs/login/", {
+            "email": "gest-hopital-legacy@test.com",
+            "password": "password123",
+        })
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["user"]["active_structure"]["id"], str(hopital.id))
+        self.assertEqual(response.data["user"]["active_structure"]["type"], TypeStructure.HOPITAL)
+
     def test_activate_proprietaire_requiert_otp(self):
         InvitationService.inviter_proprietaire(
             nom="Proprio Test",

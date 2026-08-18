@@ -1,4 +1,4 @@
-﻿from rest_framework.views import APIView
+from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
@@ -20,6 +20,7 @@ from .serializers import (
     InviteStructureMemberSerializer,
     ProprietaireStructureCreateSerializer,
     StructureMapSerializer,
+    UpdateStructureStatusSerializer,
     UpdateStructureMemberStatusSerializer,
     MemberPermissionsUpdateSerializer,
 )
@@ -70,7 +71,7 @@ class CreateStructureView(APIView):
 
         return Response(
             {
-                "message": "Structure crÃ©Ã©e avec succÃ¨s",
+                "message": "Structure créée avec succès",
                 "data": StructureDetailSerializer(structure).data,
             },
             status=status.HTTP_201_CREATED,
@@ -152,7 +153,7 @@ class StructureDetailView(APIView):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        allowed_fields = {"nom", "adresse", "telephone", "photo"}
+        allowed_fields = {"nom", "adresse", "telephone", "photo", "latitude", "longitude"}
         data = {}
         for key in allowed_fields:
             if key in request.data:
@@ -255,7 +256,7 @@ class ValidateStructureView(APIView):
                     administrateur=request.user,
                 )
 
-                message = "Structure validÃ©e avec succÃ¨s."
+                message = "Structure validée avec succès."
 
             else:
 
@@ -265,7 +266,7 @@ class ValidateStructureView(APIView):
                     motif=serializer.validated_data["motif"],
                 )
 
-                message = "Structure refusÃ©e avec succÃ¨s."
+                message = "Structure refusée avec succès."
 
         except ValueError as e:
 
@@ -292,7 +293,7 @@ class StructuresProchesView(APIView):
         lon = request.query_params.get("lon")
         rayon = request.query_params.get("rayon", 10)
 
-        if not lat or not lon:
+        if lat is None or lon is None:
             return Response(
                 {"detail": "lat et lon requis"},
                 status=400
@@ -345,12 +346,12 @@ class AddFavoriView(APIView):
 
         if not created:
             return Response(
-                {"detail": "DÃ©jÃ  dans vos favoris"},
+                {"detail": "Déjà dans vos favoris"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
         return Response(
-            {"message": "AjoutÃ© aux favoris", "data": FavoriSerializer(favori).data},
+            {"message": "Ajouté aux favoris", "data": FavoriSerializer(favori).data},
             status=status.HTTP_201_CREATED,
         )
 
@@ -374,7 +375,7 @@ class RemoveFavoriView(APIView):
 
         favori.delete()
         return Response(
-            {"message": "RetirÃ© des favoris"},
+            {"message": "Retiré des favoris"},
             status=status.HTTP_200_OK,
         )
 
@@ -466,7 +467,7 @@ class SetHorairesView(APIView):
 
         return Response(
             {
-                "message": "Horaires enregistrÃ©s",
+                "message": "Horaires enregistrés",
                 "data": HoraireSerializer(horaires_crees, many=True).data,
             },
             status=status.HTTP_200_OK,
@@ -494,16 +495,15 @@ class UpdateSingleHoraireView(APIView):
         if not serializer.validated_data.get("est_ferme", False):
             ouverture = serializer.validated_data.get("heure_ouverture", horaire.heure_ouverture)
             fermeture = serializer.validated_data.get("heure_fermeture", horaire.heure_fermeture)
-            if ouverture and fermeture and ouverture >= fermeture:
+            if not ouverture or not fermeture:
                 return Response(
-                    {"detail": "L'heure d'ouverture doit Ãªtre avant l'heure de fermeture."},
+                    {"detail": "Les heures d'ouverture et de fermeture sont obligatoires."},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
-
         serializer.save()
 
         return Response(
-            {"message": "Horaire mis Ã  jour", "data": serializer.data},
+            {"message": "Horaire mis à jour", "data": serializer.data},
             status=status.HTTP_200_OK,
         )
     
@@ -551,7 +551,7 @@ class MyStructureView(APIView):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        allowed_fields = {"nom", "adresse", "telephone", "photo"}
+        allowed_fields = {"nom", "adresse", "telephone", "photo", "latitude", "longitude"}
         data = {k: v for k, v in request.data.items() if k in allowed_fields}
 
         serializer = StructureCreateSerializer(structure, data=data, partial=True)
@@ -590,7 +590,10 @@ class OwnerStructuresView(APIView):
             type=serializer.validated_data["type"],
             adresse=serializer.validated_data.get("adresse", ""),
             telephone=serializer.validated_data.get("telephone", ""),
-            statut=StatutStructure.EN_ATTENTE,
+            latitude=serializer.validated_data.get("latitude"),
+            longitude=serializer.validated_data.get("longitude"),
+            statut=StatutStructure.ACTIVE,
+            date_validation=timezone.now(),
         )
 
         EquipeStructure.objects.create(
@@ -603,10 +606,90 @@ class OwnerStructuresView(APIView):
 
         return Response(
             {
-                "message": "Structure creee",
+                "message": "Structure créée et activée.",
                 "data": StructureDetailSerializer(structure).data,
             },
             status=status.HTTP_201_CREATED,
+        )
+
+
+def _changer_statut_structure(structure, action):
+    if action == "DEACTIVATE":
+        if structure.statut == StatutStructure.SUSPENDUE:
+            return "Structure déjà désactivée."
+        structure.statut = StatutStructure.SUSPENDUE
+        structure.save(update_fields=["statut"])
+        return "Structure désactivée."
+
+    if structure.latitude is None or structure.longitude is None:
+        raise ValueError("La structure doit avoir une localisation GPS avant activation.")
+
+    structure.statut = StatutStructure.ACTIVE
+    if not structure.date_validation:
+        structure.date_validation = timezone.now()
+        structure.save(update_fields=["statut", "date_validation"])
+    else:
+        structure.save(update_fields=["statut"])
+    return "Structure activée."
+
+
+class OwnerStructureStatusView(APIView):
+
+    @proprietaire_required
+    def patch(self, request, pk):
+        serializer = UpdateStructureStatusSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        try:
+            structure = Structure.objects.get(id=pk, est_supprimee=False)
+        except Structure.DoesNotExist:
+            return Response(
+                {"detail": "Structure introuvable."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        assert_proprietaire_owns_structure(request.user, structure.id)
+
+        try:
+            message = _changer_statut_structure(
+                structure,
+                serializer.validated_data["action"],
+            )
+        except ValueError as exc:
+            return Response({"detail": str(exc)}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response(
+            {"message": message, "data": StructureDetailSerializer(structure).data},
+            status=status.HTTP_200_OK,
+        )
+
+
+class AdminStructureStatusView(APIView):
+
+    @admin_required
+    def patch(self, request, pk):
+        serializer = UpdateStructureStatusSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        try:
+            structure = Structure.objects.get(id=pk, est_supprimee=False)
+        except Structure.DoesNotExist:
+            return Response(
+                {"detail": "Structure introuvable."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        try:
+            message = _changer_statut_structure(
+                structure,
+                serializer.validated_data["action"],
+            )
+        except ValueError as exc:
+            return Response({"detail": str(exc)}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response(
+            {"message": message, "data": StructureDetailSerializer(structure).data},
+            status=status.HTTP_200_OK,
         )
 
 
@@ -624,7 +707,7 @@ class MyStructureTeamView(APIView):
         structure = Structure.objects.get(id=structure_id, est_supprimee=False)
         if not structure:
             return Response(
-                {"detail": "Aucune structure associÃ©e Ã  votre compte."},
+                {"detail": "Aucune structure associée à votre compte."},
                 status=status.HTTP_404_NOT_FOUND,
             )
 

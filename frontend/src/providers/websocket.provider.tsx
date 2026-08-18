@@ -23,6 +23,23 @@ const WebSocketContext = createContext<WebSocketContextValue>({
   subscribe: () => () => {},
 });
 
+function decodeJwtPayload(token: string): { exp?: number } | null {
+  const payloadPart = token.split(".")[1];
+  if (!payloadPart) return null;
+
+  try {
+    const normalized = payloadPart
+      .replace(/-/g, "+")
+      .replace(/_/g, "/")
+      .padEnd(Math.ceil(payloadPart.length / 4) * 4, "=");
+    const parsed = JSON.parse(atob(normalized));
+    if (!parsed || typeof parsed !== "object") return null;
+    return parsed as { exp?: number };
+  } catch {
+    return null;
+  }
+}
+
 export function useWebSocket() {
   return useContext(WebSocketContext);
 }
@@ -67,16 +84,14 @@ export default function WebSocketProvider({ children }: { children: React.ReactN
     // refresh token if expired before connecting
     let token = authStorage.getAccessToken();
     if (token) {
-      try {
-        const payload = JSON.parse(atob(token.split(".")[1]));
+      const payload = decodeJwtPayload(token);
+      if (payload?.exp) {
         const isExpired = payload.exp * 1000 < Date.now();
         if (isExpired) {
           const tokens = await tokenService.refreshToken();
           useAuthStore.getState().setTokens(tokens);
           token = tokens.access;
         }
-      } catch {
-        // if token parsing fails, use it as-is
       }
     }
     if (!token) return;

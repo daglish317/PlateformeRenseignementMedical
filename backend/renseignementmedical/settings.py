@@ -338,7 +338,7 @@ else:
 # Fichiers statiques / médias
 # ---------------------------------------------------------------------------
 LANGUAGE_CODE = "fr-fr"
-TIME_ZONE = "Africa/Abidjan"
+TIME_ZONE = os.getenv("TIME_ZONE", "Africa/Lagos")
 USE_I18N = True
 USE_TZ = True
 

@@ -12,6 +12,7 @@ class TypeStructure(models.TextChoices):
 class StatutStructure(models.TextChoices):
     EN_ATTENTE = "EN_ATTENTE", "En attente"
     ACTIVE = "ACTIVE", "Active"
+    SUSPENDUE = "SUSPENDUE", "Suspendue"
     REFUSEE = "REFUSEE", "Refusée"
 
 

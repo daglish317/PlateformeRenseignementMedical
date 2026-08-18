@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useMemo, useState } from "react";
 import { Building2 } from "lucide-react";
@@ -55,7 +55,7 @@ export default function OwnerCaissePage() {
         <SectionCard title="Caisse">
           <div className="rounded-lg border border-border bg-muted/30 p-8 text-center">
             <p className="text-muted-foreground">
-              Module Caisse - En cours d'implémentation
+              Module Caisse - En cours d&apos;implémentation
             </p>
           </div>
         </SectionCard>

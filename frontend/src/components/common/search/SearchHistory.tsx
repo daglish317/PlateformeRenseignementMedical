@@ -15,6 +15,15 @@ export default function SearchHistory({
   onRemove,
   onClear,
 }: SearchHistoryProps) {
+  const normalizedHistory = Array.from(
+    new Map(
+      history
+        .map((query) => query.trim())
+        .filter(Boolean)
+        .map((query) => [query.toLowerCase(), query])
+    ).values()
+  );
+
   if (history.length === 0) {
     return (
       <div className="px-4 py-6 text-center text-sm text-muted-foreground">
@@ -41,8 +50,8 @@ export default function SearchHistory({
       </div>
 
       <ul>
-        {history.map((query) => (
-          <li key={query}>
+        {normalizedHistory.map((query) => (
+          <li key={query.toLowerCase()}>
             <div className="group flex items-center justify-between px-4 py-2 transition-colors hover:bg-muted/60">
               <button
                 type="button"

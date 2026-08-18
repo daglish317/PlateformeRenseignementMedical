@@ -1,3 +1,5 @@
+import type { StructureType } from "@/types/map";
+
 export type RoleUtilisateur =
   | "ADMINISTRATEUR"
   | "PROPRIETAIRE"
@@ -6,6 +8,12 @@ export type RoleUtilisateur =
   | "PATIENT";
 
 export type TypeAuthentification = "EMAIL" | "GOOGLE";
+
+export interface ActiveStructure {
+  id: string;
+  nom: string;
+  type: StructureType;
+}
 
 export interface User {
   id: string;
@@ -17,4 +25,5 @@ export interface User {
   is_active: boolean;
   is_staff: boolean;
   date_joined: string;
+  active_structure?: ActiveStructure | null;
 }

@@ -7,6 +7,7 @@ les suggestions (§5-6), le stock (§10, §17), la péremption (§11), l'ouvertu
 publique (§27-28, §30) et la recherche interne (§29).
 """
 from datetime import datetime, time, timedelta
+from unittest.mock import patch
 
 from django.test import TestCase
 from django.utils import timezone
@@ -399,6 +400,54 @@ class MultiPeriodesTests(PublicSearchTestBase):
         self.assertTrue(HoraireService.est_ouverte(pharmacie, moment=lundi_midi))
         self.assertFalse(HoraireService.est_ouverte(pharmacie, moment=lundi_14h))
         self.assertTrue(HoraireService.est_ouverte(pharmacie, moment=lundi_16h))
+
+    def test_plage_qui_traverse_minuit_reste_ouverte_le_lendemain(self):
+        pharmacie = self._pharmacie(nom="Garde de nuit")
+        Horaire.objects.create(
+            structure=pharmacie,
+            jour=JourSemaine.LUNDI,
+            heure_ouverture=time(20, 0),
+            heure_fermeture=time(6, 0),
+            position=0,
+        )
+        self._ajouter_stock(
+            pharmacie,
+            "Paracétamol",
+            quantite=10,
+            date_peremption=timezone.localdate() + timedelta(days=365),
+        )
+
+        mardi_2h = timezone.make_aware(datetime(2026, 1, 6, 2, 0))
+        with patch("structures.services.timezone.localtime", return_value=mardi_2h):
+            response = self._recherche("paracétamol")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["total"], 1)
+        self.assertEqual(response.data["results"][0]["structure"]["nom"], "Garde de nuit")
+
+    def test_meme_heure_ouverture_fermeture_signifie_24h_sur_24(self):
+        pharmacie = self._pharmacie(nom="Pharmacie 24h")
+        Horaire.objects.create(
+            structure=pharmacie,
+            jour=JourSemaine.MARDI,
+            heure_ouverture=time(0, 0),
+            heure_fermeture=time(0, 0),
+            position=0,
+        )
+        self._ajouter_stock(
+            pharmacie,
+            "Paracétamol",
+            quantite=10,
+            date_peremption=timezone.localdate() + timedelta(days=365),
+        )
+
+        mardi_18h = timezone.make_aware(datetime(2026, 1, 6, 18, 0))
+        with patch("structures.services.timezone.localtime", return_value=mardi_18h):
+            response = self._recherche("paracétamol")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["total"], 1)
+        self.assertEqual(response.data["results"][0]["structure"]["nom"], "Pharmacie 24h")
 
 
 class FichePubliqueTests(PublicSearchTestBase):

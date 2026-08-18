@@ -69,6 +69,14 @@ class StockItem(models.Model):
         """Stock physique disponible à la vente (physique − réservé)."""
         return max(self.quantite - self.quantite_reservee, 0)
 
+    def save(self, *args, **kwargs):
+        from core.utils.text import normaliser_texte
+
+        self.nom_normalise = normaliser_texte(self.nom)
+        if kwargs.get("update_fields") is not None:
+            kwargs["update_fields"] = set(kwargs["update_fields"]) | {"nom_normalise"}
+        super().save(*args, **kwargs)
+
     class Meta:
         unique_together = ("structure", "nom", "type_item")
         ordering = ["nom"]

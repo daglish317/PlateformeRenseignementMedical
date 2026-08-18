@@ -31,7 +31,7 @@ export default function SearchSuggestions({
 
       {suggestions.map((item, index) => (
         <SearchItem
-          key={`${item.text}-${index}`}
+          key={`${item.type}-${item.text}-${index}`}
           nom={item.text}
           type={item.type}
           onClick={() => onSelect(item.text)}

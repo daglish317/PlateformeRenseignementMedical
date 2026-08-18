@@ -121,6 +121,24 @@ class HoraireService:
     JOURS = ["LUNDI", "MARDI", "MERCREDI", "JEUDI", "VENDREDI", "SAMEDI", "DIMANCHE"]
 
     @staticmethod
+    def _plage_couvre_heure(horaire, heure, depuis_veille=False):
+        if horaire.est_ferme:
+            return False
+
+        ouverture = horaire.heure_ouverture
+        fermeture = horaire.heure_fermeture
+
+        if ouverture == fermeture:
+            return True
+
+        if ouverture < fermeture:
+            return not depuis_veille and ouverture <= heure <= fermeture
+
+        if depuis_veille:
+            return heure <= fermeture
+        return heure >= ouverture
+
+    @staticmethod
     def est_ouverte(structure, moment=None, horaires=None):
         """
         Retourne True si la structure est ouverte au moment donné (défaut: maintenant).
@@ -131,23 +149,30 @@ class HoraireService:
         if not structure:
             return False
 
-        moment = moment or timezone.localtime()
-        jour = HoraireService.JOURS[moment.weekday()]
+        moment = timezone.localtime(moment) if moment else timezone.localtime()
+        jour_index = moment.weekday()
+        jour = HoraireService.JOURS[jour_index]
+        jour_precedent = HoraireService.JOURS[(jour_index - 1) % len(HoraireService.JOURS)]
         heure = moment.time()
 
         if horaires is None:
-            horaires = structure.horaires.filter(
-                jour=jour,
-                est_ferme=False,
+            horaires = list(
+                structure.horaires.filter(
+                    jour__in=[jour, jour_precedent],
+                    est_ferme=False,
+                )
             )
         else:
-            horaires = [
-                h for h in horaires
-                if h.jour == jour and not h.est_ferme
-            ]
+            horaires = [h for h in horaires if not h.est_ferme]
 
         for h in horaires:
-            if h.heure_ouverture <= heure <= h.heure_fermeture:
+            if h.jour == jour and HoraireService._plage_couvre_heure(h, heure):
+                return True
+            if h.jour == jour_precedent and HoraireService._plage_couvre_heure(
+                h,
+                heure,
+                depuis_veille=True,
+            ):
                 return True
         return False
 

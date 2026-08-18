@@ -21,6 +21,8 @@ from .views import (
     PermissionRegistryView,
     MyPermissionsView,
     MemberPermissionsView,
+    OwnerStructureStatusView,
+    AdminStructureStatusView,
 )
 from .views import StructuresProchesView
 from .form import StructureFormSubmitView
@@ -30,6 +32,7 @@ urlpatterns = [
     path("me/permissions/", MyPermissionsView.as_view(), name="structure-me-permissions"),
     path("permissions/registry/", PermissionRegistryView.as_view(), name="structure-permissions-registry"),
     path("owner/", OwnerStructuresView.as_view(), name="structure-owner"),
+    path("owner/<uuid:pk>/status/", OwnerStructureStatusView.as_view(), name="structure-owner-status"),
     path("team/", MyStructureTeamView.as_view(), name="structure-team"),
     path("team/<uuid:member_id>/status/", StructureTeamMemberStatusView.as_view(), name="structure-team-status"),
     path("team/<uuid:member_id>/permissions/", MemberPermissionsView.as_view(), name="structure-team-permissions"),
@@ -38,6 +41,7 @@ urlpatterns = [
     path("admin/list/", AdminListStructuresView.as_view(), name="structure-admin-list"),
 
     path("admin/validate/<uuid:pk>/", ValidateStructureView.as_view(), name="structure-validate"),
+    path("admin/<uuid:pk>/status/", AdminStructureStatusView.as_view(), name="structure-admin-status"),
 
     path("<uuid:pk>/", StructureDetailView.as_view(), name="structure-detail"),
     path("<uuid:structure_id>/produits/", StructureProduitsPublicsView.as_view(), name="structure-produits-publics"),

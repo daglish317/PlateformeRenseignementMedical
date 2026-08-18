@@ -1,11 +1,9 @@
-import { User } from "@/features/auth/types/user";
+import type { User } from "@/features/auth/types/user";
 
 type RedirectPath = "/" | "/admin" | "/owner" | "/pharmacy" | "/hospital";
 
 export const getRedirectPath = (user: User): RedirectPath => {
-
   switch (user.role) {
-
     case "ADMINISTRATEUR":
       return "/admin";
 
@@ -13,8 +11,9 @@ export const getRedirectPath = (user: User): RedirectPath => {
       return "/owner";
 
     case "GESTIONNAIRE":
+      return user.active_structure?.type === "HOPITAL" ? "/hospital" : "/pharmacy";
+
     case "CAISSIER":
-      // GESTIONNAIRE et CAISSIER utilisent le même dashboard équipe pharmacie
       return "/pharmacy";
 
     case "PATIENT":
@@ -23,5 +22,4 @@ export const getRedirectPath = (user: User): RedirectPath => {
     default:
       return "/";
   }
-
 };

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useMemo, useState } from "react";
 import {
@@ -30,35 +30,35 @@ const MODULE_LABELS: Record<string, string> = {
   FACTURE: "Factures",
   INVENTAIRE: "Inventaires",
   ALERTES: "Alertes",
-  PEREMPTION: "Péremption",
+  PEREMPTION: "PÃ©remption",
   HISTORIQUE: "Historique",
   STATISTIQUES: "Statistiques",
   HORAIRES: "Horaires",
   NOTIFICATIONS: "Notifications",
   PROFIL: "Profil",
-  PARAMETRES: "Paramètres",
+  PARAMETRES: "ParamÃ¨tres",
 };
 
 const MODULE_DESCRIPTIONS: Record<string, string> = {
-  APPROVISIONNEMENT: "Réception des lots, entrées de stock et suivi fournisseur.",
-  STOCK: "Catalogue, quantités, seuils et disponibilité des médicaments.",
-  VENTE: "Ventes au comptoir et sorties liées aux clients.",
-  CAISSE: "Encaissements, retours, reçus et validation des paiements.",
+  APPROVISIONNEMENT: "RÃ©ception des lots, entrÃ©es de stock et suivi fournisseur.",
+  STOCK: "Catalogue, quantitÃ©s, seuils et disponibilitÃ© des mÃ©dicaments.",
+  VENTE: "Ventes au comptoir et sorties liÃ©es aux clients.",
+  CAISSE: "Encaissements, retours, reÃ§us et validation des paiements.",
   FACTURE: "Consultation, impression et export des factures.",
-  INVENTAIRE: "Contrôles physiques, écarts et ajustements de stock.",
-  ALERTES: "Ruptures, péremptions, caisse et incidents opérationnels.",
-  PEREMPTION: "Lots proches de l'expiration et traitements associés.",
-  HISTORIQUE: "Journal des actions et traçabilité de la structure.",
+  INVENTAIRE: "ContrÃ´les physiques, Ã©carts et ajustements de stock.",
+  ALERTES: "Ruptures, pÃ©remptions, caisse et incidents opÃ©rationnels.",
+  PEREMPTION: "Lots proches de l'expiration et traitements associÃ©s.",
+  HISTORIQUE: "Journal des actions et traÃ§abilitÃ© de la structure.",
   STATISTIQUES: "Indicateurs, exports et analyse de performance.",
-  HORAIRES: "Horaires d'ouverture et disponibilité publique.",
-  NOTIFICATIONS: "Alertes reçues sur le compte de l'utilisateur.",
-  PROFIL: "Informations personnelles du compte connecté.",
-  PARAMETRES: "Préférences et sécurité du compte.",
+  HORAIRES: "Horaires d'ouverture et disponibilitÃ© publique.",
+  NOTIFICATIONS: "Alertes reÃ§ues sur le compte de l'utilisateur.",
+  PROFIL: "Informations personnelles du compte connectÃ©.",
+  PARAMETRES: "PrÃ©fÃ©rences et sÃ©curitÃ© du compte.",
 };
 
 const ACTION_LABELS: Record<ActionPermission, string> = {
   CONSULTER: "Consulter",
-  CREER: "Créer",
+  CREER: "CrÃ©er",
   MODIFIER: "Modifier",
   SUPPRIMER: "Supprimer",
   EXPORTER: "Exporter",
@@ -68,7 +68,7 @@ const ACTION_LABELS: Record<ActionPermission, string> = {
   ANNULER: "Annuler",
   VALIDER_PAIEMENT: "Valider paiement",
   REFUSER_PAIEMENT: "Refuser paiement",
-  IMPRIMER_RECU: "Imprimer reçu",
+  IMPRIMER_RECU: "Imprimer reÃ§u",
   RETOUR_CAISSE: "Retour caisse",
 };
 
@@ -91,11 +91,11 @@ const MODULE_ORDER: ModuleOperationnel[] = [
 
 const MODULE_GROUPS: Array<{ title: string; modules: ModuleOperationnel[] }> = [
   {
-    title: "Opérations métier",
+    title: "OpÃ©rations mÃ©tier",
     modules: ["APPROVISIONNEMENT", "STOCK", "VENTE", "CAISSE", "FACTURE"],
   },
   {
-    title: "Suivi et contrôle",
+    title: "Suivi et contrÃ´le",
     modules: ["INVENTAIRE", "ALERTES", "PEREMPTION", "HISTORIQUE", "STATISTIQUES"],
   },
   {
@@ -161,10 +161,10 @@ function clonePermissions(input: TeamPermissionMap | undefined): TeamPermissionM
 function normalizePermissions(input: TeamPermissionMap): TeamPermissionMap {
   const next: TeamPermissionMap = {};
 
-  for (const module of MODULE_ORDER) {
-    const actions = input[module];
+  for (const moduleName of MODULE_ORDER) {
+    const actions = input[moduleName];
     if (actions?.length) {
-      next[module] = [...new Set(actions)].sort();
+      next[moduleName] = [...new Set(actions)].sort();
     }
   }
 
@@ -278,7 +278,7 @@ function MemberPermissionsEditorContent({
             onClick={() => setDraftPermissions(clonePermissions(permissions))}
             disabled={!editable || !isChanged}
           >
-            Réinitialiser
+            RÃ©initialiser
           </Button>
           <Button
             type="button"
@@ -307,10 +307,10 @@ function MemberPermissionsEditorContent({
               </Badge>
             </div>
             <p className="mt-3 max-w-3xl text-sm leading-6 text-muted-foreground">
-              Les modules cochés ici sont les seuls qui apparaîtront dans l'espace
+              Les modules cochés ici sont les seuls qui apparaîtront dans l&apos;espace
               du collaborateur. La structure liée est <span className="font-medium">{structureId}</span>.
-              La messagerie reste réservée au propriétaire, au gestionnaire d'hôpital
-              et à l'administration SantéProx.
+              La messagerie reste réservée au propriétaire, au gestionnaire d&apos;hôpital
+              et à l&apos;administration SantéProx.
             </p>
           </div>
 
@@ -346,8 +346,8 @@ function MemberPermissionsEditorContent({
           <div className="flex items-start gap-3 rounded-lg border border-warning/40 bg-warning/10 p-4 text-sm text-warning">
             <AlertCircle className="mt-0.5 size-5" />
             <p>
-              Ce membre n'a encore aucun module actif. Activez au moins un module
-              avant d'enregistrer pour éviter un dashboard vide ou incohérent.
+              Ce membre n&apos;a encore aucun module actif. Activez au moins un module
+              avant d&apos;enregistrer pour éviter un dashboard vide ou incohérent.
             </p>
           </div>
         )}
@@ -392,7 +392,7 @@ function MemberPermissionsEditorContent({
                               </Badge>
                             </div>
                             <p className="mt-1 text-xs leading-5 text-muted-foreground">
-                              {MODULE_DESCRIPTIONS[module] ?? "Module opérationnel."}
+                              {MODULE_DESCRIPTIONS[module] ?? "Module opÃ©rationnel."}
                             </p>
                           </div>
 
@@ -456,12 +456,12 @@ function MemberPermissionsEditorContent({
             <CheckCircle2 className="mt-0.5 size-4 text-success" />
             <p>
               {activePermissions} permission(s) active(s). Les changements sont pris
-              en compte après enregistrement et actualisation des permissions côté utilisateur.
+              en compte aprÃ¨s enregistrement et actualisation des permissions cÃ´tÃ© utilisateur.
             </p>
           </div>
           {isChanged && (
             <Badge variant="warning" className="w-fit">
-              Modifications non enregistrées
+              Modifications non enregistrÃ©es
             </Badge>
           )}
         </div>
@@ -491,7 +491,7 @@ export function MemberPermissionsEditor({ member }: MemberPermissionsEditorProps
     return (
       <SectionCard title="Permissions du membre">
         <p className="text-sm text-muted-foreground">
-          Sélectionnez un membre pour consulter et modifier ses permissions.
+          SÃ©lectionnez un membre pour consulter et modifier ses permissions.
         </p>
       </SectionCard>
     );
@@ -505,7 +505,7 @@ export function MemberPermissionsEditor({ member }: MemberPermissionsEditorProps
           <div className="space-y-1">
             <p className="font-medium">{member.nom}</p>
             <p className="text-sm text-muted-foreground">
-              Les permissions du propriétaire ne sont pas modifiables depuis cet écran.
+              Les permissions du propriÃ©taire ne sont pas modifiables depuis cet Ã©cran.
             </p>
           </div>
         </div>
@@ -551,3 +551,4 @@ export function MemberPermissionsEditor({ member }: MemberPermissionsEditorProps
     />
   );
 }
+

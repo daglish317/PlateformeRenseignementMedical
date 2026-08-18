@@ -169,6 +169,7 @@ class StockService:
         qs = StockItem.objects.filter(
             structure=structure,
             type_item=StockItem.TYPE_MEDICAMENT,
+            disponible=True,
         ).filter(quantite__gt=F("quantite_reservee"))
         if recherche:
             qs = qs.filter(nom_normalise__icontains=recherche)
@@ -187,6 +188,7 @@ class StockService:
         recherche = normaliser_texte(recherche)
         qs = StockItem.objects.filter(
             type_item=StockItem.TYPE_MEDICAMENT,
+            disponible=True,
             structure__type="PHARMACIE",
             structure__statut="ACTIVE",
             structure__est_supprimee=False,
@@ -201,15 +203,7 @@ class StockService:
     @staticmethod
     def suggestions_medicaments(requete, limite=8):
         """Noms de médicaments réellement présents en pharmacie (suggestions)."""
-        requete = normaliser_texte(requete)
-        qs = StockItem.objects.filter(
-            type_item=StockItem.TYPE_MEDICAMENT,
-            structure__type="PHARMACIE",
-            structure__statut="ACTIVE",
-            structure__est_supprimee=False,
-        )
-        if requete:
-            qs = qs.filter(nom_normalise__icontains=requete)
+        qs = StockService.produits_publics_globaux(recherche=requete)
         return list(
             qs.values_list("nom", flat=True)
             .distinct()

@@ -39,17 +39,18 @@ export function DashboardBreadcrumb() {
     <nav className="flex items-center gap-1 text-sm text-muted-foreground">
       {crumbs.map((crumb, index) => {
         const isLast = index === crumbs.length - 1;
+        const key = `${crumb.href ?? crumb.label}-${index}`;
 
         if (isLast) {
           return (
-            <span key={index} className="font-medium text-foreground">
+            <span key={key} className="font-medium text-foreground">
               {crumb.label}
             </span>
           );
         }
 
         return (
-          <span key={index} className="flex items-center gap-1">
+          <span key={key} className="flex items-center gap-1">
             {crumb.href ? (
               <Link href={crumb.href} className="hover:text-foreground transition-colors">
                 {crumb.label}

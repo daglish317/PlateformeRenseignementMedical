@@ -30,7 +30,7 @@ export default function PublicHome() {
       */}
       <aside
         className={cn(
-          "absolute inset-0 flex flex-col border-b border-border bg-background",
+          "absolute inset-0 z-20 flex flex-col border-b border-border bg-background",
           view === "recherche" ? "visible" : "invisible",
           "md:visible md:static md:h-full md:w-[390px] md:shrink-0 md:border-b-0 md:border-r",
           "xl:w-[420px]"
@@ -46,7 +46,7 @@ export default function PublicHome() {
       */}
       <section
         className={cn(
-          "absolute inset-0 shrink-0 bg-background",
+          "absolute inset-0 z-10 shrink-0 bg-background",
           view === "carte" ? "visible" : "invisible",
           "md:visible md:static md:h-full md:flex-1"
         )}

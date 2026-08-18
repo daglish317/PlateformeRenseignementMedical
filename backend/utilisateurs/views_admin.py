@@ -40,7 +40,7 @@ class RegisterAdminView(APIView):
         if len(password) < 8:
             return Response({"detail": "Mot de passe trop court (min 8)."}, status=400)
         if Utilisateur.objects.filter(email=email).exists():
-            return Response({"detail": "Cette adresse email est dÃ©jÃ  utilisÃ©e."}, status=400)
+            return Response({"detail": "Cette adresse email est déjà utilisée."}, status=400)
 
         user = Utilisateur.objects.create_user(
             nom=nom,
@@ -222,12 +222,12 @@ class AdminUserDetailView(APIView):
         if action == "reactivate":
             u.is_active = True
             u.save(update_fields=["is_active"])
-            return Response({"message": "Utilisateur rÃ©activÃ©"})
+            return Response({"message": "Utilisateur réactivé"})
         if action == "delete":
             u.is_active = False
             u.email = f"deleted_{u.id}_{u.email}"
             u.save(update_fields=["is_active", "email"])
-            return Response({"message": "Utilisateur supprimÃ© (logique)"})
+            return Response({"message": "Utilisateur supprimé (logique)"})
 
         return Response({"detail": "Action invalide"}, status=400)
 
@@ -349,7 +349,7 @@ class AdminManagerDetailView(APIView):
             return Response({"message": "Proprietaire reactive"})
         if action == "reset_password":
             VerificationService.generate(email=m.email)
-            return Response({"message": "Nouveau mot de passe envoyÃ© par email"})
+            return Response({"message": "Nouveau mot de passe envoyé par email"})
 
         return Response({"detail": "Action invalide"}, status=400)
 

@@ -14,31 +14,18 @@ import { useSearchStore } from "@/store/search-store";
 import { useSearch } from "@/hooks/useSearch";
 
 export default function SearchBar() {
-  const [inputValue, setInputValue] = useState("");
+  const query = useSearchStore((state) => state.query);
+  const setQuery = useSearchStore((state) => state.setQuery);
+  const page = useSearchStore((state) => state.page);
   const [open, setOpen] = useState(false);
 
   const t = useTranslations("search");
-
   const containerRef = useRef<HTMLDivElement>(null);
 
   const { history, addSearch, removeSearch, clearHistory } = useSearchHistory();
-
-  const { data: suggestions = [] } = useSuggestions(inputValue);
-
-  const query = useSearchStore((state) => state.query);
-
-  const setQuery = useSearchStore((state) => state.setQuery);
-
-  const page = useSearchStore((state) => state.page);
+  const { data: suggestions = [] } = useSuggestions(query);
 
   useSearch({ query, page });
-
-  const [prevQuery, setPrevQuery] = useState(query);
-
-  if (prevQuery !== query) {
-    setPrevQuery(query);
-    setInputValue(query);
-  }
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -63,34 +50,30 @@ export default function SearchBar() {
     if (!text) return;
 
     addSearch(text);
-
-    setInputValue(text);
-
     setQuery(text);
-
     setOpen(false);
   }
 
   return (
     <div ref={containerRef} className="relative w-full">
       <SearchInput
-        value={inputValue}
+        value={query}
         placeholder={t("placeholder")}
         onChange={(value) => {
-          setInputValue(value);
+          setQuery(value);
           setOpen(true);
         }}
         onFocus={() => setOpen(true)}
         onKeyDown={(event) => {
           if (event.key === "Enter") {
-            submit(inputValue);
+            submit(query);
           }
         }}
       />
 
       {open && (
         <SearchDropdown>
-          {inputValue.trim() === "" ? (
+          {query.trim() === "" ? (
             <SearchHistory
               history={history}
               onSelect={submit}
@@ -105,4 +88,3 @@ export default function SearchBar() {
     </div>
   );
 }
-

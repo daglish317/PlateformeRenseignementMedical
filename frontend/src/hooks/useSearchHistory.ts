@@ -11,8 +11,14 @@ export function useSearchHistory() {
 
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
+      if (!stored) return [];
 
-      return stored ? (JSON.parse(stored) as string[]) : [];
+      const parsed = JSON.parse(stored);
+      if (!Array.isArray(parsed)) return [];
+
+      return parsed
+        .map((item) => String(item).trim())
+        .filter(Boolean);
     } catch {
       return [];
     }

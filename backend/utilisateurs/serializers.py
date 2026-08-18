@@ -2,12 +2,15 @@ from rest_framework import serializers
 from django.utils import timezone
 
 from structures.models import EquipeStructure, StatutEquipeStructure
+from structures.permissions import get_user_structure
 from .models import Utilisateur
 from .models import RoleUtilisateur, TypeAuthentification
 from .services.auth_service import AuthService
 
 
 class UtilisateurSerializer(serializers.ModelSerializer):
+    active_structure = serializers.SerializerMethodField()
+
     class Meta:
         model = Utilisateur
         fields = [
@@ -20,8 +23,19 @@ class UtilisateurSerializer(serializers.ModelSerializer):
             "is_active",
             "is_staff",
             "date_joined",
+            "active_structure",
         ]
         read_only_fields = fields
+
+    def get_active_structure(self, obj):
+        structure = get_user_structure(obj)
+        if not structure:
+            return None
+        return {
+            "id": str(structure.id),
+            "nom": structure.nom,
+            "type": structure.type,
+        }
 
 
 class UtilisateurUpdateSerializer(serializers.ModelSerializer):

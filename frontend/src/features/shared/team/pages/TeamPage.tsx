@@ -92,14 +92,10 @@ export function TeamPage() {
   );
 
   const resolvedSelectedMemberId = useMemo(() => {
-    if (editableMembers.length === 0) {
-      return "";
-    }
-
+    if (editableMembers.length === 0) return "";
     if (editableMembers.some((member) => member.id === selectedMemberId)) {
       return selectedMemberId;
     }
-
     return editableMembers[0].id;
   }, [editableMembers, selectedMemberId]);
 
@@ -341,7 +337,7 @@ export function TeamPage() {
               )}
               {!ownerStructures.isLoading && ownerStructures.data?.results.length === 0 && (
                 <p className="text-sm text-muted-foreground">
-                  Créez d'abord une structure pour pouvoir inviter son équipe.
+                  Créez d&apos;abord une structure pour pouvoir inviter son équipe.
                 </p>
               )}
               {ownerStructures.data && ownerStructures.data.results.length > 0 && (
@@ -444,7 +440,7 @@ export function TeamPage() {
 
         {team.isError && (
           <p className="p-4 text-sm text-destructive">
-            Impossible de charger l'équipe.
+            Impossible de charger l&apos;équipe.
           </p>
         )}
 
@@ -563,7 +559,7 @@ export function TeamPage() {
           ) : editableMembers.length === 0 ? (
             <SectionCard>
               <p className="text-sm text-muted-foreground">
-                Aucun membre opérationnel n'est encore rattaché à cette structure.
+                Aucun membre opérationnel n&apos;est encore rattaché à cette structure.
               </p>
             </SectionCard>
           ) : (
