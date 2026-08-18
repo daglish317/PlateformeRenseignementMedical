@@ -91,16 +91,6 @@ export default function StructureMarker({
   const selected = selectedStructure?.id === structure.id;
   const icon = buildIcon(structure.type, selected);
 
-  // Calculer le temps de marche estimé (5 km/h en moyenne)
-  const walkingTimeMinutes = structure.distance_km 
-    ? Math.round((structure.distance_km / 5) * 60) 
-    : null;
-
-  // Calculer le temps en voiture estimé (40 km/h en moyenne urbaine)
-  const drivingTimeMinutes = structure.distance_km 
-    ? Math.round((structure.distance_km / 40) * 60) 
-    : null;
-
   const handleViewDetails = () => {
     router.push(`/structure/${structure.id}`);
   };
@@ -151,16 +141,16 @@ export default function StructureMarker({
                 <MapPin className="h-3.5 w-3.5" />
                 {structure.distance_km.toFixed(1)} km
               </span>
-              {walkingTimeMinutes !== null && walkingTimeMinutes > 0 && (
+              {structure.temps_marche_min !== null && structure.temps_marche_min !== undefined && (
                 <span className="inline-flex items-center gap-1">
                   <Footprints className="h-3.5 w-3.5" />
-                  ~{walkingTimeMinutes} min
+                  ~{structure.temps_marche_min} min
                 </span>
               )}
-              {drivingTimeMinutes !== null && drivingTimeMinutes > 0 && (
+              {structure.temps_voiture_min !== null && structure.temps_voiture_min !== undefined && (
                 <span className="inline-flex items-center gap-1">
                   <Car className="h-3.5 w-3.5" />
-                  ~{drivingTimeMinutes} min
+                  ~{structure.temps_voiture_min} min
                 </span>
               )}
             </div>

@@ -1,8 +1,11 @@
 export type UserLocation = {
   latitude: number;
   longitude: number;
+  accuracy?: number;
 };
 
+const TARGET_ACCURACY_METERS = 50;
+const MAX_LOCATION_WAIT_MS = 8000;
 
 export function getCurrentLocation(): Promise<UserLocation> {
   return new Promise((resolve, reject) => {
@@ -17,19 +20,56 @@ export function getCurrentLocation(): Promise<UserLocation> {
       return;
     }
 
+    let settled = false;
+    let bestPosition: GeolocationPosition | null = null;
 
-    navigator.geolocation.getCurrentPosition(
+    const finish = (position: GeolocationPosition) => {
+      if (settled) return;
+      settled = true;
+      navigator.geolocation.clearWatch(watchId);
+      clearTimeout(timeoutId);
+      resolve({
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude,
+        accuracy: position.coords.accuracy,
+      });
+    };
+
+    const timeoutId = window.setTimeout(() => {
+      if (settled) return;
+      if (bestPosition) {
+        finish(bestPosition);
+        return;
+      }
+      settled = true;
+      navigator.geolocation.clearWatch(watchId);
+      reject(new Error("Impossible d'obtenir une position GPS fiable."));
+    }, MAX_LOCATION_WAIT_MS);
+
+    const watchId = navigator.geolocation.watchPosition(
       (position) => {
+        if (
+          !bestPosition ||
+          position.coords.accuracy < bestPosition.coords.accuracy
+        ) {
+          bestPosition = position;
+        }
 
-        resolve({
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
-        });
+        if (position.coords.accuracy <= TARGET_ACCURACY_METERS) {
+          finish(position);
+        }
 
       },
 
       (error) => {
-
+        if (bestPosition) {
+          finish(bestPosition);
+          return;
+        }
+        if (settled) return;
+        settled = true;
+        navigator.geolocation.clearWatch(watchId);
+        clearTimeout(timeoutId);
         reject(error);
 
       },
@@ -37,7 +77,7 @@ export function getCurrentLocation(): Promise<UserLocation> {
       {
         enableHighAccuracy: true,
         timeout: 10000,
-        maximumAge: 30000,
+        maximumAge: 0,
       }
     );
 
@@ -67,6 +107,7 @@ export function watchPosition(
       onPosition({
         latitude: position.coords.latitude,
         longitude: position.coords.longitude,
+        accuracy: position.coords.accuracy,
       });
     },
     (error) => {
@@ -75,7 +116,7 @@ export function watchPosition(
     {
       enableHighAccuracy: true,
       timeout: 15000,
-      maximumAge: 10000,
+      maximumAge: 0,
     }
   );
 

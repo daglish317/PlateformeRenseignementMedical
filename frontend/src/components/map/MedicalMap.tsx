@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useEffect, memo } from "react";
+import { useEffect, memo, useMemo } from "react";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 import { useCurrentLocation } from "@/hooks/map/useCurrentLocation";
@@ -24,6 +24,8 @@ export type MapStructure = {
   latitude: number | null;
   longitude: number | null;
   distance_km?: number | null;
+  temps_marche_min?: number | null;
+  temps_voiture_min?: number | null;
 };
 
 const MapView = dynamic(() => import("./MapView"), {
@@ -85,10 +87,16 @@ function MedicalMap() {
   const query = useQuery();
 
   // La carte et la liste utilisent le même ensemble de données filtrées (§20).
-  const structures = results?.map_results ?? (results?.results ?? []).map((item) => ({
-    ...item.structure,
-    distance_km: item.distance_km,
-  }));
+  const structures = useMemo(
+    () =>
+      results?.map_results ?? (results?.results ?? []).map((item) => ({
+        ...item.structure,
+        distance_km: item.distance_km,
+        temps_marche_min: item.temps_marche_min,
+        temps_voiture_min: item.temps_voiture_min,
+      })),
+    [results]
+  );
 
   const showEmptyState = query.trim().length > 0 && structures.length === 0 && results !== null;
 
@@ -129,7 +137,7 @@ function MedicalMap() {
 
   return (
     <div className="relative h-full w-full">
-      <MapView location={location}>
+      <MapView location={location} structures={structures}>
         {location && <UserMarker location={location} />}
         {structures.map((structure) => (
           <StructureMarker key={structure.id} structure={structure} />

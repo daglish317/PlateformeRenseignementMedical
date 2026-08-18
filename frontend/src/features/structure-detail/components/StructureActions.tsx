@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { MapPin, Phone, Calendar } from "lucide-react";
+import { ArrowLeft, MapPin, Phone, Calendar } from "lucide-react";
 import { useRoute } from "@/features/routing/hooks/useRoute";
 import { useCurrentLocation } from "@/hooks/map/useCurrentLocation";
 import { useRouter } from "next/navigation";
@@ -34,6 +34,21 @@ export default function StructureActions({ structure }: { structure: StructureDe
           <FavoriteButton structureId={structure.id} />
         </div>
         <div className="flex flex-col gap-4">
+          <Button
+            variant="outline"
+            className="w-full rounded-2xl py-6 text-base font-semibold border-2 transition-all hover:bg-muted"
+            onClick={() => {
+              if (window.history.length > 1) {
+                router.back();
+                return;
+              }
+              router.push("/");
+            }}
+          >
+            <ArrowLeft className="mr-2 h-5 w-5" />
+            Retour
+          </Button>
+
           <Button 
             className="w-full rounded-2xl py-7 text-lg font-semibold shadow-md transition-all hover:scale-[1.02]" 
             onClick={handleRoute} 

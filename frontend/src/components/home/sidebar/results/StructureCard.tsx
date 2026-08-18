@@ -1,12 +1,12 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { ArrowRight, Car, Footprints, MapPin, Pill } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import type { PublicPharmacieResult } from "@/types/search";
+import { Link } from "@/i18n/navigation";
 import { useSearchStore } from "@/store/search-store";
 import { useRoute } from "@/features/routing/hooks/useRoute";
 import { useCurrentLocation } from "@/hooks/map/useCurrentLocation";
@@ -45,39 +45,39 @@ export default function StructureCard({ result }: StructureCardProps) {
     <article
       onClick={() => setSelectedStructure(structure)}
       className={cn(
-        "relative flex cursor-pointer gap-3 overflow-hidden rounded-xl border bg-card p-3 pl-4 transition-all hover:shadow-md",
+        "relative flex cursor-pointer gap-2.5 overflow-hidden rounded-xl border bg-card p-2.5 pl-3 transition-all hover:shadow-md",
         isSelected ? "border-primary ring-1 ring-primary" : "border-border"
       )}
     >
       {/* Bandeau couleur pharmacie */}
-      <span className="absolute inset-y-0 left-0 w-1.5 bg-emerald-500" />
+      <span className="absolute inset-y-0 left-0 w-1 bg-emerald-500" />
 
       {/* Photo */}
-      <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-lg bg-muted">
+      <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-muted">
         {structure.photo ? (
           <Image
             src={structure.photo}
             alt={structure.nom}
             fill
-            sizes="96px"
+            sizes="80px"
             className="object-cover"
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center bg-emerald-50 dark:bg-emerald-500/10">
-            <Pill className="h-8 w-8 text-emerald-500" />
+            <Pill className="h-6 w-6 text-emerald-500" />
           </div>
         )}
         <div className="absolute bottom-1 left-1">
-          <Badge className="border-0 bg-emerald-50 px-1.5 py-0 text-[10px] leading-4 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400">
+          <Badge className="border-0 bg-emerald-50 px-1.5 py-0 text-[9px] leading-4 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400">
             Pharmacie
           </Badge>
         </div>
       </div>
 
       {/* Infos */}
-      <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+      <div className="flex min-w-0 flex-1 flex-col gap-1">
         <div className="flex items-start justify-between gap-1">
-          <h3 className="line-clamp-2 text-sm font-semibold leading-tight text-foreground">
+          <h3 className="line-clamp-1 text-sm font-semibold leading-tight text-foreground">
             {structure.nom}
           </h3>
           <div onClick={(e) => e.stopPropagation()} className="shrink-0">
@@ -86,7 +86,7 @@ export default function StructureCard({ result }: StructureCardProps) {
         </div>
 
         {/* Produit + quantité */}
-        <p className="line-clamp-1 text-xs font-medium text-foreground">
+        <p className="line-clamp-1 text-[11px] font-medium text-foreground">
           {produit.nom}
           <span className="ml-2 text-muted-foreground">
             {t("stockAvailable", { quantite: produit.quantite })}
@@ -96,7 +96,7 @@ export default function StructureCard({ result }: StructureCardProps) {
         {/* Statut ouvert / fermé */}
         <Badge
           className={cn(
-            "w-fit border-0 px-2 py-0 text-[11px]",
+            "w-fit border-0 px-2 py-0 text-[10px]",
             est_ouverte
               ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400"
               : "bg-red-50 text-red-700 dark:bg-red-500/15 dark:text-red-400"
@@ -105,7 +105,7 @@ export default function StructureCard({ result }: StructureCardProps) {
           {est_ouverte ? t("open") : t("closed")}
         </Badge>
 
-        <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
+        <div className="flex flex-wrap gap-x-2 gap-y-0.5 text-[11px] text-muted-foreground">
           {distance_km !== null && (
             <span className="flex items-center gap-1">
               <MapPin className="h-3 w-3" />
@@ -127,16 +127,16 @@ export default function StructureCard({ result }: StructureCardProps) {
         </div>
 
         {structure.adresse && (
-          <p className="line-clamp-1 text-xs text-muted-foreground">
+          <p className="line-clamp-1 text-[11px] text-muted-foreground">
             {structure.adresse}
           </p>
         )}
 
-        <div className="mt-auto flex gap-1.5 pt-1.5">
+        <div className="mt-auto flex gap-1 pt-1">
           <Button
             variant="outline"
             size="sm"
-            className="h-7 rounded-lg px-2.5 text-xs"
+            className="h-6 rounded-lg px-2 text-[11px]"
             onClick={handleRoute}
             disabled={routeLoading}
           >
@@ -149,7 +149,7 @@ export default function StructureCard({ result }: StructureCardProps) {
           >
             <Button
               size="sm"
-              className="h-7 rounded-lg px-2.5 text-xs"
+              className="h-6 rounded-lg px-2 text-[11px]"
             >
               {t("details")}
               <ArrowRight className="ml-1 h-3 w-3" />

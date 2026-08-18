@@ -6,11 +6,13 @@ import { MapContainer, TileLayer } from "react-leaflet";
 
 import { MAP } from "@/constants/map";
 import MapController from "./MapController";
+import type { MapStructure } from "./MedicalMap";
 import type { UserLocation } from "@/services/map/geolocalisation";
 
 type MapViewProps = {
   children?: ReactNode;
   location?: UserLocation | null;
+  structures?: MapStructure[];
   zoomControl?: boolean;
 };
 
@@ -28,6 +30,7 @@ const TILES_URL = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
 export default function MapView({
   children,
   location,
+  structures = [],
   zoomControl = false,
 }: MapViewProps) {
   return (
@@ -51,6 +54,7 @@ export default function MapView({
 
       <MapController
         location={location}
+        structures={structures}
       />
 
       {children}

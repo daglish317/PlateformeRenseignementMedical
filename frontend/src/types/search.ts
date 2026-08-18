@@ -7,6 +7,9 @@ export type Structure = {
   telephone: string;
   latitude: number | null;
   longitude: number | null;
+  distance_km?: number | null;
+  temps_marche_min?: number | null;
+  temps_voiture_min?: number | null;
 };
 
 export type ServiceItem = {
