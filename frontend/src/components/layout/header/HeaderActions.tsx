@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useAuthStore } from "@/features/auth/store/auth-store";
 import { useLogout } from "@/features/auth/hooks/useLogout";
-import { ChevronDown, Heart, LogOut, MessageSquare, User } from "lucide-react";
+import { Heart, LogOut, MessageSquare } from "lucide-react";
 
 type HeaderActionsProps = {
   showPublicLinks?: boolean;
@@ -32,12 +32,10 @@ function ContactMenu({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
-        className="inline-flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+        className="inline-flex h-10 w-10 items-center justify-center rounded-full text-muted-foreground hover:bg-accent hover:text-accent-foreground"
         aria-label="Ouvrir les liens de contact"
       >
         <MessageSquare className="h-4 w-4" />
-        Nous contacter
-        <ChevronDown className="h-4 w-4" />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="min-w-52">
         <DropdownMenuItem onClick={() => router.push(contactHref)}>
@@ -66,7 +64,7 @@ export default function HeaderActions({
 
   if (authenticated) {
     return (
-      <div className="flex items-center gap-2 shrink-0">
+      <div className="flex items-center gap-3 shrink-0">
         {showPublicLinks && (
           <ContactMenu contactHref={contactHref} feedbackHref={feedbackHref} />
         )}
@@ -82,17 +80,6 @@ export default function HeaderActions({
           </Button>
         </Link>
 
-        <Link href="/profil">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="rounded-full text-muted-foreground hover:text-foreground"
-            aria-label="Profil"
-          >
-            <User className="h-5 w-5" />
-          </Button>
-        </Link>
-
         <LanguageSwitcher />
         <ThemeToggle />
 
@@ -105,7 +92,7 @@ export default function HeaderActions({
   }
 
   return (
-    <div className="flex items-center gap-2 shrink-0">
+    <div className="flex items-center gap-3 shrink-0">
       {showPublicLinks && (
         <ContactMenu contactHref={contactHref} feedbackHref={feedbackHref} />
       )}

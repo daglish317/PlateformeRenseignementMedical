@@ -25,19 +25,10 @@ const typesProjet = [
   "Autre",
 ];
 
-const budgets = [
-  "Moins de 200 000 FCFA",
-  "200 000 - 500 000 FCFA",
-  "500 000 - 1 000 000 FCFA",
-  "Plus de 1 000 000 FCFA",
-  "À discuter",
-];
-
 interface FormState {
   nom: string;
   email: string;
   typeProjet: string;
-  budget: string;
   message: string;
 }
 
@@ -45,7 +36,6 @@ const initialState: FormState = {
   nom: "",
   email: "",
   typeProjet: "",
-  budget: "",
   message: "",
 };
 
@@ -66,10 +56,6 @@ export function ContactForm() {
       setError("Veuillez indiquer votre nom.");
       return;
     }
-    if (!form.email.trim()) {
-      setError("Veuillez indiquer votre email.");
-      return;
-    }
     if (!form.typeProjet) {
       setError("Veuillez choisir le type de projet.");
       return;
@@ -83,9 +69,8 @@ export function ContactForm() {
       "Bonjour, je vous contacte via SantéProx.",
       "",
       `Nom : ${form.nom.trim()}`,
-      `Email : ${form.email.trim()}`,
+      form.email.trim() ? `Email : ${form.email.trim()}` : "",
       `Type de projet : ${form.typeProjet}`,
-      form.budget ? `Budget : ${form.budget}` : "",
       "",
       "Description du projet :",
       form.message.trim(),
@@ -119,9 +104,8 @@ export function ContactForm() {
                     "Bonjour, je vous contacte via SantéProx.",
                     "",
                     `Nom : ${form.nom.trim()}`,
-                    `Email : ${form.email.trim()}`,
+                    form.email.trim() ? `Email : ${form.email.trim()}` : "",
                     `Type de projet : ${form.typeProjet}`,
-                    form.budget ? `Budget : ${form.budget}` : "",
                     "",
                     "Description du projet :",
                     form.message.trim(),
@@ -172,7 +156,7 @@ export function ContactForm() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email">Email *</Label>
+              <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
                 type="email"
@@ -183,38 +167,20 @@ export function ContactForm() {
             </div>
           </div>
 
-          <div className="grid gap-6 sm:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="typeProjet">Type de projet *</Label>
-              <Select
-                id="typeProjet"
-                value={form.typeProjet}
-                onChange={(e) => update("typeProjet", e.target.value)}
-              >
-                <option value="">Choisir un type...</option>
-                {typesProjet.map((type) => (
-                  <option key={type} value={type}>
-                    {type}
-                  </option>
-                ))}
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="budget">Budget estimé</Label>
-              <Select
-                id="budget"
-                value={form.budget}
-                onChange={(e) => update("budget", e.target.value)}
-              >
-                <option value="">À discuter</option>
-                {budgets.map((budget) => (
-                  <option key={budget} value={budget}>
-                    {budget}
-                  </option>
-                ))}
-              </Select>
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="typeProjet">Type de projet *</Label>
+            <Select
+              id="typeProjet"
+              value={form.typeProjet}
+              onChange={(e) => update("typeProjet", e.target.value)}
+            >
+              <option value="">Choisir un type...</option>
+              {typesProjet.map((type) => (
+                <option key={type} value={type}>
+                  {type}
+                </option>
+              ))}
+            </Select>
           </div>
 
           <div className="space-y-2">
