@@ -4,6 +4,7 @@ import { useState } from "react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Hospital, Pill } from "lucide-react";
+
 import {
   Table,
   TableBody,
@@ -13,13 +14,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ManagerStatusBadge } from "./ManagerStatusBadge";
+import { AdminEmptyState } from "../../shared/components/AdminEmptyState";
 import { ManagerActions } from "./ManagerActions";
 import { ManagerDetails } from "./ManagerDetails";
-import { SuspendDialog } from "./SuspendDialog";
-import { ResetPasswordDialog } from "./ResetPasswordDialog";
+import { ManagerStatusBadge } from "./ManagerStatusBadge";
 import { ReactivateDialog } from "./ReactivateDialog";
-import { AdminEmptyState } from "../../shared/components/AdminEmptyState";
+import { ResetPasswordDialog } from "./ResetPasswordDialog";
+import { SuspendDialog } from "./SuspendDialog";
 import { useManagers } from "../hooks/useManagers";
 import { useManagersStore } from "../store/managers-store";
 import type { ManagerAdmin } from "../types/manager";
@@ -27,15 +28,29 @@ import type { ManagerAdmin } from "../types/manager";
 function TableSkeleton() {
   return (
     <>
-      {Array.from({ length: 5 }).map((_, i) => (
-        <TableRow key={i}>
-          <TableCell><Skeleton className="h-4 w-32" /></TableCell>
-          <TableCell><Skeleton className="h-4 w-40" /></TableCell>
-          <TableCell className="hidden md:table-cell"><Skeleton className="h-4 w-28" /></TableCell>
-          <TableCell><Skeleton className="h-4 w-20" /></TableCell>
-          <TableCell><Skeleton className="h-5 w-20 rounded-full" /></TableCell>
-          <TableCell className="hidden sm:table-cell"><Skeleton className="h-4 w-20" /></TableCell>
-          <TableCell><Skeleton className="h-7 w-20" /></TableCell>
+      {Array.from({ length: 5 }).map((_, index) => (
+        <TableRow key={index}>
+          <TableCell>
+            <Skeleton className="h-4 w-32" />
+          </TableCell>
+          <TableCell>
+            <Skeleton className="h-4 w-40" />
+          </TableCell>
+          <TableCell className="hidden md:table-cell">
+            <Skeleton className="h-4 w-28" />
+          </TableCell>
+          <TableCell>
+            <Skeleton className="h-4 w-20" />
+          </TableCell>
+          <TableCell>
+            <Skeleton className="h-5 w-20 rounded-full" />
+          </TableCell>
+          <TableCell className="hidden sm:table-cell">
+            <Skeleton className="h-4 w-20" />
+          </TableCell>
+          <TableCell>
+            <Skeleton className="h-7 w-20" />
+          </TableCell>
         </TableRow>
       ))}
     </>
@@ -47,13 +62,24 @@ interface ManagersTableProps {
   pageSize: number;
 }
 
+function managerKindLabel(manager: ManagerAdmin) {
+  if (manager.role === "GESTIONNAIRE") return "Gestionnaire hopital";
+  return "Proprietaire pharmacie";
+}
+
 export function ManagersTable({ page, pageSize }: ManagersTableProps) {
   const { filters } = useManagersStore();
-  const { data, isLoading, isError, refetch } = useManagers({ ...filters, page, pageSize });
+  const { data, isLoading, isError, refetch } = useManagers({
+    ...filters,
+    page,
+    pageSize,
+  });
 
   const [detailManager, setDetailManager] = useState<ManagerAdmin | null>(null);
   const [suspendTarget, setSuspendTarget] = useState<ManagerAdmin | null>(null);
-  const [reactivateTarget, setReactivateTarget] = useState<ManagerAdmin | null>(null);
+  const [reactivateTarget, setReactivateTarget] = useState<ManagerAdmin | null>(
+    null
+  );
   const [resetTarget, setResetTarget] = useState<ManagerAdmin | null>(null);
 
   if (isError) {
@@ -61,7 +87,7 @@ export function ManagersTable({ page, pageSize }: ManagersTableProps) {
       <div className="py-8 text-center text-sm text-muted-foreground">
         Erreur lors du chargement.
         <button onClick={() => refetch()} className="ml-1 text-primary underline">
-          Réessayer
+          Reessayer
         </button>
       </div>
     );
@@ -72,8 +98,8 @@ export function ManagersTable({ page, pageSize }: ManagersTableProps) {
   if (!isLoading && managers.length === 0) {
     return (
       <AdminEmptyState
-        title="Aucun gestionnaire trouvé"
-        description="Aucun gestionnaire ne correspond à vos critères de recherche."
+        title="Aucun responsable trouve"
+        description="Aucun responsable ne correspond a vos criteres de recherche."
       />
     );
   }
@@ -86,7 +112,7 @@ export function ManagersTable({ page, pageSize }: ManagersTableProps) {
             <TableHead>Nom</TableHead>
             <TableHead>Email</TableHead>
             <TableHead className="hidden md:table-cell">Structure</TableHead>
-            <TableHead className="hidden sm:table-cell">Type</TableHead>
+            <TableHead className="hidden sm:table-cell">Responsable</TableHead>
             <TableHead>Statut</TableHead>
             <TableHead className="hidden sm:table-cell">Date</TableHead>
             <TableHead className="w-24">Actions</TableHead>
@@ -102,13 +128,15 @@ export function ManagersTable({ page, pageSize }: ManagersTableProps) {
                   <span className="font-medium">{manager.nom}</span>
                 </TableCell>
                 <TableCell>
-                  <span className="text-sm text-muted-foreground">{manager.email}</span>
+                  <span className="text-sm text-muted-foreground">
+                    {manager.email}
+                  </span>
                 </TableCell>
                 <TableCell className="hidden md:table-cell">
                   {manager.structure ? (
                     <span className="text-sm">{manager.structure.nom}</span>
                   ) : (
-                    <span className="text-sm text-muted-foreground">—</span>
+                    <span className="text-sm text-muted-foreground">-</span>
                   )}
                 </TableCell>
                 <TableCell className="hidden sm:table-cell">
@@ -119,12 +147,12 @@ export function ManagersTable({ page, pageSize }: ManagersTableProps) {
                       ) : (
                         <Pill className="h-4 w-4 text-emerald-600" />
                       )}
-                      <span className="text-sm">
-                        {manager.structure.type === "HOPITAL" ? "Hôpital" : "Pharmacie"}
-                      </span>
+                      <span className="text-sm">{managerKindLabel(manager)}</span>
                     </div>
                   ) : (
-                    <span className="text-sm text-muted-foreground">—</span>
+                    <span className="text-sm text-muted-foreground">
+                      {managerKindLabel(manager)}
+                    </span>
                   )}
                 </TableCell>
                 <TableCell>
@@ -132,7 +160,9 @@ export function ManagersTable({ page, pageSize }: ManagersTableProps) {
                 </TableCell>
                 <TableCell className="hidden sm:table-cell">
                   <span className="text-sm text-muted-foreground">
-                    {format(new Date(manager.date_joined), "dd MMM yyyy", { locale: fr })}
+                    {format(new Date(manager.date_joined), "dd MMM yyyy", {
+                      locale: fr,
+                    })}
                   </span>
                 </TableCell>
                 <TableCell>
@@ -153,25 +183,30 @@ export function ManagersTable({ page, pageSize }: ManagersTableProps) {
       <ManagerDetails
         manager={detailManager}
         open={!!detailManager}
-        onOpenChange={(open) => { if (!open) setDetailManager(null); }}
+        onOpenChange={(open) => {
+          if (!open) setDetailManager(null);
+        }}
       />
-
       <SuspendDialog
         manager={suspendTarget}
         open={!!suspendTarget}
-        onOpenChange={(open) => { if (!open) setSuspendTarget(null); }}
+        onOpenChange={(open) => {
+          if (!open) setSuspendTarget(null);
+        }}
       />
-
       <ReactivateDialog
         manager={reactivateTarget}
         open={!!reactivateTarget}
-        onOpenChange={(open) => { if (!open) setReactivateTarget(null); }}
+        onOpenChange={(open) => {
+          if (!open) setReactivateTarget(null);
+        }}
       />
-
       <ResetPasswordDialog
         manager={resetTarget}
         open={!!resetTarget}
-        onOpenChange={(open) => { if (!open) setResetTarget(null); }}
+        onOpenChange={(open) => {
+          if (!open) setResetTarget(null);
+        }}
       />
     </>
   );

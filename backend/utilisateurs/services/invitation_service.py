@@ -9,6 +9,9 @@ from structures.models import (
     EquipeStructure,
     RoleEquipeStructure,
     StatutEquipeStructure,
+    StatutStructure,
+    Structure,
+    TypeStructure,
 )
 from utilisateurs.models import RoleUtilisateur, TypeAuthentification, Utilisateur
 
@@ -45,6 +48,52 @@ class InvitationService:
         )
 
         return proprietaire
+
+    @staticmethod
+    @transaction.atomic
+    def inviter_gestionnaire_hopital(*, nom, email, structure_nom=None):
+        email = email.lower().strip()
+        nom = nom.strip()
+        structure_nom = (structure_nom or "").strip()
+
+        if not nom:
+            raise ValueError("Nom du gestionnaire requis.")
+        if Utilisateur.objects.filter(email=email).exists():
+            raise ValueError("Un utilisateur existe deja avec cet email.")
+
+        gestionnaire = Utilisateur.objects.create(
+            nom=nom,
+            email=email,
+            role=RoleUtilisateur.GESTIONNAIRE,
+            type_authentification=TypeAuthentification.EMAIL,
+            is_active=False,
+            email_verifie=False,
+        )
+        gestionnaire.set_unusable_password()
+        gestionnaire.save()
+
+        structure = Structure.objects.create(
+            nom=structure_nom or f"Hopital de {nom}",
+            type=TypeStructure.HOPITAL,
+            statut=StatutStructure.ACTIVE,
+            gestionnaire=gestionnaire,
+        )
+
+        EquipeStructure.objects.create(
+            structure=structure,
+            utilisateur=gestionnaire,
+            role=RoleEquipeStructure.GESTIONNAIRE,
+            statut=StatutEquipeStructure.INVITE,
+        )
+
+        VerificationService.generate(email=email)
+
+        EventDispatcher.dispatch(
+            EventTypes.USER_INVITED,
+            {"utilisateur": gestionnaire, "email": email, "structure": structure},
+        )
+
+        return gestionnaire
 
     @staticmethod
     @transaction.atomic

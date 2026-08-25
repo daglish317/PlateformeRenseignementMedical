@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from .models import Utilisateur, RoleUtilisateur, TypeAuthentification
-from .serializers import UtilisateurSerializer
+from .serializers import InviteGestionnaireSerializer, UtilisateurSerializer
 from .decorators import admin_required
 from .services.auth_service import AuthService
 from .services.invitation_service import InvitationService
@@ -237,7 +237,17 @@ class AdminManagersListView(APIView):
     @admin_required
     def get(self, request):
         qs = (
-            Utilisateur.objects.filter(role=RoleUtilisateur.PROPRIETAIRE)
+            Utilisateur.objects.filter(
+                Q(role=RoleUtilisateur.PROPRIETAIRE)
+                | Q(
+                    role=RoleUtilisateur.GESTIONNAIRE,
+                    structures_membres__structure__type=TypeStructure.HOPITAL,
+                )
+                | Q(
+                    role=RoleUtilisateur.GESTIONNAIRE,
+                    structure__type=TypeStructure.HOPITAL,
+                )
+            )
             .prefetch_related("structures_membres__structure")
         )
 
@@ -272,6 +282,7 @@ class AdminManagersListView(APIView):
                 "id": str(m.id),
                 "nom": m.nom,
                 "email": m.email,
+                "role": m.role,
                 "is_active": m.is_active,
                 "date_joined": m.date_joined.isoformat(),
                 "last_login": m.last_login.isoformat() if m.last_login else None,
@@ -286,19 +297,30 @@ class AdminManagersListView(APIView):
 
     @admin_required
     def post(self, request):
-        nom = request.data.get("nom", "").strip()
-        email = request.data.get("email", "").lower().strip()
-        if not nom or not email:
-            return Response({"detail": "Nom et email requis."}, status=400)
+        serializer = InviteGestionnaireSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
         try:
-            proprietaire = InvitationService.inviter_proprietaire(
-                nom=nom,
-                email=email,
-            )
+            if (
+                data["invitation_type"]
+                == InviteGestionnaireSerializer.INVITATION_GESTIONNAIRE_HOPITAL
+            ):
+                proprietaire = InvitationService.inviter_gestionnaire_hopital(
+                    nom=data["nom"],
+                    email=data["email"],
+                    structure_nom=data.get("structure_nom", ""),
+                )
+                message = "Invitation gestionnaire hopital envoyee"
+            else:
+                proprietaire = InvitationService.inviter_proprietaire(
+                    nom=data["nom"],
+                    email=data["email"],
+                )
+                message = "Invitation proprietaire pharmacie envoyee"
         except ValueError as e:
             return Response({"detail": str(e)}, status=400)
         return Response(
-            {"message": "Invitation proprietaire envoyee", "data": UtilisateurSerializer(proprietaire).data},
+            {"message": message, "data": UtilisateurSerializer(proprietaire).data},
             status=201,
         )
 
@@ -309,10 +331,19 @@ class AdminManagerDetailView(APIView):
     def get(self, request, pk):
         try:
             m = Utilisateur.objects.prefetch_related("structures_membres__structure").get(
-                id=pk, role=RoleUtilisateur.PROPRIETAIRE
+                Q(role=RoleUtilisateur.PROPRIETAIRE)
+                | Q(
+                    role=RoleUtilisateur.GESTIONNAIRE,
+                    structures_membres__structure__type=TypeStructure.HOPITAL,
+                )
+                | Q(
+                    role=RoleUtilisateur.GESTIONNAIRE,
+                    structure__type=TypeStructure.HOPITAL,
+                ),
+                id=pk,
             )
         except Utilisateur.DoesNotExist:
-            return Response({"detail": "Proprietaire introuvable"}, status=404)
+            return Response({"detail": "Responsable introuvable"}, status=404)
 
         membership = m.structures_membres.first()
         structure = membership.structure if membership else getattr(m, "structure", None)
@@ -320,6 +351,7 @@ class AdminManagerDetailView(APIView):
             "id": str(m.id),
             "nom": m.nom,
             "email": m.email,
+            "role": m.role,
             "is_active": m.is_active,
             "date_joined": m.date_joined.isoformat(),
             "last_login": m.last_login.isoformat() if m.last_login else None,
@@ -334,9 +366,20 @@ class AdminManagerDetailView(APIView):
     @admin_required
     def patch(self, request, pk):
         try:
-            m = Utilisateur.objects.get(id=pk, role=RoleUtilisateur.PROPRIETAIRE)
+            m = Utilisateur.objects.get(
+                Q(role=RoleUtilisateur.PROPRIETAIRE)
+                | Q(
+                    role=RoleUtilisateur.GESTIONNAIRE,
+                    structures_membres__structure__type=TypeStructure.HOPITAL,
+                )
+                | Q(
+                    role=RoleUtilisateur.GESTIONNAIRE,
+                    structure__type=TypeStructure.HOPITAL,
+                ),
+                id=pk,
+            )
         except Utilisateur.DoesNotExist:
-            return Response({"detail": "Proprietaire introuvable"}, status=404)
+            return Response({"detail": "Responsable introuvable"}, status=404)
 
         action = request.data.get("action")
         if action == "suspend":

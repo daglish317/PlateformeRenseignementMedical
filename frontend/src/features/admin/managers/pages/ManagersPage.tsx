@@ -21,8 +21,8 @@ export function ManagersPage() {
   return (
     <div className="space-y-6">
       <AdminPageTitle
-        title="Gestion des proprietaires"
-        subtitle="Creation des structures et invitation des proprietaires"
+        title="Gestion des responsables"
+        subtitle="Invitation des proprietaires de pharmacie et des gestionnaires d'hopital"
         actions={<CreateManagerDialog />}
       />
 

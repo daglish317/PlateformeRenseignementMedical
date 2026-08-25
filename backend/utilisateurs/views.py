@@ -51,6 +51,16 @@ def _user_response(user):
     }
 
 
+def _is_pending_hospital_manager(user):
+    if not user or user.role != RoleUtilisateur.GESTIONNAIRE:
+        return False
+    return EquipeStructure.objects.filter(
+        utilisateur=user,
+        statut=StatutEquipeStructure.INVITE,
+        structure__type="HOPITAL",
+    ).exists()
+
+
 class RegisterView(APIView):
 
     def post(self, request):
@@ -191,16 +201,28 @@ class InviteGestionnaireView(APIView):
         serializer = InviteGestionnaireSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         try:
-            proprietaire = InvitationService.inviter_proprietaire(
-                nom=serializer.validated_data["nom"],
-                email=serializer.validated_data["email"],
-            )
+            if (
+                serializer.validated_data.get("invitation_type")
+                == InviteGestionnaireSerializer.INVITATION_GESTIONNAIRE_HOPITAL
+            ):
+                invite = InvitationService.inviter_gestionnaire_hopital(
+                    nom=serializer.validated_data["nom"],
+                    email=serializer.validated_data["email"],
+                    structure_nom=serializer.validated_data.get("structure_nom", ""),
+                )
+                message = "Invitation gestionnaire hopital envoyee"
+            else:
+                invite = InvitationService.inviter_proprietaire(
+                    nom=serializer.validated_data["nom"],
+                    email=serializer.validated_data["email"],
+                )
+                message = "Invitation proprietaire pharmacie envoyee"
         except ValueError as e:
             return Response({"detail": str(e)}, status=400)
         return Response(
             {
                 "message": "Invitation envoyée",
-                "data": UtilisateurSerializer(proprietaire).data,
+                "data": UtilisateurSerializer(invite).data,
             },
             status=201,
         )
@@ -255,7 +277,10 @@ class CheckGestionnaireView(APIView):
         )
         # Le propriétaire (invité par l'admin) garde le flux email + OTP.
         # Le gestionnaire/caissier crée son compte directement (pas d'OTP).
-        requires_otp = is_pending and user.role == RoleUtilisateur.PROPRIETAIRE
+        requires_otp = is_pending and (
+            user.role == RoleUtilisateur.PROPRIETAIRE
+            or _is_pending_hospital_manager(user)
+        )
         return Response({
             "is_invited": is_pending,
             "is_gestionnaire": is_pending,
@@ -288,7 +313,11 @@ class ActivateGestionnaireView(APIView):
         # Seul le propriétaire (invité par l'admin) doit valider un code OTP
         # avant l'activation. Le gestionnaire/caissier crée son compte avec
         # son email seul (pas d'email envoyé par le propriétaire).
-        if user.role == RoleUtilisateur.PROPRIETAIRE:
+        requires_otp = (
+            user.role == RoleUtilisateur.PROPRIETAIRE
+            or _is_pending_hospital_manager(user)
+        )
+        if requires_otp:
             session = VerificationSession.objects.filter(
                 email=email,
                 is_verified=True,

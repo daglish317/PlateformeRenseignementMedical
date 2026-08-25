@@ -1,5 +1,5 @@
 import api from "@/lib/axios";
-import type { ManagerAdmin } from "../types/manager";
+import type { CreateAdminManagerPayload, ManagerAdmin } from "../types/manager";
 
 interface ManagersListResponse {
   results: ManagerAdmin[];
@@ -19,7 +19,7 @@ export const managersService = {
     return response.data;
   },
 
-  create: async (data: { nom: string; email: string }): Promise<{ message: string; data: ManagerAdmin }> => {
+  create: async (data: CreateAdminManagerPayload): Promise<{ message: string; data: ManagerAdmin }> => {
     const response = await api.post("/utilisateurs/admin/managers/", data);
     return response.data;
   },

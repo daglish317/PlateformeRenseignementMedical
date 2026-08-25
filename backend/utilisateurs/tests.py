@@ -186,7 +186,12 @@ class InvitationFlowTests(TestCase):
             structure=hopital,
         )
 
-        self.client.post("/api/utilisateurs/register/", {
+        VerificationSession.objects.create(
+            email="gest-hopital@test.com",
+            is_verified=True,
+            expires_at=timezone.now() + timedelta(hours=24),
+        )
+        self.client.post("/api/utilisateurs/gestionnaire/activate/", {
             "nom": "Gestionnaire Hopital",
             "email": "gest-hopital@test.com",
             "password": "password123",
@@ -231,6 +236,118 @@ class InvitationFlowTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data["user"]["active_structure"]["id"], str(hopital.id))
         self.assertEqual(response.data["user"]["active_structure"]["type"], TypeStructure.HOPITAL)
+
+    def test_admin_invite_gestionnaire_hopital_cree_structure_hopital(self):
+        admin = Utilisateur.objects.create_user(
+            email="admin@test.com",
+            password="password123",
+            nom="Admin",
+            role=RoleUtilisateur.ADMINISTRATEUR,
+            type_authentification=TypeAuthentification.EMAIL,
+            email_verifie=True,
+            is_staff=True,
+        )
+        self.client.force_authenticate(admin)
+
+        response = self.client.post("/api/utilisateurs/admin/managers/", {
+            "nom": "Gestionnaire Hopital",
+            "email": "admin-hopital@test.com",
+            "invitation_type": "GESTIONNAIRE_HOPITAL",
+            "structure_nom": "Hopital Admin",
+        })
+
+        self.assertEqual(response.status_code, 201)
+        user = Utilisateur.objects.get(email="admin-hopital@test.com")
+        self.assertEqual(user.role, RoleUtilisateur.GESTIONNAIRE)
+        structure = Structure.objects.get(gestionnaire=user)
+        self.assertEqual(structure.type, TypeStructure.HOPITAL)
+        self.assertEqual(structure.nom, "Hopital Admin")
+        self.assertTrue(
+            EquipeStructure.objects.filter(
+                utilisateur=user,
+                structure=structure,
+                role=RoleEquipeStructure.GESTIONNAIRE,
+                statut=StatutEquipeStructure.INVITE,
+            ).exists()
+        )
+        self.assertTrue(VerificationCode.objects.filter(email="admin-hopital@test.com").exists())
+
+    def test_check_gestionnaire_hopital_requires_otp_true(self):
+        hopital = Structure.objects.create(
+            nom="Hopital OTP",
+            type=TypeStructure.HOPITAL,
+        )
+        InvitationService.inviter_gestionnaire(
+            nom="Gest Hopital OTP",
+            email="gest-hopital-otp@test.com",
+            structure=hopital,
+        )
+
+        response = self.client.post("/api/utilisateurs/gestionnaire/check/", {
+            "email": "gest-hopital-otp@test.com",
+        })
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.data["is_invited"])
+        self.assertTrue(response.data["requires_otp"])
+        self.assertEqual(response.data["role"], RoleUtilisateur.GESTIONNAIRE)
+
+    def test_register_ne_peut_pas_activer_gestionnaire_hopital(self):
+        hopital = Structure.objects.create(
+            nom="Hopital Direct Register",
+            type=TypeStructure.HOPITAL,
+        )
+        InvitationService.inviter_gestionnaire(
+            nom="Gest Hopital Direct",
+            email="gest-hopital-direct@test.com",
+            structure=hopital,
+        )
+
+        response = self.client.post("/api/utilisateurs/register/", {
+            "nom": "Gestionnaire Hopital Direct",
+            "email": "gest-hopital-direct@test.com",
+            "password": "password123",
+        })
+
+        self.assertEqual(response.status_code, 400)
+        user = Utilisateur.objects.get(email="gest-hopital-direct@test.com")
+        self.assertFalse(user.is_active)
+        self.assertFalse(user.email_verifie)
+
+    def test_activate_gestionnaire_hopital_avec_otp_valide(self):
+        hopital = Structure.objects.create(
+            nom="Hopital Activation",
+            type=TypeStructure.HOPITAL,
+        )
+        InvitationService.inviter_gestionnaire(
+            nom="Gest Hopital Activation",
+            email="gest-hopital-activation@test.com",
+            structure=hopital,
+        )
+        VerificationSession.objects.create(
+            email="gest-hopital-activation@test.com",
+            is_verified=True,
+            expires_at=timezone.now() + timedelta(hours=24),
+        )
+
+        response = self.client.post("/api/utilisateurs/gestionnaire/activate/", {
+            "email": "gest-hopital-activation@test.com",
+            "nom": "Gestionnaire Hopital Active",
+            "password": "password123",
+        })
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["user"]["role"], RoleUtilisateur.GESTIONNAIRE)
+        self.assertEqual(response.data["user"]["active_structure"]["type"], TypeStructure.HOPITAL)
+        user = Utilisateur.objects.get(email="gest-hopital-activation@test.com")
+        self.assertTrue(user.is_active)
+        self.assertTrue(user.email_verifie)
+        self.assertTrue(
+            EquipeStructure.objects.filter(
+                utilisateur=user,
+                statut=StatutEquipeStructure.ACTIF,
+            ).exists()
+        )
 
     def test_activate_proprietaire_requiert_otp(self):
         InvitationService.inviter_proprietaire(
