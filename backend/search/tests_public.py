@@ -256,6 +256,31 @@ class TexteEtSuggestionsTests(PublicSearchTestBase):
         response = self._recherche("para")
         self.assertEqual(response.data["total"], 1)
 
+    def test_recherche_vide_affiche_les_structures_proches(self):
+        lointaine = self._pharmacie(
+            nom="Lointaine",
+            lat="3.900000",
+            lon="11.650000",
+        )
+        self._horaires_toujours_ouverts(lointaine)
+        self._ajouter_stock(
+            lointaine,
+            "Paracétamol lointain",
+            quantite=8,
+            date_peremption=timezone.localdate() + timedelta(days=365),
+        )
+
+        response = self.client.get(
+            "/api/search/public/pharmacies/",
+            {"lat": "3.848000", "lon": "11.502100"},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["total"], 2)
+        self.assertEqual(response.data["results"][0]["structure"]["nom"], "Pharmacie A")
+        self.assertEqual(response.data["results"][1]["structure"]["nom"], "Lointaine")
+        self.assertEqual(len(response.data["map_results"]), 2)
+
     def test_aucune_invention_de_medicament(self):
         response = self._recherche("médicament-inexistant")
         self.assertEqual(response.data["total"], 0)
@@ -369,8 +394,20 @@ class PaginationTests(PublicSearchTestBase):
         self.assertFalse(page3.data["has_next"])
 
     def test_q_obligatoire(self):
+        pharmacie = self._pharmacie(nom="Sans requête")
+        self._horaires_toujours_ouverts(pharmacie)
+        self._ajouter_stock(
+            pharmacie,
+            "Paracétamol",
+            quantite=10,
+            date_peremption=timezone.localdate() + timedelta(days=365),
+        )
+
         response = self._recherche("")
-        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["total"], 1)
+        self.assertEqual(len(response.data["results"]), 1)
+        self.assertFalse(response.data["has_next"])
 
 
 class MultiPeriodesTests(PublicSearchTestBase):

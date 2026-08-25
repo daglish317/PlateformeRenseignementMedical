@@ -79,9 +79,6 @@ class PublicPharmacySearchEngine:
           6. localisation exploitable.
         """
         query = (query or "").strip()
-        if not query:
-            return {"results": [], "total": 0, "normalized_query": ""}
-
         # 1-3-4-6 : candidats en base (stock > 0, non périmé, pharmacie active + GPS)
         candidats = StockService.produits_publics_globaux(recherche=query)
         candidats = list(
@@ -134,6 +131,17 @@ class PublicPharmacySearchEngine:
             lignes.sort(key=lambda c: (c["distance_km"] is None, c["distance_km"] or 0, c["nom"].lower()))
         else:
             lignes.sort(key=lambda c: c["nom"].lower())
+
+        if not query:
+            lignes_uniques = []
+            structures_vues = set()
+            for ligne in lignes:
+                structure_id = str(ligne["structure_id"])
+                if structure_id in structures_vues:
+                    continue
+                structures_vues.add(structure_id)
+                lignes_uniques.append(ligne)
+            lignes = lignes_uniques
 
         total = len(lignes)
         start = (page - 1) * page_size

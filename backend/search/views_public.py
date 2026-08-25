@@ -22,11 +22,6 @@ class PublicPharmacySearchView(APIView):
 
     def get(self, request):
         query = (request.query_params.get("q") or "").strip()
-        if not query:
-            return Response(
-                {"detail": 'Paramètre "q" requis.'},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
 
         try:
             user_lat = (
@@ -76,6 +71,7 @@ class PublicPharmacySearchView(APIView):
                 "query": query,
                 "normalized_query": resultat["normalized_query"],
                 "results": results,
+                "map_results": resultat.get("map_results", []),
                 "total": total,
                 "page": page,
                 "page_size": page_size,

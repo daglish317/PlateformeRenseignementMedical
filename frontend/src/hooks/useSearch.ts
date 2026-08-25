@@ -36,7 +36,7 @@ export function useSearch({
       pageSize,
     ],
 
-    enabled: query.trim().length > 0,
+    enabled: true,
 
     queryFn: async () => {
       const { data } = await axios.get<PublicPharmacieResponse>(
@@ -63,11 +63,6 @@ export function useSearch({
   }, [searchQuery.isFetching, setLoading]);
 
   useEffect(() => {
-    if (query.trim().length === 0) {
-      setResults(null);
-      return;
-    }
-
     if (searchQuery.isError) {
       setResults({
         query,
