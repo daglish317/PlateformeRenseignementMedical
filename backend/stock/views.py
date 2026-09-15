@@ -9,7 +9,13 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 
-from .models import Approvisionnement, Medicament, StockItem, StockMovement
+from .models import (
+    Approvisionnement,
+    LigneApprovisionnement,
+    Medicament,
+    StockItem,
+    StockMovement,
+)
 from .serializers import (
     ApprovisionnementSerializer,
     ApprovisionnementCreateSerializer,
@@ -287,12 +293,20 @@ class MedicamentListView(APIView):
             structure_id=OuterRef("structure_id"),
             nom=OuterRef("nom"),
         )
+        latest_ligne = (
+            LigneApprovisionnement.objects.filter(
+                medicament__structure_id=OuterRef("structure_id"),
+                medicament__nom=OuterRef("nom"),
+            )
+            .order_by("-approvisionnement__date_reception", "-id")
+        )
         queryset = queryset.annotate(
             _stock_avant=Subquery(stock_item.values("quantite")[:1]),
             _stock_physique=Subquery(stock_item.values("quantite")[:1]),
             _stock_reservee=Subquery(
                 stock_item.values("quantite_reservee")[:1]
             ),
+            _prix_achat_actuel=Subquery(latest_ligne.values("prix_achat")[:1]),
         )
 
         queryset = queryset.order_by("nom")[:20]

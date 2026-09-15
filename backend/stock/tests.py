@@ -5,12 +5,14 @@ from rest_framework.test import APIClient
 
 from structures.models import (
     EquipeStructure,
+    MembrePermission,
     RoleEquipeStructure,
     StatutEquipeStructure,
     StatutStructure,
     Structure,
     TypeStructure,
 )
+from structures.permission_registry import ActionPermission, ModuleOperationnel
 from utilisateurs.models import RoleUtilisateur, TypeAuthentification, Utilisateur
 
 from .models import Approvisionnement, Medicament, StockItem, StockMovement
@@ -49,6 +51,29 @@ class ApprovisionnementBaseTestCase(TestCase):
             role=RoleEquipeStructure.GESTIONNAIRE,
             statut=StatutEquipeStructure.ACTIF,
         )
+        membership = EquipeStructure.objects.get(
+            structure=self.structure,
+            utilisateur=self.gestionnaire,
+        )
+        MembrePermission.objects.bulk_create(
+            [
+                MembrePermission(
+                    equipe=membership,
+                    module=ModuleOperationnel.APPROVISIONNEMENT.value,
+                    action=ActionPermission.CONSULTER.value,
+                ),
+                MembrePermission(
+                    equipe=membership,
+                    module=ModuleOperationnel.APPROVISIONNEMENT.value,
+                    action=ActionPermission.CREER.value,
+                ),
+                MembrePermission(
+                    equipe=membership,
+                    module=ModuleOperationnel.APPROVISIONNEMENT.value,
+                    action=ActionPermission.RECHERCHER.value,
+                ),
+            ]
+        )
         EquipeStructure.objects.create(
             structure=self.structure,
             utilisateur=self.proprietaire,
@@ -63,6 +88,7 @@ class ApprovisionnementBaseTestCase(TestCase):
             "date_reception": "2026-08-07",
             "fournisseur": "Grossiste Test",
             "reference_bon": "BL-001",
+            "montant_total_declare": "7000.00",
             "lignes": [
                 {
                     "nom": "Paracetamol 500mg",
@@ -125,7 +151,7 @@ class ApprovisionnementTests(ApprovisionnementBaseTestCase):
         self.assertEqual(StockItem.objects.count(), 0)
         self.assertEqual(StockMovement.objects.count(), 0)
 
-    def test_proprietaire_ne_cree_pas_approvisionnement(self):
+    def test_proprietaire_peut_creer_approvisionnement(self):
         self.client.force_authenticate(user=self.proprietaire)
 
         response = self.client.post(
@@ -134,7 +160,8 @@ class ApprovisionnementTests(ApprovisionnementBaseTestCase):
             format="json",
         )
 
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(Approvisionnement.objects.count(), 1)
 
     def test_autocomplete_approvisionnement_retourne_medicaments_connus_non_vendables(self):
         Medicament.objects.create(
@@ -160,3 +187,25 @@ class ApprovisionnementTests(ApprovisionnementBaseTestCase):
         noms = {item["nom"] for item in response.data}
         self.assertIn("Produit sans prix", noms)
         self.assertIn("Produit reserve sans stock", noms)
+
+    def test_autocomplete_approvisionnement_expose_stock_et_prix_actuel(self):
+        creation = self.client.post(
+            "/api/stocks/approvisionnements/",
+            self.payload(),
+            format="json",
+        )
+
+        self.assertEqual(creation.status_code, 201)
+
+        response = self.client.get(
+            "/api/stocks/medicaments/",
+            {"structure_id": str(self.structure.id), "search": "Paracetamol"},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        medicament = next(
+            item for item in response.data if item["nom"] == "Paracetamol 500mg"
+        )
+        self.assertEqual(medicament["stock_physique"], 20)
+        self.assertEqual(medicament["stock_avant"], 20)
+        self.assertEqual(str(medicament["prix_achat_actuel"]), "100.00")

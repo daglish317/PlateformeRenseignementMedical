@@ -3,6 +3,8 @@
 import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 
+import Header from "@/components/layout/header/Header";
+import Footer from "@/components/layout/footer/Footer";
 import { AuthLayout } from "@/features/auth/components/AuthLayout";
 import { AuthCard } from "@/features/auth/components/AuthCard";
 import { LoginForm } from "@/features/auth/components/LoginForm";
@@ -22,25 +24,29 @@ export default function LoginPage() {
     : "/inscription";
 
   return (
-    <GuestRoute>
+    <div className="flex min-h-dvh flex-col bg-background">
+      <Header showSearch={false} showHomeLink />
       <AuthLayout>
-        <AuthCard title={t("loginTitle")} mode="login">
-          <div className="space-y-6">
-            <LoginForm onSuccess={redirectAfterAuth} />
+        <GuestRoute>
+          <AuthCard title={t("loginTitle")} mode="login">
+            <div className="space-y-6">
+              <LoginForm onSuccess={redirectAfterAuth} />
 
-            <Divider />
+              <Divider />
 
-            <GoogleButton onSuccess={redirectAfterAuth} />
+              <GoogleButton onSuccess={redirectAfterAuth} />
 
-            <p className="text-center text-sm text-muted-foreground">
-              {t("noAccount")}{" "}
-              <Link href={registerHref} className="font-medium text-primary hover:underline">
-                {t("signUp")}
-              </Link>
-            </p>
-          </div>
-        </AuthCard>
+              <p className="text-center text-sm text-muted-foreground">
+                {t("noAccount")}{" "}
+                <Link href={registerHref} className="font-medium text-primary hover:underline">
+                  {t("signUp")}
+                </Link>
+              </p>
+            </div>
+          </AuthCard>
+        </GuestRoute>
       </AuthLayout>
-    </GuestRoute>
+      <Footer />
+    </div>
   );
 }

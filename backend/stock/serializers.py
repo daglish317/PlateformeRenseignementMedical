@@ -73,6 +73,7 @@ class MedicamentSerializer(serializers.ModelSerializer):
     stock_physique = serializers.SerializerMethodField()
     stock_disponible = serializers.SerializerMethodField()
     stock_avant = serializers.SerializerMethodField()
+    prix_achat_actuel = serializers.SerializerMethodField()
 
     class Meta:
         model = Medicament
@@ -87,6 +88,7 @@ class MedicamentSerializer(serializers.ModelSerializer):
             "stock_avant",
             "stock_physique",
             "stock_disponible",
+            "prix_achat_actuel",
             "date_creation",
         ]
         read_only_fields = ["id", "date_creation"]
@@ -120,6 +122,15 @@ class MedicamentSerializer(serializers.ModelSerializer):
             return value
         item = self._stock_item(obj)
         return item.quantite if item else 0
+
+    def get_prix_achat_actuel(self, obj):
+        value = getattr(obj, "_prix_achat_actuel", None)
+        if value is not None:
+            return value
+        last_ligne = (
+            obj.lignes.order_by("-approvisionnement__date_reception", "-id").first()
+        )
+        return last_ligne.prix_achat if last_ligne else None
 
 
 class LigneApprovisionnementSerializer(serializers.ModelSerializer):

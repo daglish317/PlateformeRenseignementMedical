@@ -24,6 +24,7 @@ export interface Medicament {
   forme_pharmaceutique: FormePharmaceutiqueValue;
   forme_label: string;
   prix_vente: number | null;
+  prix_achat_actuel: number | null;
   tva: boolean;
   en_reserve: boolean;
   stock_avant: number;

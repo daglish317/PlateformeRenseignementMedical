@@ -50,6 +50,7 @@ MODULE_ACTIONS = {
         ActionPermission.SUPPRIMER,
         ActionPermission.EXPORTER,
         ActionPermission.IMPRIMER,
+        ActionPermission.RECHERCHER,
     ],
     ModuleOperationnel.STOCK: [
         ActionPermission.CONSULTER,

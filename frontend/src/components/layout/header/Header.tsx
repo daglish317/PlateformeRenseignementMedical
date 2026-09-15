@@ -3,10 +3,12 @@ import MobileMenu from "./MobileMenu";
 
 type HeaderProps = {
   showSearch?: boolean;
+  showHomeLink?: boolean;
 };
 
 export default function Header({
   showSearch = true,
+  showHomeLink = false,
 }: HeaderProps) {
   return (
     <header
@@ -38,10 +40,12 @@ export default function Header({
       >
         <HeaderMenu
           showSearch={showSearch}
+          showHomeLink={showHomeLink}
         />
 
         <MobileMenu
           showSearch={showSearch}
+          showHomeLink={showHomeLink}
         />
       </div>
     </header>

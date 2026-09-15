@@ -15,6 +15,7 @@ interface LogoProps {
   height?: number;
   priority?: boolean;
   className?: string;
+  asLink?: boolean;
 }
 
 export default function Logo({
@@ -23,6 +24,7 @@ export default function Logo({
   height,
   priority = false,
   className,
+  asLink = true,
 }: LogoProps) {
   const { resolvedTheme } = useTheme();
   const mounted = useMounted();
@@ -69,9 +71,12 @@ export default function Logo({
     },
   };
 
+  const linkClasses = cn("inline-flex items-center shrink-0", className);
+  const imgClasses = "h-auto w-auto object-contain";
+
   if (variant === "auto") {
-    return (
-      <Link href="/" aria-label="Retour a l'accueil de SanteProx" className={cn("inline-flex items-center shrink-0", className)}>
+    const inner = (
+      <>
         <Image
           src={horizontalLogo}
           alt="Logo SanteProx"
@@ -88,25 +93,43 @@ export default function Logo({
           priority={priority}
           className="block h-auto w-auto max-w-[50px] max-h-[50px] md:hidden"
         />
+      </>
+    );
+
+    if (!asLink) {
+      return <div className={linkClasses}>{inner}</div>;
+    }
+
+    return (
+      <Link href="/" aria-label="Retour a l'accueil de SanteProx" className={linkClasses}>
+        {inner}
       </Link>
     );
   }
 
+  const img = (
+    <Image
+      src={logo}
+      alt="Logo SanteProx"
+      width={dimensions[variant].width}
+      height={dimensions[variant].height}
+      priority={priority}
+      loading={priority ? "eager" : "lazy"}
+      className={imgClasses}
+      style={{
+        maxWidth: `${dimensions[variant].width}px`,
+        maxHeight: `${dimensions[variant].height}px`,
+      }}
+    />
+  );
+
+  if (!asLink) {
+    return <div className={linkClasses}>{img}</div>;
+  }
+
   return (
-    <Link href="/" aria-label="Retour a l'accueil de SanteProx" className={cn("inline-flex items-center shrink-0", className)}>
-      <Image
-        src={logo}
-        alt="Logo SanteProx"
-        width={dimensions[variant].width}
-        height={dimensions[variant].height}
-        priority={priority}
-        loading={priority ? "eager" : "lazy"}
-        className="h-auto w-auto object-contain"
-        style={{
-          maxWidth: `${dimensions[variant].width}px`,
-          maxHeight: `${dimensions[variant].height}px`,
-        }}
-      />
+    <Link href="/" aria-label="Retour a l'accueil de SanteProx" className={linkClasses}>
+      {img}
     </Link>
   );
 }

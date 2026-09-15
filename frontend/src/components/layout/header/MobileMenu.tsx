@@ -26,9 +26,10 @@ import { SearchBar } from "@/components/common/search";
 
 type MobileMenuProps = {
   showSearch?: boolean;
+  showHomeLink?: boolean;
 };
 
-export default function MobileMenu({ showSearch = true }: MobileMenuProps) {
+export default function MobileMenu({ showSearch = true, showHomeLink = false }: MobileMenuProps) {
   const t = useTranslations("auth");
   const [open, setOpen] = useState(false);
   const [showContactLinks, setShowContactLinks] = useState(false);
@@ -56,7 +57,7 @@ export default function MobileMenu({ showSearch = true }: MobileMenuProps) {
   return (
     <div className={`flex w-full items-center lg:hidden ${showSearch ? 'gap-1 sm:gap-1.5' : 'justify-between'}`}>
       {/* Logo ultra-minimal */}
-      <HeaderLogo />
+      <HeaderLogo asLink={!showHomeLink} />
 
       {/* Barre de recherche - MAXIMALE */}
       {showSearch && (
@@ -105,6 +106,14 @@ export default function MobileMenu({ showSearch = true }: MobileMenuProps) {
           </SheetHeader>
 
           <div className="flex flex-col gap-4 p-4 sm:gap-6 sm:p-5">
+            {showHomeLink && (
+              <Link href="/">
+                <Button variant="ghost" className="w-full justify-start">
+                  Accueil
+                </Button>
+              </Link>
+            )}
+
             <LanguageSwitcher />
             <ThemeToggle />
 

@@ -41,14 +41,19 @@ export function LigneForm({
   const [tva, setTva] = useState(initial?.tva ?? false);
   const [enReserve, setEnReserve] = useState(initial?.en_reserve ?? false);
   const [stockAvant, setStockAvant] = useState(initial?.stock_avant ?? 0);
+  const [medicamentSelectionne, setMedicamentSelectionne] = useState<Medicament | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const handleSelectMedicament = (medicament: Medicament) => {
+    setMedicamentSelectionne(medicament);
     setNom(medicament.nom);
     setForme(medicament.forme_pharmaceutique);
     setTva(medicament.tva);
     setEnReserve(medicament.en_reserve);
     setStockAvant(medicament.stock_physique ?? medicament.stock_avant ?? 0);
+    setPrixAchat(
+      medicament.prix_achat_actuel != null ? String(medicament.prix_achat_actuel) : ""
+    );
     if (medicament.tva) {
       setPrixVente("");
     } else if (medicament.prix_vente != null) {
@@ -112,11 +117,30 @@ export function LigneForm({
             <MedicamentCombobox
               structureId={structureId}
               value={nom}
-              onChange={(value) => setNom(value)}
+              onChange={(value) => {
+                setNom(value);
+                if (!medicamentSelectionne || value.trim() !== medicamentSelectionne.nom) {
+                  setMedicamentSelectionne(null);
+                  setForme("COMPRIME");
+                  setStockAvant(0);
+                  setPrixAchat("");
+                  setPrixVente("");
+                  setTva(false);
+                  setEnReserve(false);
+                }
+              }}
               onSelect={handleSelectMedicament}
             />
           </div>
           {errors.nom && <p className="mt-1 text-xs text-destructive">{errors.nom}</p>}
+          {medicamentSelectionne && medicamentSelectionne.id ? (
+            <p className="mt-1 text-xs text-muted-foreground">
+              Medicament existant selectionne. Stock actuel {stockAvant} et prix d&apos;achat actuel{" "}
+              {medicamentSelectionne.prix_achat_actuel != null
+                ? medicamentSelectionne.prix_achat_actuel.toFixed(2)
+                : "non disponible"}.
+            </p>
+          ) : null}
         </div>
 
         <div>
@@ -141,7 +165,7 @@ export function LigneForm({
         </div>
 
         <div>
-          <Label>Stock avant livraison</Label>
+          <Label>Stock actuel avant validation</Label>
           <Input
             type="number"
             min={0}
@@ -149,6 +173,9 @@ export function LigneForm({
             onChange={(e) => setStockAvant(Number(e.target.value))}
             placeholder="0"
           />
+          <p className="mt-1 text-xs text-muted-foreground">
+            Valeur pre-remplie pour un medicament existant.
+          </p>
         </div>
 
         <div>
@@ -174,6 +201,9 @@ export function LigneForm({
             onChange={(e) => setPrixAchat(e.target.value)}
             placeholder="0.00"
           />
+          <p className="mt-1 text-xs text-muted-foreground">
+            Pour un medicament deja connu, la valeur est chargee automatiquement.
+          </p>
           {errors.prix_achat && (
             <p className="mt-1 text-xs text-destructive">{errors.prix_achat}</p>
           )}
