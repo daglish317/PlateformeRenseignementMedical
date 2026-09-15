@@ -70,6 +70,10 @@ export function TeamPage() {
   const [selectedMemberId, setSelectedMemberId] = useState("");
   const effectiveStructureId =
     selectedStructureId || ownerStructures.data?.results[0]?.id || "";
+  const effectiveStructureNom =
+    ownerStructures.data?.results.find(
+      (structure) => structure.id === effectiveStructureId
+    )?.nom ?? "";
   const team = useStructureTeam(effectiveStructureId);
 
   const [structureNom, setStructureNom] = useState("");
@@ -563,7 +567,10 @@ export function TeamPage() {
               </p>
             </SectionCard>
           ) : (
-            <MemberPermissionsEditor member={selectedMember} />
+            <MemberPermissionsEditor
+              member={selectedMember}
+              structureNom={effectiveStructureNom}
+            />
           )}
         </div>
       )}

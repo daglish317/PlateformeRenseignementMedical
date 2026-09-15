@@ -209,7 +209,7 @@ function isEditableRole(role?: StructureTeamMember["role"]) {
 
 interface MemberPermissionsEditorContentProps {
   member: StructureTeamMember;
-  structureId: string;
+  structureNom?: string;
   permissions: TeamPermissionMap;
   modules: RegistryModule[];
   isSaving: boolean;
@@ -218,7 +218,7 @@ interface MemberPermissionsEditorContentProps {
 
 function MemberPermissionsEditorContent({
   member,
-  structureId,
+  structureNom,
   permissions,
   modules,
   isSaving,
@@ -307,8 +307,16 @@ function MemberPermissionsEditorContent({
               </Badge>
             </div>
             <p className="mt-3 max-w-3xl text-sm leading-6 text-muted-foreground">
-              Les modules cochés ici sont les seuls qui apparaîtront dans l&apos;espace
-              du collaborateur. La structure liée est <span className="font-medium">{structureId}</span>.
+Les modules cochés ici sont les seuls qui apparaîtront dans l&apos;espace
+              du collaborateur
+              {structureNom ? (
+                <>
+                  , rattaché à la structure{" "}
+                  <span className="font-medium">&laquo;&nbsp;{structureNom}&nbsp;&raquo;</span>.
+                </>
+              ) : (
+                <>.</>
+              )}{" "}
               La messagerie reste réservée au propriétaire, au gestionnaire d&apos;hôpital
               et à l&apos;administration SantéProx.
             </p>
@@ -472,9 +480,13 @@ function MemberPermissionsEditorContent({
 
 interface MemberPermissionsEditorProps {
   member: StructureTeamMember | null;
+  structureNom?: string;
 }
 
-export function MemberPermissionsEditor({ member }: MemberPermissionsEditorProps) {
+export function MemberPermissionsEditor({
+  member,
+  structureNom,
+}: MemberPermissionsEditorProps) {
   const permissionsQuery = useMemberPermissions(member?.id);
   const registryQuery = usePermissionRegistry();
   const updateMutation = useUpdateTeamPermissions(member?.id);
@@ -537,10 +549,10 @@ export function MemberPermissionsEditor({ member }: MemberPermissionsEditorProps
   const permissionsSignature = JSON.stringify(permissionsQuery.data.permissions);
 
   return (
-    <MemberPermissionsEditorContent
+<MemberPermissionsEditorContent
       key={`${member.id}:${permissionsSignature}`}
       member={member}
-      structureId={permissionsQuery.data.structure_id}
+      structureNom={structureNom}
       permissions={permissionsQuery.data.permissions}
       modules={modules}
       isSaving={updateMutation.isPending}
