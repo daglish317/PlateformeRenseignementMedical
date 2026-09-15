@@ -5,10 +5,11 @@ import { ownerStructuresService } from "../api/owner-structures.service";
 
 export const OWNER_STRUCTURES_QUERY_KEY = ["owner", "structures"] as const;
 
-export function useOwnerStructures() {
+export function useOwnerStructures(enabled = true) {
   return useQuery({
     queryKey: OWNER_STRUCTURES_QUERY_KEY,
     queryFn: ownerStructuresService.list,
+    enabled,
     staleTime: 5 * 60 * 1000,
   });
 }

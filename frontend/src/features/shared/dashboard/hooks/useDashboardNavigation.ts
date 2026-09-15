@@ -12,7 +12,7 @@ import { ownerNavigation } from "../navigation/owner-navigation";
 import type { DashboardNavItem, DashboardType } from "../types";
 import { useMyStructureId } from "./useMyStructureId";
 import { useMyPermissions } from "./useMyPermissions";
-import { useMyStructure } from "@/features/shared/structure-profile/hooks/useMyStructure";
+import { useOwnerActiveStructure } from "@/features/shared/owner-structures/hooks/useOwnerActiveStructure";
 import { filterDashboardNavigation } from "../utils/permissions";
 
 const NAVIGATION: Record<DashboardType, DashboardNavItem[]> = {
@@ -34,11 +34,17 @@ export function useDashboardNavigation(type: DashboardType) {
   const user = useAuthStore((state) => state.user);
   const { data: structureId } = useMyStructureId(type !== "OWNER");
 
-  // Pour le propriétaire, récupérer le type de structure pour filtrer
-  const { data: myStructure } = useMyStructure(type === "OWNER");
-  const structureType = myStructure?.type;
-  const ownerStructureId = myStructure?.id;
-  const activeStructureId = type === "OWNER" ? ownerStructureId : structureId;
+  // Pour le propriétaire, récupérer la structure active du store
+  const {
+    structure: ownerStructure,
+    isLoading: ownerStructuresLoading,
+  } = useOwnerActiveStructure(type === "OWNER");
+
+  // Pour non-owner, le type de structure n'est pas utilisé pour filtrer
+  const structureType = type === "OWNER" ? ownerStructure?.type?.toUpperCase() : undefined;
+  const activeStructureId = type === "OWNER"
+    ? ownerStructure?.id
+    : structureId;
 
   const { data: permissions } = useMyPermissions(
     activeStructureId,
@@ -79,5 +85,7 @@ export function useDashboardNavigation(type: DashboardType) {
     navigation,
     activeItem,
     pathname,
+    structureId: activeStructureId,
+    isLoading: type === "OWNER" ? ownerStructuresLoading : false,
   };
 }

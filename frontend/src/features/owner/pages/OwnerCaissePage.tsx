@@ -1,22 +1,15 @@
 ﻿"use client";
 
-import { useMemo, useState } from "react";
 import { Building2 } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { PageContainer } from "@/features/shared/dashboard/components/PageContainer";
 import { PageTitle } from "@/features/shared/dashboard/components/PageTitle";
 import { SectionCard } from "@/features/shared/dashboard/components/SectionCard";
-import { useOwnerStructures } from "@/features/shared/owner-structures/hooks/useOwnerStructures";
+import { useOwnerStructureSelector } from "@/features/shared/owner-structures/hooks/useOwnerStructureSelector";
 
 export default function OwnerCaissePage() {
-  const { data, isLoading } = useOwnerStructures();
-  const pharmacies = useMemo(
-    () => (data?.results ?? []).filter((structure) => structure.type === "PHARMACIE"),
-    [data]
-  );
-  const [structureId, setStructureId] = useState("");
-  const selectedStructureId = structureId || pharmacies[0]?.id || "";
+  const { structureId: selectedStructureId, pharmacies, isLoading, setStructureId } = useOwnerStructureSelector();
 
   return (
     <PageContainer className="space-y-6">

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import dynamic from "next/dynamic";
 import { BarChart3, Building2, FileSpreadsheet, FileText } from "lucide-react";
 
@@ -10,7 +10,7 @@ import { Select } from "@/components/ui/select";
 import { PageTitle } from "@/features/shared/dashboard/components/PageTitle";
 import { SectionCard } from "@/features/shared/dashboard/components/SectionCard";
 import { PageContainer } from "@/features/shared/dashboard/components/PageContainer";
-import { useOwnerStructures } from "@/features/shared/owner-structures/hooks/useOwnerStructures";
+import { useOwnerStructureSelector } from "@/features/shared/owner-structures/hooks/useOwnerStructureSelector";
 import {
   EtatParametres,
   FiltresStatistiques,
@@ -89,14 +89,7 @@ function construireParams(etat: EtatParametres): StatistiquesParams {
 }
 
 export default function OwnerStatistiquesPage() {
-  const { data, isLoading: structuresEnChargement } = useOwnerStructures();
-  const pharmacies = useMemo(
-    () => (data?.results ?? []).filter((s) => s.type === "PHARMACIE"),
-    [data]
-  );
-
-  const [structureId, setStructureId] = useState("");
-  const structureSelectionnee = structureId || pharmacies[0]?.id || "";
+  const { structureId: structureSelectionnee, pharmacies, isLoading: structuresEnChargement, setStructureId } = useOwnerStructureSelector();
 
   const [etat, setEtat] = useState<EtatParametres>({
     periode: "mois",

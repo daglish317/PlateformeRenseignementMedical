@@ -30,35 +30,35 @@ const MODULE_LABELS: Record<string, string> = {
   FACTURE: "Factures",
   INVENTAIRE: "Inventaires",
   ALERTES: "Alertes",
-  PEREMPTION: "PÃ©remption",
+  PEREMPTION: "Péremption",
   HISTORIQUE: "Historique",
   STATISTIQUES: "Statistiques",
   HORAIRES: "Horaires",
   NOTIFICATIONS: "Notifications",
   PROFIL: "Profil",
-  PARAMETRES: "ParamÃ¨tres",
+  PARAMETRES: "Paramètres",
 };
 
 const MODULE_DESCRIPTIONS: Record<string, string> = {
-  APPROVISIONNEMENT: "RÃ©ception des lots, entrÃ©es de stock et suivi fournisseur.",
-  STOCK: "Catalogue, quantitÃ©s, seuils et disponibilitÃ© des mÃ©dicaments.",
-  VENTE: "Ventes au comptoir et sorties liÃ©es aux clients.",
-  CAISSE: "Encaissements, retours, reÃ§us et validation des paiements.",
+  APPROVISIONNEMENT: "Réception des lots, entrées de stock et suivi fournisseur.",
+  STOCK: "Catalogue, quantités, seuils et disponibilité des médicaments.",
+  VENTE: "Ventes au comptoir et sorties liées aux clients.",
+  CAISSE: "Encaissements, retours, reçus et validation des paiements.",
   FACTURE: "Consultation, impression et export des factures.",
-  INVENTAIRE: "ContrÃ´les physiques, Ã©carts et ajustements de stock.",
-  ALERTES: "Ruptures, pÃ©remptions, caisse et incidents opÃ©rationnels.",
-  PEREMPTION: "Lots proches de l'expiration et traitements associÃ©s.",
-  HISTORIQUE: "Journal des actions et traÃ§abilitÃ© de la structure.",
+  INVENTAIRE: "Contrôles physiques, écarts et ajustements de stock.",
+  ALERTES: "Ruptures, péremptions, caisse et incidents opérationnels.",
+  PEREMPTION: "Lots proches de l'expiration et traitements associés.",
+  HISTORIQUE: "Journal des actions et traçabilité de la structure.",
   STATISTIQUES: "Indicateurs, exports et analyse de performance.",
-  HORAIRES: "Horaires d'ouverture et disponibilitÃ© publique.",
-  NOTIFICATIONS: "Alertes reÃ§ues sur le compte de l'utilisateur.",
-  PROFIL: "Informations personnelles du compte connectÃ©.",
-  PARAMETRES: "PrÃ©fÃ©rences et sÃ©curitÃ© du compte.",
+  HORAIRES: "Horaires d'ouverture et disponibilité publique.",
+  NOTIFICATIONS: "Alertes reçues sur le compte de l'utilisateur.",
+  PROFIL: "Informations personnelles du compte connecté.",
+  PARAMETRES: "Préférences et sécurité du compte.",
 };
 
 const ACTION_LABELS: Record<ActionPermission, string> = {
   CONSULTER: "Consulter",
-  CREER: "CrÃ©er",
+  CREER: "Créer",
   MODIFIER: "Modifier",
   SUPPRIMER: "Supprimer",
   EXPORTER: "Exporter",
@@ -68,7 +68,7 @@ const ACTION_LABELS: Record<ActionPermission, string> = {
   ANNULER: "Annuler",
   VALIDER_PAIEMENT: "Valider paiement",
   REFUSER_PAIEMENT: "Refuser paiement",
-  IMPRIMER_RECU: "Imprimer reÃ§u",
+  IMPRIMER_RECU: "Imprimer reçu",
   RETOUR_CAISSE: "Retour caisse",
 };
 
@@ -91,11 +91,11 @@ const MODULE_ORDER: ModuleOperationnel[] = [
 
 const MODULE_GROUPS: Array<{ title: string; modules: ModuleOperationnel[] }> = [
   {
-    title: "OpÃ©rations mÃ©tier",
+    title: "Opérations métier",
     modules: ["APPROVISIONNEMENT", "STOCK", "VENTE", "CAISSE", "FACTURE"],
   },
   {
-    title: "Suivi et contrÃ´le",
+    title: "Suivi et contrôle",
     modules: ["INVENTAIRE", "ALERTES", "PEREMPTION", "HISTORIQUE", "STATISTIQUES"],
   },
   {
@@ -278,7 +278,7 @@ function MemberPermissionsEditorContent({
             onClick={() => setDraftPermissions(clonePermissions(permissions))}
             disabled={!editable || !isChanged}
           >
-            RÃ©initialiser
+            Réinitialiser
           </Button>
           <Button
             type="button"
@@ -392,7 +392,7 @@ function MemberPermissionsEditorContent({
                               </Badge>
                             </div>
                             <p className="mt-1 text-xs leading-5 text-muted-foreground">
-                              {MODULE_DESCRIPTIONS[module] ?? "Module opÃ©rationnel."}
+                              {MODULE_DESCRIPTIONS[module] ?? "Module opérationnel."}
                             </p>
                           </div>
 
@@ -456,12 +456,12 @@ function MemberPermissionsEditorContent({
             <CheckCircle2 className="mt-0.5 size-4 text-success" />
             <p>
               {activePermissions} permission(s) active(s). Les changements sont pris
-              en compte aprÃ¨s enregistrement et actualisation des permissions cÃ´tÃ© utilisateur.
+              en compte après enregistrement et actualisation des permissions côté utilisateur.
             </p>
           </div>
           {isChanged && (
             <Badge variant="warning" className="w-fit">
-              Modifications non enregistrÃ©es
+              Modifications non enregistrées
             </Badge>
           )}
         </div>
@@ -491,7 +491,7 @@ export function MemberPermissionsEditor({ member }: MemberPermissionsEditorProps
     return (
       <SectionCard title="Permissions du membre">
         <p className="text-sm text-muted-foreground">
-          SÃ©lectionnez un membre pour consulter et modifier ses permissions.
+          Sélectionnez un membre pour consulter et modifier ses permissions.
         </p>
       </SectionCard>
     );
@@ -505,7 +505,7 @@ export function MemberPermissionsEditor({ member }: MemberPermissionsEditorProps
           <div className="space-y-1">
             <p className="font-medium">{member.nom}</p>
             <p className="text-sm text-muted-foreground">
-              Les permissions du propriÃ©taire ne sont pas modifiables depuis cet Ã©cran.
+              Les permissions du propriétaire ne sont pas modifiables depuis cet écran.
             </p>
           </div>
         </div>

@@ -6,7 +6,7 @@ import { SectionCard } from "@/features/shared/dashboard/components/SectionCard"
 import { PageContainer } from "@/features/shared/dashboard/components/PageContainer";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
-import { useOwnerStructures } from "@/features/shared/owner-structures/hooks/useOwnerStructures";
+import { useOwnerStructureSelector } from "@/features/shared/owner-structures/hooks/useOwnerStructureSelector";
 import {
   useInventaires,
   useTelechargerInventaire,
@@ -16,15 +16,7 @@ import { InventaireListTable } from "@/features/inventaire/components/Inventaire
 import { InventaireDetailDialog } from "@/features/inventaire/components/InventaireDetailDialog";
 
 export default function OwnerInventairesPage() {
-  const { data, isLoading: structuresEnChargement } = useOwnerStructures();
-  const pharmacies = useMemo(
-    () => (data?.results ?? []).filter((s) => s.type === "PHARMACIE"),
-    [data]
-  );
-
-  const [structureId, setStructureId] = useState("");
-  const structureSelectionnee =
-    structureId || pharmacies[0]?.id || "";
+  const { structureId: structureSelectionnee, pharmacies, isLoading: structuresEnChargement, setStructureId } = useOwnerStructureSelector();
 
   const structureNom = useMemo(
     () =>

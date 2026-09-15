@@ -20,6 +20,7 @@ import { DASHBOARD_HEADER } from "../constants/layout";
 import { DashboardBreadcrumb } from "./DashboardBreadcrumb";
 import { useAuthStore } from "@/features/auth/store/auth-store";
 import { useNotifications } from "@/providers/notification.provider";
+import { OwnerStructureSwitcher } from "@/features/owner/components/OwnerStructureSwitcher";
 import type { DashboardType } from "../types";
 
 interface DashboardHeaderProps {
@@ -49,7 +50,7 @@ export function DashboardHeader({ type, className }: DashboardHeaderProps) {
   return (
     <header
       className={cn(
-        "flex shrink-0 items-center gap-3 border-b border-border/70 px-4 shadow-sm backdrop-blur",
+        "z-20 flex shrink-0 items-center gap-3 border-b border-border/70 px-4 shadow-sm backdrop-blur",
         className
       )}
       style={{ height: DASHBOARD_HEADER.height }}
@@ -63,6 +64,12 @@ export function DashboardHeader({ type, className }: DashboardHeaderProps) {
           <PanelLeftClose className="h-5 w-5" />
         )}
       </Button>
+
+      {type === "OWNER" && (
+        <div className="w-40 sm:w-48 lg:w-56">
+          <OwnerStructureSwitcher />
+        </div>
+      )}
 
       <div className="hidden min-w-0 flex-1 md:block">
         <DashboardBreadcrumb />

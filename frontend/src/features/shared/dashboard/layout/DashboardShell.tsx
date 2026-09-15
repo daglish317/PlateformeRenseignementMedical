@@ -16,7 +16,7 @@ export function DashboardShell({ children, type }: DashboardShellProps) {
   return (
     <div
       className={cn(
-        "dashboard-shell flex h-screen overflow-hidden bg-background",
+        "dashboard-shell relative flex h-screen min-h-0 overflow-hidden bg-background supports-[height:100dvh]:h-dvh",
         type === "PHARMACIE" && "dashboard-pharmacy",
         type === "HOPITAL" && "dashboard-hospital",
         type === "OWNER" && "dashboard-owner"
@@ -24,7 +24,7 @@ export function DashboardShell({ children, type }: DashboardShellProps) {
       data-dashboard-type={type}
     >
       <DashboardSidebar type={type} className="sidebar-bg" />
-      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
         <DashboardHeader type={type} className="header-bg" />
         <DashboardContent>{children}</DashboardContent>
         <DashboardFooter />
