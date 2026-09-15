@@ -5,6 +5,7 @@ export type UserLocation = {
 };
 
 const TARGET_ACCURACY_METERS = 50;
+const MAX_ACCEPTABLE_ACCURACY_METERS = 200;
 const MAX_LOCATION_WAIT_MS = 8000;
 
 export function getCurrentLocation(): Promise<UserLocation> {
@@ -35,15 +36,31 @@ export function getCurrentLocation(): Promise<UserLocation> {
       });
     };
 
-    const timeoutId = window.setTimeout(() => {
+    const fail = (message: string) => {
       if (settled) return;
-      if (bestPosition) {
+      settled = true;
+      navigator.geolocation.clearWatch(watchId);
+      clearTimeout(timeoutId);
+      reject(new Error(message));
+    };
+
+    const finishWithBest = () => {
+      if (!bestPosition) {
+        fail("Impossible d'obtenir une position GPS fiable.");
+        return;
+      }
+      if (bestPosition.coords.accuracy <= MAX_ACCEPTABLE_ACCURACY_METERS) {
         finish(bestPosition);
         return;
       }
-      settled = true;
-      navigator.geolocation.clearWatch(watchId);
-      reject(new Error("Impossible d'obtenir une position GPS fiable."));
+      const precision = Math.round(bestPosition.coords.accuracy);
+      fail(
+        `Position trop imprécise (précision ~${precision} m). Réessayez à l'extérieur ou activez le GPS.`
+      );
+    };
+
+    const timeoutId = window.setTimeout(() => {
+      finishWithBest();
     }, MAX_LOCATION_WAIT_MS);
 
     const watchId = navigator.geolocation.watchPosition(
@@ -63,7 +80,7 @@ export function getCurrentLocation(): Promise<UserLocation> {
 
       (error) => {
         if (bestPosition) {
-          finish(bestPosition);
+          finishWithBest();
           return;
         }
         if (settled) return;

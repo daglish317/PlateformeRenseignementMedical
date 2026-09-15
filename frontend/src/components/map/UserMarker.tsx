@@ -73,7 +73,17 @@ export default function UserMarker({
     >
 
       <Popup>
-        Vous êtes ici
+        <div className="text-center">
+          <div className="font-medium">Vous êtes ici</div>
+          {typeof location.accuracy === "number" && (
+            <div className="mt-0.5 text-xs text-muted-foreground">
+              Précision ≈ {Math.round(location.accuracy)} m
+              {location.accuracy > 150 ? (
+                <span className="text-amber-600"> (imprécise)</span>
+              ) : null}
+            </div>
+          )}
+        </div>
       </Popup>
 
     </Marker>

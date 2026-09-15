@@ -10,6 +10,7 @@ import { useSearchStore } from "@/store/search-store";
 
 const SEUIL_DEPLACEMENT_M = 800;
 const COOLDOWN_MS = 20_000;
+const PRECISION_MAX_M = 1.5;
 
 function distanceMetres(a: UserLocation, b: UserLocation): number {
   const R = 6371000;
@@ -46,6 +47,17 @@ export function usePositionWatcher(enabled = true) {
     const stop = watchPosition((location) => {
       const maintenant = Date.now();
       const precedente = derniereAcceptee.current;
+
+      // Ne jamais remplacer une position déjà précise par un fix moins fiable
+      // (dérive GPS typique). On accepte seulement si la nouvelle position
+      // est au moins aussi précise que l'ancienne (tolérance 1.5x).
+      if (
+        precedente?.accuracy !== undefined &&
+        location.accuracy !== undefined &&
+        location.accuracy > precedente.accuracy * PRECISION_MAX_M
+      ) {
+        return;
+      }
 
       if (
         precedente &&

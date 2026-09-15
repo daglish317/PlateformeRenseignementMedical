@@ -112,7 +112,7 @@ function MedicalMap() {
 
   useEffect(() => {
     if (locationError) {
-      toast.warning(tMap("locationUnavailable"));
+      toast.warning(locationError || tMap("locationUnavailable"));
     }
   }, [locationError, tMap]);
 
