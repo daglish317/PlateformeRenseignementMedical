@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -61,14 +62,16 @@ export function OwnerStructureSwitcher() {
         }
       />
       <DropdownMenuContent align="start" className="w-64">
-        <DropdownMenuLabel>
-          <div className="flex flex-col">
-            <span className="text-sm font-medium">Mes pharmacies</span>
-            <span className="text-xs font-normal text-muted-foreground">
-              Changer de pharmacie active
-            </span>
-          </div>
-        </DropdownMenuLabel>
+        <DropdownMenuGroup>
+          <DropdownMenuLabel>
+            <div className="flex flex-col">
+              <span className="text-sm font-medium">Mes pharmacies</span>
+              <span className="text-xs font-normal text-muted-foreground">
+                Changer de pharmacie active
+              </span>
+            </div>
+          </DropdownMenuLabel>
+        </DropdownMenuGroup>
         <DropdownMenuSeparator />
         {pharmacies.length === 0 ? (
           <DropdownMenuItem disabled>

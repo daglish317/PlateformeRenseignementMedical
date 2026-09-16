@@ -1,6 +1,6 @@
 "use client";
 
-import { memo } from "react";
+import { memo, useMemo } from "react";
 import type { LucideIcon } from "lucide-react";
 
 import { usePathname } from "@/i18n/navigation";
@@ -75,23 +75,30 @@ function getGroupLabel(item: { label: string; href: string }): string {
   return "Compte";
 }
 
+function useGroupedItems(items: SidebarMenuProps["items"]) {
+  return useMemo(() => {
+    const order: string[] = [];
+    const byLabel = new Map<string, SidebarMenuProps["items"]>();
+
+    for (const item of items) {
+      const label = getGroupLabel(item);
+      const group = byLabel.get(label);
+
+      if (!group) {
+        order.push(label);
+        byLabel.set(label, [item]);
+      } else {
+        group.push(item);
+      }
+    }
+
+    return order.map((label) => ({ label, items: byLabel.get(label)! }));
+  }, [items]);
+}
+
 function SidebarMenuComponent({ items, collapsed, onNavigate }: SidebarMenuProps) {
   const pathname = usePathname();
-  const groupedItems = items.reduce<Array<{ label: string; items: SidebarMenuProps["items"] }>>(
-    (groups, item) => {
-      const groupLabel = getGroupLabel(item);
-      const current = groups[groups.length - 1];
-
-      if (!current || current.label !== groupLabel) {
-        groups.push({ label: groupLabel, items: [item] });
-      } else {
-        current.items.push(item);
-      }
-
-      return groups;
-    },
-    []
-  );
+  const groupedItems = useGroupedItems(items);
 
   return (
     <nav className="flex flex-col gap-5">

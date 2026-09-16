@@ -111,7 +111,6 @@ export function QuickActions({ type }: QuickActionsProps) {
               <Link
                 key={action.label}
                 href={action.href}
-                prefetch={false}
                 className="group flex h-full flex-col gap-4 rounded-lg border border-border/70 bg-background p-4 transition-all hover:-translate-y-0.5 hover:border-primary/30 hover:bg-muted/40 hover:shadow-sm"
               >
                 <div className="flex items-start justify-between gap-3">

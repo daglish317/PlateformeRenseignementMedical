@@ -28,7 +28,6 @@ function SidebarMenuItemComponent({
   return (
     <Link
       href={item.href}
-      prefetch={false}
       title={collapsed ? item.label : undefined}
       aria-current={active ? "page" : undefined}
       onClick={handleClick}
