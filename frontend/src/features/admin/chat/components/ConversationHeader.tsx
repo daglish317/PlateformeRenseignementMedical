@@ -14,17 +14,18 @@ interface ConversationHeaderProps {
 export function ConversationHeader({ onBack, showBack }: ConversationHeaderProps) {
   const selectedConversation = useChatStore((s) => s.selectedConversation);
   const user = useAuthStore((s) => s.user);
-  const isGestionnaire = user?.role === "GESTIONNAIRE";
+  const isStructureMember =
+    user?.role === "GESTIONNAIRE" || user?.role === "PROPRIETAIRE";
   if (!selectedConversation) return null;
 
   const { structure } = selectedConversation;
-  const displayName = isGestionnaire
+  const displayName = isStructureMember
     ? "SantéProx Admin"
     : (selectedConversation.structure_nom ?? structure?.nom ?? "Unknown");
-  const displayPhoto = isGestionnaire
+  const displayPhoto = isStructureMember
     ? null
     : (selectedConversation.structure_photo ?? structure?.photo ?? null);
-  const displayType = isGestionnaire
+  const displayType = isStructureMember
     ? null
     : (selectedConversation.structure_type ?? structure?.type ?? null);
 
@@ -38,7 +39,7 @@ export function ConversationHeader({ onBack, showBack }: ConversationHeaderProps
       <Avatar className="h-9 w-9">
         <AvatarImage src={displayPhoto ?? undefined} alt={displayName} />
         <AvatarFallback>
-          {isGestionnaire ? (
+          {isStructureMember ? (
             <Shield className="h-4 w-4" />
           ) : displayType === "HOPITAL" ? (
             <Hospital className="h-4 w-4" />
@@ -50,7 +51,7 @@ export function ConversationHeader({ onBack, showBack }: ConversationHeaderProps
       <div className="min-w-0">
         <p className="truncate text-sm font-medium">{displayName}</p>
         <p className="text-xs text-muted-foreground">
-          {isGestionnaire
+          {isStructureMember
             ? "Administrateur"
             : displayType === "HOPITAL"
               ? "Hôpital"

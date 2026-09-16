@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { chatService } from "../api/chat.service";
+import { chatService, type MessagesResponse } from "../api/chat.service";
 import { useChatStore } from "../store/chat-store";
 import { useAuthStore } from "@/features/auth/store/auth-store";
 
@@ -40,9 +40,20 @@ export function useSendMessage() {
 
       queryClient.setQueryData(
         ["admin", "chat", "messages", structureId],
-        (old: { messages: unknown[]; results: unknown[] } | undefined) => {
-          if (!old) return { messages: [optimisticMessage], results: [optimisticMessage], page: 1, page_size: 100, total: 1 };
-          return { ...old, messages: [...(old.messages ?? []), optimisticMessage], results: [...(old.results ?? []), optimisticMessage] };
+        (old: MessagesResponse | undefined) => {
+          if (!old) {
+            return {
+              messages: [optimisticMessage],
+              total_messages: 1,
+              page: 1,
+              page_size: 100,
+            };
+          }
+          return {
+            ...old,
+            messages: [...(old.messages ?? []), optimisticMessage],
+            total_messages: (old.total_messages ?? 0) + 1,
+          };
         }
       );
 

@@ -2,10 +2,10 @@ import api from "@/lib/axios";
 import type { ChatConversation, ChatMessage } from "../types/chat";
 
 export interface MessagesResponse {
-  results: ChatMessage[];
+  messages: ChatMessage[];
+  total_messages: number;
   page: number;
   page_size: number;
-  total: number;
 }
 
 export const chatService = {

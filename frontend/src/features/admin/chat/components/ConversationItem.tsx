@@ -40,17 +40,18 @@ export function ConversationItem({
   onClick,
 }: ConversationItemProps) {
   const user = useAuthStore((s) => s.user);
-  const isGestionnaire = user?.role === "GESTIONNAIRE";
+  const isStructureMember =
+    user?.role === "GESTIONNAIRE" || user?.role === "PROPRIETAIRE";
 
-  const displayName = isGestionnaire
+  const displayName = isStructureMember
     ? "SantéProx Admin"
     : (conversation.structure_nom ?? conversation.structure?.nom ?? "Unknown");
   
-  const displayPhoto = isGestionnaire
+  const displayPhoto = isStructureMember
     ? null
     : (conversation.structure_photo ?? conversation.structure?.photo ?? null);
 
-  const displayType = isGestionnaire
+  const displayType = isStructureMember
     ? null
     : (conversation.structure_type ?? conversation.structure?.type ?? null);
 
@@ -67,7 +68,7 @@ export function ConversationItem({
       <Avatar className="h-10 w-10 shrink-0">
         <AvatarImage src={displayPhoto ?? undefined} alt={displayName} />
         <AvatarFallback>
-          {isGestionnaire ? (
+          {isStructureMember ? (
             <Shield className="h-4 w-4" />
           ) : displayType === "HOPITAL" ? (
             <Hospital className="h-4 w-4" />
